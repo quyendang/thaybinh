@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+jinja2
+aiofiles
+pydantic
+supabase
+python-multipart
+pyjwt
+cryptography
+requests

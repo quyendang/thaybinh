@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TTS Keys</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            margin: 0;
+            padding-top: 20px;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 1000px; /* Tăng độ rộng container lên 1000px */
+            max-width: 90%; /* Giới hạn tối đa 90% để không vượt quá màn hình */
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .message {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        table {
+            width: 100%;
+            min-width: 1000px; /* Tăng min-width của bảng lên 1000px */
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            table-layout: auto;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            word-break: break-all;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .delete-btn {
+            padding: 5px 10px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+        .add-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .add-btn:hover {
+            background-color: #0056b3;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        button[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        #addPopup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .close-btn:hover {
+            background-color: #c82333;
+        }
+        tr[is_live="False"] {
+            background-color: #ffcccc;
+        }
+    </style>
+    <script>
+        function showAddForm() {
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('addPopup').style.display = 'block';
+        }
+        function closeAddForm() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('addPopup').style.display = 'none';
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>TTS Keys</h1>
+        {% if success %}
+            <div class="message success">{{ success }}</div>
+        {% endif %}
+        {% if error %}
+            <div class="message error">{{ error }}</div>
+        {% endif %}
+        <button class="add-btn" onclick="showAddForm()">Add New Key</button>
+        <table>
+            <tr>
+                <th>#</th>
+                <th>API Key</th>
+                <th>Base URL</th>
+                <th>Provider</th>
+                <th>Balance</th>
+                <th>Description</th>
+                <th>Action</th>
+            </tr>
+            {% for key in keys %}
+            <tr is_live="{{ key.is_live|lower }}">
+                <td>{{ loop.index }}</td>
+                <td>{{ key.api_key }}</td>
+                <td>{{ key.base_url }}</td>
+                <td>{{ key.provider }}</td>
+                <td>{{ "%.2f"|format(key.balance) }}</td>
+                <td>{{ key.description }}</td>
+                <td>
+                    <form method="post" action="/delete_key/{{ key.id }}">
+                        <button type="submit" class="delete-btn">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div id="overlay" class="overlay" onclick="closeAddForm()"></div>
+    <div id="addPopup">
+        <button class="close-btn" onclick="closeAddForm()">Close</button>
+        <form method="post">
+            <div class="form-group">
+                <label for="api_key">API Key:</label>
+                <input type="text" id="api_key" name="api_key" required>
+            </div>
+            <div class="form-group">
+                <label for="base_url">Base URL:</label>
+                <input type="text" id="base_url" name="base_url">
+            </div>
+            <div class="form-group">
+                <label for="provider">Provider:</label>
+                <select id="provider" name="provider" required>
+                    <option value="Google">Google</option>
+                    <option value="OpenAI">OpenAI</option>
+                    <option value="Elevenlabs">Elevenlabs</option>
+                </select>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</body>
+</html>
