@@ -169,12 +169,12 @@ async def _render_lesson_by_id(
         words_list = _extract_words(words_resp.data or [])
     except Exception as e:
         logging.error(f"[ERROR] lesson_by_id: {e}")
-        return templates.TemplateResponse("error.html", {"request": request, "error": str(e)})
+        return templates.TemplateResponse(request, "error.html", {"error": str(e)})
 
     return templates.TemplateResponse(
+        request,
         "share.html",
         {
-            "request": request,
             "words": words_list,
             "lesson_id": lesson_id,
             "lesson_name": lesson_name,
@@ -215,12 +215,12 @@ async def _render_lesson_by_short_id(
         hide_columns_print = [int(x) for x in p.split(",") if x.isdigit()]
     except Exception as e:
         logging.error(f"[ERROR] lesson_by_short_id: {e}")
-        return templates.TemplateResponse("error.html", {"request": request, "error": str(e)})
+        return templates.TemplateResponse(request, "error.html", {"error": str(e)})
 
     return templates.TemplateResponse(
+        request,
         "share.html",
         {
-            "request": request,
             "words": words_list,
             "lesson_id": short_id,
             "lesson_name": lesson_name,
@@ -244,7 +244,7 @@ async def homepage(
     sort: str | None = Query(None),
 ):
     if not lessonid:
-        return templates.TemplateResponse("landing.html", {"request": request})
+        return templates.TemplateResponse(request, "landing.html")
     lesson_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, lessonid + SALT))
     return await _render_lesson_by_id(
         request, lesson_id,
@@ -265,7 +265,7 @@ async def firebase(
 ):
     if not lessonid:
         return templates.TemplateResponse(
-            "error.html", {"request": request, "error": "Missing required query param: lessonid"}
+            request, "error.html", {"error": "Missing required query param: lessonid"}
         )
     lesson_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, lessonid + SALT))
     return await _render_lesson_by_id(
@@ -300,7 +300,7 @@ async def keys_page(request: Request):
     except Exception as e:
         logging.error(f"[ERROR] Fetching keys: {e}")
         keys = []
-    return templates.TemplateResponse("key.html", {"request": request, "keys": keys})
+    return templates.TemplateResponse(request, "key.html", {"keys": keys})
 
 
 @app.post("/keys")
@@ -316,12 +316,13 @@ async def add_key(
              "created_at": "now()", "is_live": True, "balance": 0.0, "description": ""}
         ).execute()
         return templates.TemplateResponse(
+            request,
             "key.html",
-            {"request": request, "success": "Key added successfully", "keys": resp.data},
+            {"success": "Key added successfully", "keys": resp.data},
         )
     except Exception as e:
         logging.error(f"[ERROR] Adding key: {e}")
-        return templates.TemplateResponse("key.html", {"request": request, "error": str(e)})
+        return templates.TemplateResponse(request, "key.html", {"error": str(e)})
 
 
 @app.post("/delete_key/{id}")
@@ -329,11 +330,11 @@ async def delete_key(request: Request, id: str):
     try:
         supabase.table("ttskeys").delete().eq("id", id).execute()
         return templates.TemplateResponse(
-            "key.html", {"request": request, "success": "Key deleted successfully"}
+            request, "key.html", {"success": "Key deleted successfully"}
         )
     except Exception as e:
         logging.error(f"[ERROR] Deleting key: {e}")
-        return templates.TemplateResponse("key.html", {"request": request, "error": str(e)})
+        return templates.TemplateResponse(request, "key.html", {"error": str(e)})
 
 
 # ------------------------------------------------------------------
@@ -430,12 +431,12 @@ async def remove_user(
 @app.get("/privacy", response_class=HTMLResponse)
 @app.get("/privacypolicy", response_class=HTMLResponse)
 async def privacy_page(request: Request):
-    return templates.TemplateResponse("fasteng-privacy-policy.html", {"request": request})
+    return templates.TemplateResponse(request, "fasteng-privacy-policy.html")
 
 
 @app.get("/terms", response_class=HTMLResponse)
 async def terms_page(request: Request):
-    return templates.TemplateResponse("fasteng-terms.html", {"request": request})
+    return templates.TemplateResponse(request, "fasteng-terms.html")
 
 
 @app.get("/app-ads.txt", include_in_schema=False)
@@ -496,7 +497,7 @@ _CODE_DEFAULTS = {"mode": "encode", "input_data": "", "password": "", "salt": ""
 
 @app.get("/code", response_class=HTMLResponse)
 async def code_get(request: Request):
-    return templates.TemplateResponse("code.html", {"request": request, **_CODE_DEFAULTS})
+    return templates.TemplateResponse(request, "code.html", {**_CODE_DEFAULTS})
 
 
 @app.post("/code", response_class=HTMLResponse)
@@ -525,8 +526,9 @@ async def code_post(
         except Exception as e:
             error = f"Lỗi: {e}"
     return templates.TemplateResponse(
+        request,
         "code.html",
-        {"request": request, "mode": mode, "input_data": input_data,
+        {"mode": mode, "input_data": input_data,
          "password": password, "salt": salt, "result": result, "error": error},
     )
 
