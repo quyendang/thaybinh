@@ -438,6 +438,10 @@ async def privacy_page(request: Request):
 async def terms_page(request: Request):
     return templates.TemplateResponse(request, "fasteng-terms.html")
 
+@app.get("/destinationb1", response_class=HTMLResponse)
+async def terms_page(request: Request):
+    return templates.TemplateResponse(request, "destinationb1.html")
+
 
 @app.get("/app-ads.txt", include_in_schema=False)
 def get_app_ads():
