@@ -188,47 +188,88 @@ async def _render_lesson_by_short_id(
     request: Request, short_id: str, c: str, p: str
 ):
     try:
+        clean_short_id = short_id.replace("!", "")
+
         lesson_resp = (
             supabase.table("lessons")
-            .select("id, name")
-            .eq("short_id", short_id.replace("!", ""))
+            .select(
+                """
+                id,
+                name,
+                group:groups!lessons_group_id_fkey (
+                    name
+                )
+                """
+            )
+            .eq("short_id", clean_short_id)
             .single()
             .execute()
         )
+
         if not lesson_resp.data:
             raise ValueError(f"Lesson short_id={short_id} not found")
 
-        lesson_name = lesson_resp.data.get("name", f"Lesson {short_id}")
+        lesson_data = lesson_resp.data
+
+        raw_lesson_name = (
+            lesson_data.get("name")
+            or f"Lesson {clean_short_id}"
+        )
+
+        group_data = lesson_data.get("group") or {}
+        group_name = group_data.get("name")
+
+        lesson_name = (
+            f"{group_name}/{raw_lesson_name}"
+            if group_name
+            else raw_lesson_name
+        )
+
         words_resp = (
             supabase.table("words")
             .select("*")
-            .eq("lesson_id", lesson_resp.data["id"])
+            .eq("lesson_id", lesson_data["id"])
             .order("latest_update", desc=False)
             .execute()
         )
+
         words_list = _extract_words(words_resp.data or [])
 
         if "!" in short_id:
             random.shuffle(words_list)
 
-        hide_columns = [int(x) for x in c.split(",") if x.isdigit()]
-        hide_columns_print = [int(x) for x in p.split(",") if x.isdigit()]
+        hide_columns = [
+            int(x)
+            for x in c.split(",")
+            if x.isdigit()
+        ]
+
+        hide_columns_print = [
+            int(x)
+            for x in p.split(",")
+            if x.isdigit()
+        ]
+
     except Exception as e:
         logging.error(f"[ERROR] lesson_by_short_id: {e}")
-        return templates.TemplateResponse(request, "error.html", {"error": str(e)})
+
+        return templates.TemplateResponse(
+            request,
+            "error.html",
+            {"error": str(e)},
+        )
 
     return templates.TemplateResponse(
         request,
         "share.html",
         {
             "words": words_list,
-            "lesson_id": short_id,
+            "lesson_id": clean_short_id,
             "lesson_name": lesson_name,
             "hide_columns": hide_columns,
             "hide_columns_print": hide_columns_print,
         },
     )
-
 
 # ------------------------------------------------------------------
 # LESSON / SHARE ROUTES
