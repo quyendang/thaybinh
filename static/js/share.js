@@ -217,13 +217,13 @@
 
     document.addEventListener("keydown", (event) => {
         if (!(event.altKey && event.shiftKey) || event.metaKey || event.ctrlKey) return;
-        const key = event.key.toLowerCase();
-        if (key === "m") {
+        if (event.code === "KeyM") {
             if (document.querySelector("dialog[open]")) return;
             event.preventDefault();
             toggleTools();
             return;
         }
+        const key = event.key.toLowerCase();
         const shortcuts = { "1": "copy-basic", "2": "copy-vietnamese", p: "print", s: "open-selection" };
         if (!shortcuts[key]) return;
         event.preventDefault();
