@@ -6,14 +6,24 @@
     const storagePrefix = `fasteng:share:${lessonId}`;
     const hiddenWordsKey = `${storagePrefix}:hidden-words`;
     const formatKey = `${storagePrefix}:copy-format`;
+    const studyKey = `${storagePrefix}:study-state`;
+    const hiddenColumns = new Set((table.dataset.hiddenColumns || "").split(",").filter(Boolean).map(Number));
     const toast = document.querySelector("#toast");
     const copyDialog = document.querySelector("#copy-dialog");
     const selectionDialog = document.querySelector("#selection-dialog");
+    const resumeDialog = document.querySelector("#resume-dialog");
     const toolPanel = document.querySelector("#lesson-tools");
+    const lessonList = document.querySelector("#lesson-list");
+    const studyWorkspace = document.querySelector("#study-workspace");
+    const flashContent = document.querySelector("#flash-content");
+    const slideContent = document.querySelector("#slide-content");
+    const studyProgress = document.querySelector("#study-progress");
+    const studyStartButton = document.querySelector('[data-action="start-study"]');
     let activeAudio = null;
     let activeAudioButton = null;
     let toastTimer = null;
     let lastTrigger = null;
+    let studyState = null;
 
     const getRows = () => [...table.tBodies[0].rows];
     const readStorage = (key, fallback) => {
@@ -38,11 +48,54 @@
         lastTrigger?.focus();
     };
     const selectedRows = () => getRows().filter((row) => !row.classList.contains("is-user-hidden"));
+    const fieldVisible = (column) => !hiddenColumns.has(column);
+
+    function element(tag, className, text) {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text !== undefined) node.textContent = text;
+        return node;
+    }
+
+    function makeButton(label, action, className = "button") {
+        const button = element("button", className, label);
+        button.type = "button";
+        button.dataset.action = action;
+        return button;
+    }
+
+    function makeAudioButton(word) {
+        if (!word.voice) return null;
+        const button = element("button", "audio-button");
+        button.type = "button";
+        button.dataset.audioSrc = word.voice;
+        button.setAttribute("aria-label", `Nghe phát âm từ ${word.word}`);
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("aria-hidden", "true");
+        svg.setAttribute("viewBox", "0 0 24 24");
+        ["M11.25 5.25 6.75 9H3.75v6h3l4.5 3.75V5.25Z", "M15.75 8.25a5.25 5.25 0 0 1 0 7.5", "M18.75 5.25a9.5 9.5 0 0 1 0 13.5"].forEach((d) => {
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", d);
+            svg.append(path);
+        });
+        button.append(svg);
+        return button;
+    }
+
+    function setRowVisibility(rowKey, hidden) {
+        document.querySelectorAll(`[data-row-key="${CSS.escape(rowKey)}"]`).forEach((node) => {
+            node.classList.toggle("is-user-hidden", hidden);
+        });
+    }
 
     function restoreSelection() {
         const hiddenKeys = new Set(readStorage(hiddenWordsKey, []));
-        getRows().forEach((row) => row.classList.toggle("is-user-hidden", hiddenKeys.has(row.dataset.rowKey)));
+        getRows().forEach((row) => setRowVisibility(row.dataset.rowKey, hiddenKeys.has(row.dataset.rowKey)));
         updateVisibleCount();
+        if (!studyWorkspace.hidden && studyState) {
+            studyState = normalizeStudyState(studyState);
+            renderStudy();
+        }
     }
 
     function updateVisibleCount() {
@@ -109,8 +162,7 @@
         const list = selectionDialog.querySelector("#selection-list");
         const hiddenKeys = new Set(readStorage(hiddenWordsKey, []));
         list.replaceChildren(...getRows().map((row, index) => {
-            const item = document.createElement("div");
-            item.className = "selection-item";
+            const item = element("div", "selection-item");
             const input = document.createElement("input");
             input.type = "checkbox";
             input.id = `word-choice-${index}`;
@@ -118,10 +170,8 @@
             input.checked = !hiddenKeys.has(row.dataset.rowKey);
             const label = document.createElement("label");
             label.htmlFor = input.id;
-            const word = document.createElement("strong");
-            word.textContent = row.dataset.word || "Từ chưa có tên";
-            const meaning = document.createElement("span");
-            meaning.textContent = row.dataset.meaning || "Chưa có nghĩa";
+            const word = element("strong", "", row.dataset.word || "Từ chưa có tên");
+            const meaning = element("span", "", row.dataset.meaning || "Chưa có nghĩa");
             label.append(word, meaning);
             item.append(input, label);
             return item;
@@ -162,6 +212,7 @@
         if (!source) return showToast("Từ này chưa có audio.", true);
         if (activeAudioButton === button && activeAudio && !activeAudio.paused) {
             activeAudio.pause();
+            button.classList.remove("is-playing");
             return;
         }
         activeAudio?.pause();
@@ -178,6 +229,278 @@
         activeAudio.play().catch(() => showToast("Trình duyệt đã chặn phát audio.", true));
     }
 
+    function studyWords() {
+        return selectedRows().map((row) => ({
+            key: row.dataset.rowKey,
+            index: row.dataset.index,
+            word: row.dataset.word || "",
+            type: row.dataset.type || "",
+            ipa: row.dataset.ipa || "",
+            meaning: row.dataset.meaning || "",
+            example: row.dataset.example || "",
+            translate: row.dataset.translate || "",
+            voice: row.dataset.wordVoice || "",
+        }));
+    }
+
+    function canStudy() {
+        const words = studyWords();
+        return fieldVisible(1) && fieldVisible(4) && words.some((word) => word.word && word.meaning);
+    }
+
+    function newStudyState(direction = "en-to-meaning") {
+        const keys = studyWords().map((word) => word.key);
+        return {
+            version: 1,
+            mode: "flash",
+            direction,
+            queue: keys,
+            known: [],
+            slideIndex: 0,
+            revealed: false,
+            updatedAt: Date.now(),
+        };
+    }
+
+    function normalizeStudyState(candidate) {
+        const words = studyWords();
+        const allowed = new Set(words.map((word) => word.key));
+        const queue = Array.isArray(candidate?.queue) ? candidate.queue.filter((key) => allowed.has(key)) : [];
+        const known = Array.isArray(candidate?.known) ? candidate.known.filter((key) => allowed.has(key) && !queue.includes(key)) : [];
+        const direction = candidate?.direction === "vi-to-en" && fieldVisible(6) && words.some((word) => word.translate)
+            ? "vi-to-en" : "en-to-meaning";
+        return {
+            version: 1,
+            mode: candidate?.mode === "slide" ? "slide" : "flash",
+            direction,
+            queue,
+            known,
+            slideIndex: Math.max(0, Math.min(Number(candidate?.slideIndex) || 0, Math.max(words.length - 1, 0))),
+            revealed: Boolean(candidate?.revealed),
+            updatedAt: Number(candidate?.updatedAt) || Date.now(),
+        };
+    }
+
+    function saveStudyState() {
+        if (!studyState) return;
+        studyState.updatedAt = Date.now();
+        writeStorage(studyKey, studyState);
+    }
+
+    function activeWord() {
+        const key = studyState?.queue?.[0];
+        return studyWords().find((word) => word.key === key);
+    }
+
+    function appendDetail(container, label, value, className = "") {
+        if (!value) return;
+        const block = element("div", `study-detail ${className}`.trim());
+        block.append(element("span", "study-detail-label", label), element("p", "", value));
+        container.append(block);
+    }
+
+    function setModeTabs() {
+        const mode = studyState?.mode || "flash";
+        document.querySelectorAll("[data-study-mode]").forEach((tab) => {
+            const selected = tab.dataset.studyMode === mode;
+            tab.setAttribute("aria-selected", String(selected));
+            tab.tabIndex = selected ? 0 : -1;
+        });
+        document.querySelector("#flash-panel").hidden = mode !== "flash";
+        document.querySelector("#slide-panel").hidden = mode !== "slide";
+    }
+
+    function updateStudyProgress() {
+        if (!studyState) return;
+        const total = studyWords().length;
+        if (studyState.mode === "slide") {
+            studyProgress.textContent = total ? `Slide ${studyState.slideIndex + 1} / ${total}` : "Không có từ để học";
+            return;
+        }
+        const known = studyState.known.length;
+        studyProgress.textContent = total ? `${known} / ${total} từ đã nhớ trong lượt này` : "Không có từ để học";
+    }
+
+    function renderFlash() {
+        flashContent.replaceChildren();
+        const words = studyWords();
+        const word = activeWord();
+        if (!word) {
+            const done = element("section", "study-finish");
+            done.append(
+                element("p", "study-eyebrow", "Lượt học hoàn tất"),
+                element("h3", "", "Bạn đã đi hết bộ thẻ."),
+                element("p", "", "Hãy bắt đầu một lượt mới để ôn lại toàn bộ từ vựng."),
+            );
+            const actions = element("div", "study-actions");
+            actions.append(makeButton("Học lại từ đầu", "restart-study", "button button-primary"), makeButton("Xem danh sách", "exit-study", "button"));
+            done.append(actions);
+            flashContent.append(done);
+            return;
+        }
+
+        const reverseAvailable = fieldVisible(6) && words.some((item) => item.translate);
+        const card = element("article", `flash-card${studyState.revealed ? " is-revealed" : ""}`);
+        const cardHeader = element("div", "flash-card-header");
+        cardHeader.append(element("span", "flash-card-kicker", studyState.direction === "vi-to-en" ? "Tiếng Việt → English" : "English → Meaning"));
+        const directionButton = makeButton("Đổi chiều", "toggle-direction", "button button-quiet study-direction-button");
+        directionButton.disabled = !reverseAvailable;
+        if (!reverseAvailable) directionButton.title = "Lesson này chưa có phần tiếng Việt để đổi chiều.";
+        cardHeader.append(directionButton);
+        card.append(cardHeader);
+
+        const prompt = element("div", "flash-card-prompt");
+        const promptText = studyState.direction === "vi-to-en" ? word.translate : word.word;
+        prompt.append(element("p", "flash-prompt", promptText));
+        if (studyState.direction === "en-to-meaning") {
+            const metadata = [fieldVisible(2) && word.type, fieldVisible(3) && word.ipa].filter(Boolean).join(" · ");
+            if (metadata) prompt.append(element("p", "flash-meta", metadata));
+            if (fieldVisible(1)) prompt.append(makeAudioButton(word));
+        }
+        card.append(prompt);
+
+        if (!studyState.revealed) {
+            card.append(element("p", "flash-hint", "Tự trả lời trước khi lật đáp án."));
+            card.append(makeButton("Lật đáp án", "flip-card", "button button-primary flash-flip-button"));
+        } else {
+            const answer = element("div", "flash-card-answer");
+            if (studyState.direction === "vi-to-en") {
+                answer.append(element("p", "study-detail-label", "English"), element("p", "flash-answer-word", word.word));
+                const metadata = [fieldVisible(2) && word.type, fieldVisible(3) && word.ipa].filter(Boolean).join(" · ");
+                if (metadata) answer.append(element("p", "flash-meta", metadata));
+                if (fieldVisible(1)) answer.append(makeAudioButton(word));
+            }
+            if (fieldVisible(4)) appendDetail(answer, "Meaning", word.meaning, "study-detail-primary");
+            if (fieldVisible(6)) appendDetail(answer, "Tiếng Việt", word.translate);
+            if (fieldVisible(5)) appendDetail(answer, "Example", word.example);
+            card.append(answer);
+            const actions = element("div", "study-actions flash-rating-actions");
+            actions.append(makeButton("Chưa nhớ", "mark-again", "button button-quiet"), makeButton("Đã nhớ", "mark-known", "button button-primary"));
+            card.append(actions);
+        }
+        flashContent.append(card);
+    }
+
+    function renderSlide() {
+        slideContent.replaceChildren();
+        const words = studyWords();
+        const word = words[studyState.slideIndex];
+        if (!word) {
+            slideContent.append(element("p", "study-empty", "Không có từ phù hợp với cấu hình link này."));
+            return;
+        }
+        const slide = element("article", "study-slide");
+        slide.append(element("span", "slide-index", String(word.index).padStart(2, "0")));
+        if (fieldVisible(1)) {
+            const title = element("h3", "slide-word", word.word);
+            title.tabIndex = -1;
+            slide.append(title);
+        }
+        const metadata = [fieldVisible(2) && word.type, fieldVisible(3) && word.ipa].filter(Boolean).join(" · ");
+        if (metadata) slide.append(element("p", "flash-meta", metadata));
+        if (fieldVisible(1)) slide.append(makeAudioButton(word));
+        const details = element("div", "slide-details");
+        if (fieldVisible(4)) appendDetail(details, "Meaning", word.meaning, "study-detail-primary");
+        if (fieldVisible(6)) appendDetail(details, "Tiếng Việt", word.translate);
+        if (fieldVisible(5)) appendDetail(details, "Example", word.example);
+        slide.append(details);
+        const controls = element("div", "slide-controls");
+        const previous = makeButton("Trước", "previous-slide", "button button-quiet");
+        previous.disabled = studyState.slideIndex === 0;
+        const next = makeButton("Tiếp", "next-slide", "button button-primary");
+        next.disabled = studyState.slideIndex >= words.length - 1;
+        controls.append(previous, next);
+        slide.append(controls);
+        slideContent.append(slide);
+    }
+
+    function renderStudy() {
+        if (!studyState) return;
+        studyState = normalizeStudyState(studyState);
+        setModeTabs();
+        updateStudyProgress();
+        renderFlash();
+        renderSlide();
+        saveStudyState();
+    }
+
+    function openStudyWorkspace() {
+        lessonList.hidden = true;
+        studyWorkspace.hidden = false;
+        studyStartButton.hidden = true;
+        studyStartButton?.setAttribute("aria-expanded", "true");
+    }
+
+    function exitStudy() {
+        if (resumeDialog?.open) resumeDialog.close();
+        saveStudyState();
+        studyWorkspace.hidden = true;
+        lessonList.hidden = false;
+        studyStartButton.hidden = false;
+        studyStartButton?.setAttribute("aria-expanded", "false");
+        studyStartButton?.focus();
+    }
+
+    function startStudy(trigger) {
+        if (!canStudy()) {
+            showToast("Link chia sẻ này đang ẩn Word hoặc Meaning cần cho chế độ học.", true);
+            return;
+        }
+        lastTrigger = trigger;
+        const saved = normalizeStudyState(readStorage(studyKey, null));
+        openStudyWorkspace();
+        if (saved.queue.length) {
+            studyState = saved;
+            renderStudy();
+            const total = studyWords().length;
+            const learned = saved.known.length;
+            document.querySelector("#resume-dialog-description").textContent = `${learned} / ${total} từ đã nhớ; còn ${saved.queue.length} từ trong lượt học.`;
+            openDialog(resumeDialog, trigger);
+            return;
+        }
+        studyState = newStudyState(saved.direction);
+        renderStudy();
+        flashContent.querySelector('[data-action="flip-card"]')?.focus();
+    }
+
+    function resumeStudy() {
+        if (resumeDialog?.open) resumeDialog.close();
+        renderStudy();
+        const target = studyState.mode === "slide" ? slideContent.querySelector("button") : flashContent.querySelector("button");
+        target?.focus();
+    }
+
+    function restartStudy() {
+        const direction = studyState?.direction || "en-to-meaning";
+        studyState = newStudyState(direction);
+        if (resumeDialog?.open) resumeDialog.close();
+        openStudyWorkspace();
+        renderStudy();
+        flashContent.querySelector('[data-action="flip-card"]')?.focus();
+    }
+
+    function markKnown() {
+        const key = studyState.queue.shift();
+        if (key && !studyState.known.includes(key)) studyState.known.push(key);
+        studyState.revealed = false;
+        renderStudy();
+    }
+
+    function markAgain() {
+        const key = studyState.queue.shift();
+        if (key) studyState.queue.push(key);
+        studyState.revealed = false;
+        renderStudy();
+    }
+
+    function changeSlide(delta) {
+        const next = studyState.slideIndex + delta;
+        const total = studyWords().length;
+        studyState.slideIndex = Math.max(0, Math.min(next, total - 1));
+        renderStudy();
+        slideContent.querySelector("h3")?.focus();
+    }
+
     document.addEventListener("click", (event) => {
         const button = event.target.closest("[data-action], [data-audio-src], [data-format]");
         if (!button) return;
@@ -189,6 +512,17 @@
             if (parentDialog) closeDialog(parentDialog);
             return;
         }
+        if (action === "start-study") startStudy(button);
+        if (action === "exit-study") exitStudy();
+        if (action === "resume-study") resumeStudy();
+        if (action === "restart-study") restartStudy();
+        if (action === "set-study-mode") { studyState.mode = button.dataset.studyMode; renderStudy(); }
+        if (action === "toggle-direction") { studyState.direction = studyState.direction === "en-to-meaning" ? "vi-to-en" : "en-to-meaning"; studyState.revealed = false; renderStudy(); }
+        if (action === "flip-card") { studyState.revealed = true; renderStudy(); flashContent.querySelector('[data-action="mark-again"]')?.focus(); }
+        if (action === "mark-known") markKnown();
+        if (action === "mark-again") markAgain();
+        if (action === "previous-slide") changeSlide(-1);
+        if (action === "next-slide") changeSlide(1);
         if (action === "print") { if (parentDialog) parentDialog.close(); window.print(); }
         if (action === "copy-basic") { copyFormat("2-t-5", "Word + Meaning"); if (parentDialog) parentDialog.close(); }
         if (action === "copy-vietnamese") { copyFormat("2-t-5-[7]", "Word + Meaning + Vietnamese"); if (parentDialog) parentDialog.close(); }
@@ -216,18 +550,29 @@
     document.querySelector("#custom-format-input").value = readStorage(formatKey, "1-t-4-t-5");
 
     document.addEventListener("keydown", (event) => {
-        if (!(event.altKey && event.shiftKey) || event.metaKey || event.ctrlKey) return;
-        if (event.code === "KeyM") {
-            if (document.querySelector("dialog[open]")) return;
-            event.preventDefault();
-            toggleTools();
+        if (event.altKey && event.shiftKey && !event.metaKey && !event.ctrlKey) {
+            if (event.code === "KeyM") {
+                if (document.querySelector("dialog[open]")) return;
+                event.preventDefault();
+                toggleTools();
+                return;
+            }
+            const key = event.key.toLowerCase();
+            const shortcuts = { "1": "copy-basic", "2": "copy-vietnamese", p: "print", s: "open-selection" };
+            if (shortcuts[key]) {
+                event.preventDefault();
+                document.querySelector(`[data-action="${shortcuts[key]}"]`)?.click();
+            }
             return;
         }
-        const key = event.key.toLowerCase();
-        const shortcuts = { "1": "copy-basic", "2": "copy-vietnamese", p: "print", s: "open-selection" };
-        if (!shortcuts[key]) return;
-        event.preventDefault();
-        document.querySelector(`[data-action="${shortcuts[key]}"]`)?.click();
+        if (studyWorkspace.hidden || document.querySelector("dialog[open]") || event.target.matches("input, textarea, select")) return;
+        if (studyState?.mode === "slide" && event.key === "ArrowLeft") { event.preventDefault(); changeSlide(-1); }
+        if (studyState?.mode === "slide" && event.key === "ArrowRight") { event.preventDefault(); changeSlide(1); }
+        if (studyState?.mode === "flash" && !studyState.revealed && [" ", "Enter"].includes(event.key) && !event.target.closest("button")) {
+            event.preventDefault();
+            studyState.revealed = true;
+            renderStudy();
+        }
     });
 
     restoreSelection();

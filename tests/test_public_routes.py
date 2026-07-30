@@ -28,6 +28,9 @@ def test_share_short_id_renders_workspace(client):
     assert "Lesson demo" in response.text
     assert "Phonetic rail" in response.text
     assert 'id="lesson-tools" aria-label="Công cụ bài học" hidden' in response.text
+    assert 'data-action="start-study"' in response.text
+    assert 'id="study-workspace"' in response.text
+    assert 'class="lesson-mobile-list"' in response.text
     assert "is-screen-hidden" in response.text
     assert "is-print-hidden" in response.text
 

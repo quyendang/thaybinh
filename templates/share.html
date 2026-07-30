@@ -20,10 +20,15 @@
                     <h1 class="lesson-title" id="lesson-title" tabindex="-1">{{ lesson_name }}</h1>
                     <p class="lesson-subtitle" id="visible-word-count">{{ words|length }} từ đang hiển thị</p>
                 </div>
-                <aside class="phonetic-rail" aria-label="Ngữ cảnh học phát âm">
-                    <p class="phonetic-label">Phonetic rail</p>
-                    <p class="phonetic-code">/ listen · recall · repeat /</p>
-                </aside>
+                <div class="lesson-hero-actions">
+                    <aside class="phonetic-rail" aria-label="Ngữ cảnh học phát âm">
+                        <p class="phonetic-label">Phonetic rail</p>
+                        <p class="phonetic-code">/ listen · recall · repeat /</p>
+                    </aside>
+                    <button class="button button-primary study-start-button" type="button" data-action="start-study" aria-controls="study-workspace" aria-expanded="false">
+                        Bắt đầu học
+                    </button>
+                </div>
             </header>
 
             <section class="tool-panel" id="lesson-tools" aria-label="Công cụ bài học" hidden>
@@ -55,10 +60,10 @@
                 </details>
             </section>
 
-            <section class="lesson-table-card" aria-label="Danh sách từ vựng">
+            <section class="lesson-table-card" id="lesson-list" aria-label="Danh sách từ vựng">
                 <p class="table-note">Chạm biểu tượng loa để nghe phát âm. Các ô bị ẩn được cấu hình từ link chia sẻ.</p>
                 <div class="table-scroll">
-                    <table class="lesson-table" data-lesson-id="{{ lesson_id }}">
+                    <table class="lesson-table" data-lesson-id="{{ lesson_id }}" data-hidden-columns="{{ hide_columns|join(',') }}">
                         <caption class="visually-hidden">Danh sách từ vựng của bài học {{ lesson_name }}</caption>
                         <thead>
                             <tr>
@@ -83,6 +88,7 @@
                                 data-meaning="{{ word.meaning|default('') }}"
                                 data-example="{{ word.example|default('') }}"
                                 data-translate="{{ word.translate|default('') }}"
+                                data-word-voice="{{ word.word_voice|default('') }}"
                             >
                                 <td>{{ loop.index }}</td>
                                 <td class="{{ 'is-screen-hidden' if 1 in hide_columns else '' }} {{ 'is-print-hidden' if 1 in hide_columns_print else '' }}">
@@ -109,6 +115,49 @@
                         </tbody>
                     </table>
                 </div>
+                <ol class="lesson-mobile-list" aria-label="Danh sách từ vựng trên điện thoại">
+                    {% for word in words %}
+                    <li class="mobile-word-item" data-row-key="{{ word.row_key }}">
+                        <header class="mobile-word-header">
+                            <span class="mobile-word-index">{{ loop.index }}</span>
+                            <div>
+                                {% if 1 not in hide_columns %}<strong>{{ word.word }}</strong>{% endif %}
+                                <span>{% if 2 not in hide_columns %}{{ word.type|default('') }}{% endif %}{% if 3 not in hide_columns and word.pronunciation %} · {{ word.pronunciation }}{% endif %}</span>
+                            </div>
+                            {% if word.word_voice and 1 not in hide_columns %}
+                            <button class="audio-button" type="button" data-audio-src="{{ word.word_voice }}" aria-label="Nghe phát âm từ {{ word.word }}">
+                                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M11.25 5.25 6.75 9H3.75v6h3l4.5 3.75V5.25Z"/><path d="M15.75 8.25a5.25 5.25 0 0 1 0 7.5"/><path d="M18.75 5.25a9.5 9.5 0 0 1 0 13.5"/></svg>
+                            </button>
+                            {% endif %}
+                        </header>
+                        {% if 4 not in hide_columns %}<p class="mobile-word-meaning">{{ word.meaning|default('—') }}</p>{% endif %}
+                        {% if 5 not in hide_columns or 6 not in hide_columns %}
+                        <details class="mobile-word-more">
+                            <summary>Xem thêm</summary>
+                            {% if 5 not in hide_columns %}<p><span>Example</span>{{ word.example|default('—') }}</p>{% endif %}
+                            {% if 6 not in hide_columns %}<p><span>Tiếng Việt</span>{{ word.translate|default('—') }}</p>{% endif %}
+                        </details>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ol>
+            </section>
+
+            <section class="study-workspace" id="study-workspace" aria-labelledby="study-title" hidden>
+                <header class="study-header">
+                    <div>
+                        <p class="study-eyebrow">FastENG study desk</p>
+                        <h2 id="study-title">Học từ vựng</h2>
+                    </div>
+                    <button class="button button-quiet" type="button" data-action="exit-study">Quay lại danh sách</button>
+                </header>
+                <nav class="study-mode-tabs" role="tablist" aria-label="Chế độ học">
+                    <button class="study-mode-tab" id="flash-tab" type="button" role="tab" aria-selected="true" aria-controls="flash-panel" data-action="set-study-mode" data-study-mode="flash">Flash card</button>
+                    <button class="study-mode-tab" id="slide-tab" type="button" role="tab" aria-selected="false" aria-controls="slide-panel" data-action="set-study-mode" data-study-mode="slide">Slide</button>
+                </nav>
+                <p class="study-progress" id="study-progress" aria-live="polite"></p>
+                <section class="study-panel" id="flash-panel" role="tabpanel" aria-labelledby="flash-tab"><div id="flash-content"></div></section>
+                <section class="study-panel" id="slide-panel" role="tabpanel" aria-labelledby="slide-tab" hidden><div id="slide-content"></div></section>
             </section>
         </section>
     </main>
@@ -146,6 +195,13 @@
             <div class="selection-list" id="selection-list"></div>
         </div>
         <footer class="dialog-footer"><button class="button" type="button" data-action="close-dialog">Hủy</button><button class="button button-primary" type="button" data-action="save-selection">Lưu lựa chọn</button></footer>
+    </dialog>
+
+    <dialog class="dialog" id="resume-dialog" aria-labelledby="resume-dialog-title">
+        <header class="dialog-header">
+            <div><h2 class="dialog-title" id="resume-dialog-title">Tiếp tục lượt học?</h2><p class="dialog-description" id="resume-dialog-description">Bạn vẫn còn một lượt học đang dở.</p></div>
+        </header>
+        <footer class="dialog-footer"><button class="button" type="button" data-action="exit-study">Để sau</button><button class="button button-quiet" type="button" data-action="restart-study">Học lại từ đầu</button><button class="button button-primary" type="button" data-action="resume-study">Tiếp tục</button></footer>
     </dialog>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
