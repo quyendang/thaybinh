@@ -1,1270 +1,166 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lesson - {{ lesson_name }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .card {
-            position: relative;
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .pdf-download-btn {
-            position: absolute;
-            top: 14px;
-            right: 16px;
-            z-index: 2;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 5px 9px;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.88);
-            color: #6c757d;
-            font-size: 0.78rem;
-            font-weight: 500;
-            line-height: 1;
-            cursor: pointer;
-            opacity: 0.82;
-            transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
-        }
-        .pdf-download-btn:hover {
-            background: #f8f9fa;
-            color: #495057;
-            border-color: #ced4da;
-            opacity: 1;
-        }
-        .pdf-download-btn:focus-visible {
-            outline: 2px solid rgba(0, 123, 255, 0.35);
-            outline-offset: 2px;
-        }
-        .pdf-download-btn i {
-            font-size: 0.9rem;
-        }
-        .lesson-title {
-            padding-left: 64px;
-            padding-right: 64px;
-        }
-        .table {
-            background-color: #fff;
-            border-radius: 0px;
-            overflow: hidden;
-            margin-bottom: 0;
-        }
-        .table-responsive { overflow: auto; }
-/*                     .table-responsive {
-                border-radius: 15px;
-                overflow: hidden;
-            } */
-            
-            @media print {
-                .table-responsive {
-                    border-radius: 0 !important;
-                    overflow: visible !important;
-                }
-            }
-        .table th {
-            background-color: #007bff;
-            color: white;
-            font-weight: 600;
-            text-align: center;
-            padding: 12px 8px;
-            font-size: 14px;
-        }
-        .table td {
-            vertical-align: middle;
-            padding: 12px 8px;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-
-        .flex-row-space {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-        }
-        .speaker-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.2rem;
-            color: #007bff;
-            transition: color 0.3s ease, transform 0.2s ease;
-        }
-        .speaker-btn:hover {
-            color: #0056b3;
-            transform: scale(1.1);
-        }
-
-        /* Cột Index nhỏ và xám */
-        .index-col {
-            font-size: 0.85rem;
-            text-align: center;
-        }
-
-        /* Word in đậm */
-        .word-col span {
-            font-weight: 600;
-        }
-
-        @media print {
-            body {
-                margin: 3mm !important;
-                background: #fff !important;
-                font-size: 12px !important;
-            }
-            
-            header, footer, .speaker-btn, .pdf-download-btn {
-                display: none !important;
-            }
-            
-            .card {
-                border: none !important;
-                box-shadow: none !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-            
-            .container {
-                width: 100% !important;
-                max-width: 100% !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-
-            .table {
-                width: 100% !important;
-                margin: 0 !important;
-                border-collapse: collapse !important;
-                border-radius: 0 !important;
-            }
-
-            .table th:nth-child(1),
-            .table td:nth-child(1) {
-                width: 3.125% !important; /* 0.5/16 = 3.125% */
-                text-align: center !important;
-            }
-            
-            .table th:nth-child(2), 
-            .table td:nth-child(2) { 
-                width: 15.625% !important; /* 2.5/16 = 15.625% */
-            }
-            
-            .table th:nth-child(3), 
-            .table td:nth-child(3) { 
-                width: 6.25% !important; /* 1/16 = 6.25% */
-            }
-            
-            .table th:nth-child(4), 
-            .table td:nth-child(4) { 
-                width: 12.5% !important; /* 2/16 = 12.5% */
-            }
-            
-            .table th:nth-child(5), 
-            .table td:nth-child(5) { 
-                width: 25% !important; /* 4/16 = 25% */
-            }
-            
-            .table th:nth-child(6), 
-            .table td:nth-child(6) { 
-                width: 25% !important; /* 4/16 = 25% */
-            }
-            
-            .table th:nth-child(7), 
-            .table td:nth-child(7) { 
-                width: 12.5% !important; /* 2/16 = 12.5% */
-            }
-
-            .table td, .table th {
-                font-size: 11px !important;
-                word-wrap: break-word !important;
-                padding: 6px 4px !important;
-                border: 1px solid #ddd !important;
-            }
-            
-            .table th {
-                background: #f0f0f0 !important;
-                color: black !important;
-                font-weight: bold !important;
-            }
-            
-            /* Print styles for hidden columns */
-            .print-hidden,
-            .print-hidden * {
-                color: transparent !important;
-                background-color: transparent !important;
-            }
-            
-            /* Ensure hidden columns maintain width */
-            .print-hidden {
-                min-width: 0 !important;
-                width: auto !important;
-            }
-        }
-        
-        /* Popup chọn từ (ẩn từ khỏi bảng) */
-        .word-select-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.45);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10001;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .word-select-modal {
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-            max-width: 480px;
-            width: 100%;
-            max-height: 85vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        .word-select-header {
-            padding: 20px 24px 16px;
-            border-bottom: 1px solid #e9ecef;
-            flex-shrink: 0;
-        }
-        .word-select-title {
-            margin: 0;
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #1a1a2e;
-        }
-        .word-select-hint {
-            margin: 8px 0 0;
-            font-size: 0.875rem;
-            color: #6c757d;
-        }
-        .word-select-toolbar {
-            padding: 10px 24px;
-            display: flex;
-            gap: 12px;
-            border-bottom: 1px solid #eee;
-            flex-shrink: 0;
-        }
-        .word-select-toolbar button {
-            font-size: 0.8125rem;
-            padding: 6px 12px;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-            background: #fff;
-            color: #495057;
-            cursor: pointer;
-        }
-        .word-select-toolbar button:hover {
-            background: #f8f9fa;
-            border-color: #adb5bd;
-        }
-        .word-select-list {
-            padding: 16px 24px 20px;
-            overflow-y: auto;
-            flex: 1;
-            min-height: 200px;
-            max-height: 50vh;
-        }
-        .word-select-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            border-radius: 10px;
-            margin-bottom: 6px;
-            transition: background 0.15s;
-        }
-        .word-select-item:hover {
-            background: #f8f9fa;
-        }
-        .word-select-item input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            flex-shrink: 0;
-            accent-color: #007bff;
-        }
-        .word-select-item label {
-            margin: 0;
-            cursor: pointer;
-            flex: 1;
-            font-size: 0.9375rem;
-            line-height: 1.4;
-            user-select: none;
-        }
-        .word-select-item .word-text {
-            font-weight: 600;
-            color: #1a1a2e;
-        }
-        .word-select-item .word-meta {
-            font-size: 0.8125rem;
-            color: #6c757d;
-            margin-top: 2px;
-        }
-        .word-select-footer {
-            padding: 16px 24px 20px;
-            border-top: 1px solid #e9ecef;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            flex-shrink: 0;
-        }
-        .word-select-footer .btn-cancel {
-            padding: 10px 20px;
-            border-radius: 10px;
-            border: 1px solid #dee2e6;
-            background: #fff;
-            color: #495057;
-            cursor: pointer;
-            font-size: 0.9375rem;
-        }
-        .word-select-footer .btn-cancel:hover {
-            background: #f8f9fa;
-        }
-        .word-select-footer .btn-save {
-            padding: 10px 24px;
-            border-radius: 10px;
-            border: none;
-            background: #007bff;
-            color: #fff;
-            cursor: pointer;
-            font-size: 0.9375rem;
-            font-weight: 500;
-        }
-        .word-select-footer .btn-save:hover {
-            background: #0056b3;
-        }
-        .word-select-close {
-            position: absolute;
-            top: 16px;
-            right: 20px;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: #6c757d;
-            cursor: pointer;
-            line-height: 1;
-            padding: 4px;
-        }
-        .word-select-close:hover {
-            color: #1a1a2e;
-        }
-
-        /* Responsive design for mobile */
-        @media (max-width: 768px) {
-            .container {
-                padding: 0 10px;
-            }
-
-            .pdf-download-btn {
-                top: 10px;
-                right: 10px;
-                width: 30px;
-                height: 30px;
-                padding: 0;
-                justify-content: center;
-            }
-
-            .pdf-download-btn .pdf-download-label {
-                display: none;
-            }
-
-            .lesson-title {
-                padding-left: 36px;
-                padding-right: 36px;
-            }
-            
-            .card {
-                margin: 10px 0;
-            }
-            
-            .table th,
-            .table td {
-                padding: 8px 4px;
-                font-size: 13px;
-            }
-            
-            .table th:nth-child(1),
-            .table td:nth-child(1) {
-                width: 10% !important;
-            }
-            
-            .table th:nth-child(2),
-            .table td:nth-child(2) {
-                width: 25% !important;
-            }
-            
-            .table th:nth-child(3),
-            .table td:nth-child(3) {
-                width: 15% !important;
-            }
-            
-            .table th:nth-child(4),
-            .table td:nth-child(4) {
-                width: 20% !important;
-            }
-            
-            .table th:nth-child(5),
-            .table td:nth-child(5) {
-                width: 30% !important;
-            }
-            
-            .table th:nth-child(6),
-            .table td:nth-child(6) {
-                width: 30% !important;
-            }
-            
-            .table th:nth-child(7),
-            .table td:nth-child(7) {
-                width: 25% !important;
-            }
-        }
-    </style>
+    <meta name="theme-color" content="#f6f8fb">
+    <title>{{ lesson_name }} · FastENG</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/tokens.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/share.css') }}">
 </head>
 <body>
-    <div class="container mt-5">
-        <div class="card p-4">
-            <button
-                type="button"
-                class="pdf-download-btn"
-                onclick="downloadPdf()"
-                aria-label="Tải bài học về PDF"
-                title="Tải về PDF"
-            >
-                <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>
-                <span class="pdf-download-label">PDF</span>
-            </button>
-            <h1 class="lesson-title text-center mb-4 text-primary" style="font-size: 1.8rem;">{{ lesson_name }}</h1>
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th>*</th>
-                            <th>Word</th>
-                            <th>Type</th>
-                            <th>IPA</th>
-                            <th>Meaning</th>
-                            <th>Example</th>
-                            <th>Vietnamese</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for word in words %}
-                        <tr>
-                            <td class="index-col text-muted">{{ loop.index }}</td>
-                            <td>
-                                {% if 1 not in hide_columns %}
-                                <div class="flex-row-space word-col">
-                                    <span>{{ word.word }}</span>
-                                    <button class="speaker-btn" onclick="playAudio('{{ word.word_voice }}')">
-                                        <i class="bi bi-volume-up"></i>
-                                    </button>
-                                </div>
-                                {% endif %}
-                            </td>
-                            <td class="text-center">{% if 2 not in hide_columns %}{{ word.type|default('N/A') }}{% endif %}</td>
-                            <td class="text-center">{% if 3 not in hide_columns %}{{ word.pronunciation }}{% endif %}</td>
-                            <td>{% if 4 not in hide_columns %}{{ word.meaning }}{% endif %}</td>
-                            <td>{% if 5 not in hide_columns %}{{ word.example }}{% endif %}</td>
-                            <td>{% if 6 not in hide_columns %}{{ word.translate }}{% endif %}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <main class="share-shell">
+        <section class="share-workspace" aria-labelledby="lesson-title">
+            <header class="lesson-hero">
+                <div>
+                    <p class="lesson-eyebrow">{{ group_name or "FastENG · Bài học được chia sẻ" }}</p>
+                    <h1 class="lesson-title" id="lesson-title">{{ lesson_name }}</h1>
+                    <p class="lesson-subtitle" id="visible-word-count">{{ words|length }} từ đang hiển thị</p>
+                </div>
+                <aside class="phonetic-rail" aria-label="Ngữ cảnh học phát âm">
+                    <p class="phonetic-label">Phonetic rail</p>
+                    <p class="phonetic-code">/ listen · recall · repeat /</p>
+                </aside>
+            </header>
+
+            <section class="tool-panel" aria-label="Công cụ bài học">
+                <div class="tool-group">
+                    <span class="tool-group-label">Danh sách</span>
+                    <button class="button" type="button" data-action="open-selection">
+                        Chọn từ hiển thị
+                    </button>
+                    <button class="button button-quiet" type="button" data-action="reset-selection">
+                        Khôi phục tất cả
+                    </button>
+                </div>
+                <div class="tool-group">
+                    <span class="tool-group-label">Sao chép</span>
+                    <button class="button" type="button" data-action="copy-basic">Word + Meaning</button>
+                    <button class="button" type="button" data-action="copy-vietnamese">Thêm tiếng Việt</button>
+                    <button class="button" type="button" data-action="open-copy">Tùy chỉnh</button>
+                </div>
+                <div class="tool-group">
+                    <span class="tool-group-label">Xuất</span>
+                    <button class="button button-primary" type="button" data-action="print">
+                        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4V10h16v8h-2M7 14h10v7H7z"/></svg>
+                        In / Lưu PDF
+                    </button>
+                </div>
+                <details class="shortcut-help">
+                    <summary>Phím tắt</summary>
+                    <p><kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>1</kbd>: copy cơ bản · <kbd>2</kbd>: thêm tiếng Việt · <kbd>P</kbd>: in · <kbd>S</kbd>: chọn từ.</p>
+                </details>
+            </section>
+
+            <section class="mobile-tools" aria-label="Công cụ bài học trên điện thoại">
+                <button class="button button-primary" type="button" data-action="open-tools">Mở công cụ bài học</button>
+            </section>
+
+            <section class="lesson-table-card" aria-label="Danh sách từ vựng">
+                <p class="table-note">Chạm biểu tượng loa để nghe phát âm. Các ô bị ẩn được cấu hình từ link chia sẻ.</p>
+                <div class="table-scroll">
+                    <table class="lesson-table" data-lesson-id="{{ lesson_id }}">
+                        <caption class="visually-hidden">Danh sách từ vựng của bài học {{ lesson_name }}</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Word</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">IPA</th>
+                                <th scope="col">Meaning</th>
+                                <th scope="col">Example</th>
+                                <th scope="col">Vietnamese</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for word in words %}
+                            <tr
+                                class="lesson-row"
+                                data-row-key="{{ word.row_key }}"
+                                data-index="{{ loop.index }}"
+                                data-word="{{ word.word|default('') }}"
+                                data-type="{{ word.type|default('') }}"
+                                data-ipa="{{ word.pronunciation|default('') }}"
+                                data-meaning="{{ word.meaning|default('') }}"
+                                data-example="{{ word.example|default('') }}"
+                                data-translate="{{ word.translate|default('') }}"
+                            >
+                                <td>{{ loop.index }}</td>
+                                <td class="{{ 'is-screen-hidden' if 1 in hide_columns else '' }} {{ 'is-print-hidden' if 1 in hide_columns_print else '' }}">
+                                    <div class="cell-content word-cell" {% if 1 in hide_columns %}aria-hidden="true"{% endif %}>
+                                        <span>{{ word.word }}</span>
+                                        {% if word.word_voice %}
+                                        <button class="audio-button" type="button" data-audio-src="{{ word.word_voice }}" aria-label="Nghe phát âm từ {{ word.word }}">
+                                            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6l-5 4zm11.5-.5a5 5 0 0 1 0 5m2.5-7.5a8.5 8.5 0 0 1 0 10"/></svg>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="{{ 'is-screen-hidden' if 2 in hide_columns else '' }} {{ 'is-print-hidden' if 2 in hide_columns_print else '' }}"><span class="cell-content" {% if 2 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.type|default('—') }}</span></td>
+                                <td class="ipa-cell {{ 'is-screen-hidden' if 3 in hide_columns else '' }} {{ 'is-print-hidden' if 3 in hide_columns_print else '' }}"><span class="cell-content" {% if 3 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.pronunciation|default('—') }}</span></td>
+                                <td class="{{ 'is-screen-hidden' if 4 in hide_columns else '' }} {{ 'is-print-hidden' if 4 in hide_columns_print else '' }}"><span class="cell-content" {% if 4 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.meaning|default('—') }}</span></td>
+                                <td class="{{ 'is-screen-hidden' if 5 in hide_columns else '' }} {{ 'is-print-hidden' if 5 in hide_columns_print else '' }}"><span class="cell-content" {% if 5 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.example|default('—') }}</span></td>
+                                <td class="{{ 'is-screen-hidden' if 6 in hide_columns else '' }} {{ 'is-print-hidden' if 6 in hide_columns_print else '' }}"><span class="cell-content" {% if 6 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.translate|default('—') }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <dialog class="dialog" id="copy-dialog" aria-labelledby="copy-dialog-title">
+        <header class="dialog-header">
+            <div><h2 class="dialog-title" id="copy-dialog-title">Sao chép theo format</h2><p class="dialog-description">Chỉ sao chép các từ đang hiển thị.</p></div>
+            <button class="icon-button" type="button" data-action="close-dialog" aria-label="Đóng hộp thoại">×</button>
+        </header>
+        <div class="dialog-body">
+            <div class="format-grid">
+                <button class="format-option" type="button" data-format="2-t-5" data-format-label="Word + Meaning"><strong>Word + Meaning</strong><span>word ⇥ meaning</span></button>
+                <button class="format-option" type="button" data-format="2-t-3-t-5" data-format-label="Word + Type + Meaning"><strong>Word + Type + Meaning</strong><span>word ⇥ type ⇥ meaning</span></button>
+                <button class="format-option" type="button" data-format="2-t-5-t-6" data-format-label="Word + Meaning + Example"><strong>Word + Meaning + Example</strong><span>word ⇥ meaning ⇥ example</span></button>
+                <button class="format-option" type="button" data-format="2-t-5-[7]" data-format-label="Word + Meaning + Vietnamese"><strong>Word + Meaning + Vietnamese</strong><span>word ⇥ meaning [Vietnamese]</span></button>
+                <button class="format-option" type="button" data-format="2-(3)-t-5-t-6" data-format-label="Word + Type + Meaning + Example"><strong>Word + (Type) + Meaning + Example</strong><span>word (type) ⇥ meaning ⇥ example</span></button>
+                <button class="format-option" type="button" data-format="2-t-4-t-5" data-format-label="Word + IPA + Meaning"><strong>Word + IPA + Meaning</strong><span>word ⇥ IPA ⇥ meaning</span></button>
             </div>
-            
-
+            <div class="custom-format">
+                <label for="custom-format-input">Format tùy chỉnh</label>
+                <input id="custom-format-input" type="text" spellcheck="false" aria-describedby="format-guide">
+                <p class="format-guide" id="format-guide">1: số thứ tự · 2: word · 3: type · 4: IPA · 5: meaning · 6: example · 7: Vietnamese · <code>t</code>: tab · <code>()</code>, <code>[]</code>: bọc nội dung.</p>
+                <button class="button button-primary" id="custom-format-copy" type="button">Sao chép format này</button>
+            </div>
         </div>
-    </div>
+    </dialog>
 
-    <script>
-        // Global variables for column hiding
-        const hideColumnsPrint = JSON.parse('{{ hide_columns_print|tojson if hide_columns_print else "[]" }}');
-        
-        function downloadPdf() {
-            window.print();
-        }
+    <dialog class="dialog" id="selection-dialog" aria-labelledby="selection-dialog-title">
+        <header class="dialog-header">
+            <div><h2 class="dialog-title" id="selection-dialog-title">Chọn từ hiển thị</h2><p class="dialog-description">Tùy chọn này chỉ được lưu trên thiết bị của bạn.</p></div>
+            <button class="icon-button" type="button" data-action="close-dialog" aria-label="Đóng hộp thoại">×</button>
+        </header>
+        <div class="dialog-body">
+            <div class="selection-tools"><button class="button" id="select-all" type="button">Chọn tất cả</button><button class="button button-quiet" id="deselect-all" type="button">Bỏ chọn tất cả</button></div>
+            <div class="selection-list" id="selection-list"></div>
+        </div>
+        <footer class="dialog-footer"><button class="button" type="button" data-action="close-dialog">Hủy</button><button class="button button-primary" type="button" data-action="save-selection">Lưu lựa chọn</button></footer>
+    </dialog>
 
-        function playAudio(audioSrc) {
-            if (!audioSrc) return;
-            let finalSrc = "";
-            if (audioSrc.startsWith("http://") || audioSrc.startsWith("https://")) {
-                finalSrc = audioSrc;
-            } else {
-                finalSrc = "data:audio/mp3;base64," + audioSrc;
-            }
-            var audio = new Audio(finalSrc);
-            audio.play().catch(err => console.error("Playback error:", err));
-        }
+    <dialog class="dialog tools-sheet" id="tools-dialog" aria-labelledby="tools-dialog-title">
+        <header class="dialog-header"><h2 class="dialog-title" id="tools-dialog-title">Công cụ bài học</h2><button class="icon-button" type="button" data-action="close-dialog" aria-label="Đóng">×</button></header>
+        <div class="dialog-body">
+            <button class="button" type="button" data-action="open-selection">Chọn từ hiển thị</button>
+            <button class="button" type="button" data-action="reset-selection">Khôi phục tất cả</button>
+            <button class="button" type="button" data-action="copy-basic">Sao chép Word + Meaning</button>
+            <button class="button" type="button" data-action="copy-vietnamese">Sao chép kèm tiếng Việt</button>
+            <button class="button" type="button" data-action="open-copy">Sao chép tùy chỉnh</button>
+            <button class="button button-primary" type="button" data-action="print">In / Lưu PDF</button>
+        </div>
+    </dialog>
 
-        // // Function to handle print column hiding
-        // function handlePrintColumns() {
-        //     console.log('Handling print columns:', hideColumnsPrint);
-        //     hideColumnsPrint.forEach(col => {
-        //         const colIndex = col + 1; // +1 because CSS nth-child is 1-indexed
-        //         const cells = document.querySelectorAll(`.table th:nth-child(${colIndex}), .table td:nth-child(${colIndex})`);
-                
-        //         console.log(`Hiding column ${colIndex}, found ${cells.length} cells`);
-                
-        //         cells.forEach(cell => {
-        //             // Hide text completely but keep column width
-        //             cell.style.setProperty('color', 'transparent', 'important');
-        //             cell.style.setProperty('background-color', 'transparent', 'important');
-                    
-        //             // Add print-specific class for CSS override
-        //             cell.classList.add('print-hidden');
-        //         });
-        //     });
-        // }
-
-        // // Function to restore columns after print
-        // function restorePrintColumns() {
-        //     console.log('Restoring print columns');
-        //     hideColumnsPrint.forEach(col => {
-        //         const colIndex = col + 1;
-        //         const cells = document.querySelectorAll(`.table th:nth-child(${colIndex}), .table td:nth-child(${colIndex})`);
-                
-        //         cells.forEach(cell => {
-        //             // Restore original styling
-        //             cell.style.removeProperty('color');
-        //             cell.style.removeProperty('background-color');
-        //             cell.classList.remove('print-hidden');
-        //         });
-        //     });
-        // }
-
-
-        function handlePrintColumns() {
-            console.log('Handling print columns:', hideColumnsPrint);
-            hideColumnsPrint.forEach(col => {
-                const colIndex = col + 1; // +1 because CSS nth-child is 1-indexed
-                const cells = document.querySelectorAll(`.table td:nth-child(${colIndex})`); // Target only td elements
-                
-                console.log(`Hiding column ${colIndex} content, found ${cells.length} cells`);
-                
-                cells.forEach(cell => {
-                    // Hide text completely but keep column width
-                    cell.style.setProperty('color', 'transparent', 'important');
-                    cell.style.setProperty('background-color', 'transparent', 'important');
-                    cell.classList.add('print-hidden');
-                });
-            });
-        }
-
-        function restorePrintColumns() {
-            console.log('Restoring print columns');
-            hideColumnsPrint.forEach(col => {
-                const colIndex = col + 1;
-                const cells = document.querySelectorAll(`.table td:nth-child(${colIndex})`);
-                
-                cells.forEach(cell => {
-                    cell.style.removeProperty('color');
-                    cell.style.removeProperty('background-color');
-                    cell.classList.remove('print-hidden');
-                });
-            });
-        }
-
-        // Add print event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, setting up print handlers');
-            console.log('Hide columns for print:', hideColumnsPrint);
-            
-            // Handle before print
-            window.addEventListener('beforeprint', function() {
-                console.log('Before print event triggered');
-                handlePrintColumns();
-            });
-            
-            // Handle after print
-            window.addEventListener('afterprint', function() {
-                console.log('After print event triggered');
-                restorePrintColumns();
-            });
-            
-            // Handle print media query changes
-            const mediaQuery = window.matchMedia('print');
-            mediaQuery.addListener(function(mql) {
-                console.log('Print media query changed:', mql.matches);
-                if (mql.matches) {
-                    handlePrintColumns();
-                } else {
-                    restorePrintColumns();
-                }
-            });
-            
-            // Handle Control+Q for clipboard copy (word + meaning)
-            document.addEventListener('keydown', function(event) {
-                // Check for Control+Q
-                if (event.ctrlKey && event.key === 'q') {
-                    event.preventDefault(); // Prevent default behavior
-                    copyTableToClipboard();
-                }
-                // Handle Control+W for clipboard copy with translate
-                if (event.ctrlKey && event.key === 'w') {
-                    event.preventDefault(); // Prevent default behavior
-                    copyTableToClipboardWithTranslate();
-                }
-                // Handle Control+E for custom format copy
-                if (event.ctrlKey && event.key === 'e') {
-                    event.preventDefault(); // Prevent default behavior
-                    showCustomFormatPopup();
-                }
-            });
-
-            // Bắt phím "p" 3 lần liên tiếp để mở popup chọn từ (ẩn từ khỏi bảng)
-            initWordSelectPopupOnKeyP();
-            
-            // Test print functionality
-            console.log('Print event listeners set up successfully');
-        });
-        
-        // Function to copy table data to clipboard
-        function copyTableToClipboard() {
-            try {
-                const table = document.querySelector('.table tbody');
-                if (!table) {
-                    console.error('Table not found');
-                    return;
-                }
-                
-                const rows = table.querySelectorAll('tr');
-                let clipboardText = '';
-                
-                rows.forEach(row => {
-                    const cells = row.querySelectorAll('td');
-                    if (cells.length >= 6) { // Ensure we have enough columns
-                        const word = cells[1]?.textContent?.trim() || ''; // Word column (index 1)
-                        const meaning = cells[4]?.textContent?.trim() || ''; // Meaning column (index 4)
-                        
-                        if (word && meaning) {
-                            clipboardText += word + '\t' + meaning + '\n';
-                        }
-                    }
-                });
-                
-                if (clipboardText) {
-                    // Use modern clipboard API if available
-                    if (navigator.clipboard && window.isSecureContext) {
-                        navigator.clipboard.writeText(clipboardText).then(() => {
-                            console.log('Data copied to clipboard successfully');
-                            showCopySuccessMessage();
-                        }).catch(err => {
-                            console.error('Failed to copy to clipboard:', err);
-                            fallbackCopyToClipboard(clipboardText);
-                        });
-                    } else {
-                        // Fallback for older browsers or non-secure contexts
-                        fallbackCopyToClipboard(clipboardText);
-                    }
-                } else {
-                    console.error('No data to copy');
-                }
-            } catch (error) {
-                console.error('Error copying to clipboard:', error);
-            }
-        }
-        
-        // Function to copy table data to clipboard with translate
-        function copyTableToClipboardWithTranslate() {
-            try {
-                const table = document.querySelector('.table tbody');
-                if (!table) {
-                    console.error('Table not found');
-                    return;
-                }
-                
-                const rows = table.querySelectorAll('tr');
-                let clipboardText = '';
-                
-                rows.forEach(row => {
-                    const cells = row.querySelectorAll('td');
-                    if (cells.length >= 7) { // Ensure we have enough columns including translate
-                        const word = cells[1]?.textContent?.trim() || ''; // Word column (index 1)
-                        const meaning = cells[4]?.textContent?.trim() || ''; // Meaning column (index 4)
-                        const translate = cells[6]?.textContent?.trim() || ''; // Translate column (index 6)
-                        
-                        if (word && meaning) {
-                            clipboardText += word + '\t' + meaning + '[' + translate + ']\n';
-                        }
-                    }
-                });
-                
-                if (clipboardText) {
-                    // Use modern clipboard API if available
-                    if (navigator.clipboard && window.isSecureContext) {
-                        navigator.clipboard.writeText(clipboardText).then(() => {
-                            console.log('Data with translate copied to clipboard successfully');
-                            showCopySuccessMessage('✅ Data with translate copied!');
-                        }).catch(err => {
-                            console.error('Failed to copy to clipboard:', err);
-                            fallbackCopyToClipboard(clipboardText);
-                        });
-                    } else {
-                        // Fallback for older browsers or non-secure contexts
-                        fallbackCopyToClipboard(clipboardText);
-                    }
-                } else {
-                    console.error('No data to copy');
-                }
-            } catch (error) {
-                console.error('Error copying to clipboard:', error);
-            }
-        }
-        
-        // Function to show custom format popup
-        function showCustomFormatPopup() {
-            // Remove existing popup if any
-            const existingPopup = document.getElementById('customFormatPopup');
-            if (existingPopup) {
-                existingPopup.remove();
-            }
-            
-            // Create popup container
-            const popup = document.createElement('div');
-            popup.id = 'customFormatPopup';
-            popup.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.5);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 10000;
-            `;
-            
-            // Create popup content
-            const popupContent = document.createElement('div');
-            popupContent.style.cssText = `
-                background: white;
-                padding: 30px;
-                border-radius: 12px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-                max-width: 600px;
-                width: 90%;
-                position: relative;
-            `;
-            
-            // Create close button
-            const closeBtn = document.createElement('button');
-            closeBtn.innerHTML = '&times;';
-            closeBtn.style.cssText = `
-                position: absolute;
-                top: 10px;
-                right: 15px;
-                background: none;
-                border: none;
-                font-size: 24px;
-                cursor: pointer;
-                color: #666;
-                padding: 0;
-                width: 30px;
-                height: 30px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            `;
-            closeBtn.onclick = () => popup.remove();
-            
-            // Create title
-            const title = document.createElement('h3');
-            title.textContent = 'Select Copy Format';
-            title.style.cssText = `
-                margin: 0 0 20px 0;
-                color: #333;
-                font-size: 18px;
-                text-align: center;
-            `;
-            
-            // Create preset formats section
-            const presetSection = document.createElement('div');
-            presetSection.style.cssText = `
-                margin-bottom: 25px;
-            `;
-            
-            const presetTitle = document.createElement('h4');
-            presetTitle.textContent = 'Quick Formats:';
-            presetTitle.style.cssText = `
-                margin: 0 0 15px 0;
-                color: #555;
-                font-size: 16px;
-            `;
-            
-            // Define preset formats
-            const presetFormats = [
-                { name: 'Word + Meaning', format: '2-t-5', description: 'word + tab + meaning' },
-                { name: 'Word + Type + Meaning', format: '2-t-3-t-5', description: 'word + tab + type + tab + meaning' },
-                { name: 'Word + Meaning + Example', format: '2-t-5-t-6', description: 'word + tab + meaning + tab + example' },
-                { name: 'Word + Meaning + [Translate]', format: '2-t-5-[7]', description: 'word + tab + meaning + [translate]' },
-                { name: 'Word + (Type) + Meaning + Example', format: '2-(-3-)-t-5-t-6', description: 'word + (type) + tab + meaning + tab + example' },
-                { name: 'Word + IPA + Meaning', format: '2-t-4-t-5', description: 'word + tab + IPA + tab + meaning' }
-            ];
-            
-            // Create preset buttons
-            presetFormats.forEach(preset => {
-                const presetBtn = document.createElement('button');
-                presetBtn.textContent = preset.name;
-                presetBtn.style.cssText = `
-                    display: block;
-                    width: 100%;
-                    padding: 12px;
-                    margin-bottom: 8px;
-                    background: #f8f9fa;
-                    border: 2px solid #e9ecef;
-                    border-radius: 6px;
-                    cursor: pointer;
-                    text-align: left;
-                    transition: all 0.2s;
-                    font-size: 14px;
-                `;
-                
-                presetBtn.onmouseover = () => {
-                    presetBtn.style.background = '#e3f2fd';
-                    presetBtn.style.borderColor = '#2196f3';
-                };
-                
-                presetBtn.onmouseout = () => {
-                    presetBtn.style.background = '#f8f9fa';
-                    presetBtn.style.borderColor = '#e9ecef';
-                };
-                
-                presetBtn.onclick = () => {
-                    copyTableWithCustomFormat(preset.format);
-                    popup.remove();
-                };
-                
-                // Add description below button
-                const desc = document.createElement('div');
-                desc.textContent = preset.description;
-                desc.style.cssText = `
-                    font-size: 12px;
-                    color: #666;
-                    margin-top: 4px;
-                    font-style: italic;
-                `;
-                
-                presetBtn.appendChild(desc);
-                presetSection.appendChild(presetBtn);
-            });
-            
-            // Create custom format section
-            const customSection = document.createElement('div');
-            customSection.style.cssText = `
-                border-top: 1px solid #e9ecef;
-                padding-top: 20px;
-            `;
-            
-            const customTitle = document.createElement('h4');
-            customTitle.textContent = 'Custom Format:';
-            customTitle.style.cssText = `
-                margin: 0 0 15px 0;
-                color: #555;
-                font-size: 16px;
-            `;
-            
-            const customDesc = document.createElement('p');
-            customDesc.innerHTML = `
-                <strong>Format Guide:</strong><br>
-                • Numbers: 1=Index, 2=Word, 3=Type, 4=IPA, 5=Meaning, 6=Example, 7=Translate<br>
-                • <strong>t</strong> = Tab separator<br>
-                • <strong>-</strong> = Separator between elements<br>
-                • <strong>()</strong> = Wrap content in parentheses<br>
-                • <strong>[]</strong> = Wrap content in brackets
-            `;
-            customDesc.style.cssText = `
-                margin: 0 0 15px 0;
-                color: #666;
-                font-size: 13px;
-                line-height: 1.4;
-            `;
-            
-            // Create input field
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.placeholder = 'Enter custom format (e.g., 1-t-4-t-5)';
-            input.value = '1-t-4-t-5';
-            input.style.cssText = `
-                width: 100%;
-                padding: 12px;
-                border: 2px solid #ddd;
-                border-radius: 6px;
-                font-size: 16px;
-                margin-bottom: 15px;
-                box-sizing: border-box;
-            `;
-            
-            // Create custom copy button
-            const customCopyBtn = document.createElement('button');
-            customCopyBtn.textContent = 'Copy with Custom Format';
-            customCopyBtn.style.cssText = `
-                background: #28a745;
-                color: white;
-                border: none;
-                padding: 12px 24px;
-                border-radius: 6px;
-                font-size: 16px;
-                cursor: pointer;
-                width: 100%;
-                transition: background 0.3s;
-            `;
-            customCopyBtn.onmouseover = () => customCopyBtn.style.background = '#218838';
-            customCopyBtn.onmouseout = () => customCopyBtn.style.background = '#28a745';
-            customCopyBtn.onclick = () => {
-                const format = input.value.trim();
-                if (format) {
-                    copyTableWithCustomFormat(format);
-                    popup.remove();
-                }
-            };
-            
-            // Assemble popup
-            popupContent.appendChild(closeBtn);
-            popupContent.appendChild(title);
-            popupContent.appendChild(presetSection);
-            popupContent.appendChild(customSection);
-            popupContent.appendChild(customTitle);
-            popupContent.appendChild(customDesc);
-            popupContent.appendChild(input);
-            popupContent.appendChild(customCopyBtn);
-            popup.appendChild(popupContent);
-            
-            // Add to page
-            document.body.appendChild(popup);
-            
-            // Focus input
-            input.focus();
-            input.select();
-        }
-        
-
-        
-        // Function to copy table with custom format
-        function copyTableWithCustomFormat(format) {
-            try {
-                const table = document.querySelector('.table tbody');
-                if (!table) {
-                    console.error('Table not found');
-                    return;
-                }
-                
-                const rows = table.querySelectorAll('tr');
-                let clipboardText = '';
-                
-                rows.forEach(row => {
-                    const cells = row.querySelectorAll('td');
-                    if (cells.length >= 6) {
-                        let rowText = '';
-                        const parts = format.split('-');
-                        
-                        for (let i = 0; i < parts.length; i++) {
-                            const part = parts[i];
-                            
-                            if (part === 't') {
-                                rowText += '\t';
-                            } else if (part.startsWith('(') && part.endsWith(')')) {
-                                const innerPart = part.slice(1, -1);
-                                const columnIndex = parseInt(innerPart) - 1;
-                                if (columnIndex >= 0 && columnIndex < cells.length) {
-                                    const cellContent = cells[columnIndex]?.textContent?.trim() || '';
-                                    rowText += '(' + cellContent + ')';
-                                }
-                            } else if (part.startsWith('[') && part.endsWith(']')) {
-                                const innerPart = part.slice(1, -1);
-                                const columnIndex = parseInt(innerPart) - 1;
-                                if (columnIndex >= 0 && columnIndex < cells.length) {
-                                    const cellContent = cells[columnIndex]?.textContent?.trim() || '';
-                                    rowText += '[' + cellContent + ']';
-                                }
-                            } else if (/^\d+$/.test(part)) {
-                                const columnIndex = parseInt(part) - 1;
-                                if (columnIndex >= 0 && columnIndex < cells.length) {
-                                    const cellContent = cells[columnIndex]?.textContent?.trim() || '';
-                                    rowText += cellContent;
-                                }
-                            }
-                        }
-                        
-                        if (rowText.trim()) {
-                            clipboardText += rowText + '\n';
-                        }
-                    }
-                });
-                
-                if (clipboardText) {
-                    // Use modern clipboard API if available
-                    if (navigator.clipboard && window.isSecureContext) {
-                        navigator.clipboard.writeText(clipboardText).then(() => {
-                            console.log('Data with custom format copied to clipboard successfully');
-                            showCopySuccessMessage('✅ Custom format copied!');
-                        }).catch(err => {
-                            console.error('Failed to copy to clipboard:', err);
-                            fallbackCopyToClipboard(clipboardText);
-                        });
-                    } else {
-                        // Fallback for older browsers or non-secure contexts
-                        fallbackCopyToClipboard(clipboardText);
-                    }
-                } else {
-                    console.error('No data to copy');
-                }
-            } catch (error) {
-                console.error('Error copying to clipboard:', error);
-            }
-        }
-        
-        // Fallback copy method for older browsers
-        function fallbackCopyToClipboard(text) {
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            textArea.style.position = 'fixed';
-            textArea.style.left = '-999999px';
-            textArea.style.top = '-999999px';
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            
-            try {
-                document.execCommand('copy');
-                console.log('Data copied to clipboard using fallback method');
-                showCopySuccessMessage();
-            } catch (err) {
-                console.error('Fallback copy failed:', err);
-            }
-            
-            document.body.removeChild(textArea);
-        }
-        
-        // Show success message
-        function showCopySuccessMessage(customMessage = '✅ Data copied to clipboard!') {
-            // Create a temporary success message
-            const message = document.createElement('div');
-            message.textContent = customMessage;
-            message.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: #28a745;
-                color: white;
-                padding: 12px 20px;
-                border-radius: 6px;
-                font-weight: bold;
-                z-index: 9999;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                animation: slideIn 0.3s ease-out;
-            `;
-            
-            // Add animation CSS
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes slideIn {
-                    from { transform: translateX(100%); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
-                }
-            `;
-            document.head.appendChild(style);
-            
-            document.body.appendChild(message);
-            
-            // Remove message after 3 seconds
-            setTimeout(() => {
-                if (message.parentNode) {
-                    message.parentNode.removeChild(message);
-                }
-            }, 3000);
-        }
-
-        // --- Popup chọn từ: nhấn "p" 3 lần liên tiếp ---
-        var _pKeyCount = 0;
-        var _pKeyResetTimer = null;
-        var _P_KEY_WINDOW_MS = 800;
-
-        function initWordSelectPopupOnKeyP() {
-            document.addEventListener('keydown', function(event) {
-                var tag = (event.target || event.srcElement).tagName;
-                if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-                if (event.ctrlKey || event.altKey || event.metaKey) return;
-
-                if (event.key === 'p' || event.key === 'P') {
-                    event.preventDefault();
-                    _pKeyCount++;
-                    if (_pKeyResetTimer) clearTimeout(_pKeyResetTimer);
-                    if (_pKeyCount >= 3) {
-                        _pKeyCount = 0;
-                        if (_pKeyResetTimer) clearTimeout(_pKeyResetTimer);
-                        showWordSelectPopup();
-                        return;
-                    }
-                    _pKeyResetTimer = setTimeout(function() {
-                        _pKeyCount = 0;
-                        _pKeyResetTimer = null;
-                    }, _P_KEY_WINDOW_MS);
-                } else {
-                    _pKeyCount = 0;
-                    if (_pKeyResetTimer) clearTimeout(_pKeyResetTimer);
-                }
-            });
-        }
-
-        function showWordSelectPopup() {
-            var existing = document.getElementById('wordSelectPopup');
-            if (existing) existing.remove();
-
-            var tbody = document.querySelector('.table tbody');
-            if (!tbody) return;
-            var rows = tbody.querySelectorAll('tr');
-            if (rows.length === 0) return;
-
-            var overlay = document.createElement('div');
-            overlay.id = 'wordSelectPopup';
-            overlay.className = 'word-select-overlay';
-
-            var modal = document.createElement('div');
-            modal.className = 'word-select-modal';
-
-            var header = document.createElement('div');
-            header.className = 'word-select-header';
-            header.style.position = 'relative';
-            header.innerHTML = '<h2 class="word-select-title">Chọn từ hiển thị trên bảng</h2><p class="word-select-hint">Bỏ chọn những từ bạn muốn ẩn khỏi bảng, sau đó nhấn Lưu.</p>';
-            var closeBtn = document.createElement('button');
-            closeBtn.className = 'word-select-close';
-            closeBtn.setAttribute('type', 'button');
-            closeBtn.innerHTML = '&times;';
-            closeBtn.setAttribute('aria-label', 'Đóng');
-            closeBtn.onclick = function() { overlay.remove(); };
-            header.appendChild(closeBtn);
-
-            var toolbar = document.createElement('div');
-            toolbar.className = 'word-select-toolbar';
-            var btnSelectAll = document.createElement('button');
-            btnSelectAll.type = 'button';
-            btnSelectAll.textContent = 'Chọn tất cả';
-            var btnDeselectAll = document.createElement('button');
-            btnDeselectAll.type = 'button';
-            btnDeselectAll.textContent = 'Bỏ chọn tất cả';
-            btnSelectAll.onclick = function() {
-                checkboxes.forEach(function(cb) { cb.checked = true; });
-            };
-            btnDeselectAll.onclick = function() {
-                checkboxes.forEach(function(cb) { cb.checked = false; });
-            };
-            toolbar.appendChild(btnSelectAll);
-            toolbar.appendChild(btnDeselectAll);
-
-            var list = document.createElement('div');
-            list.className = 'word-select-list';
-
-            var checkboxes = [];
-            for (var i = 0; i < rows.length; i++) {
-                var row = rows[i];
-                var cells = row.querySelectorAll('td');
-                var wordText = (cells[1] && cells[1].textContent) ? cells[1].textContent.trim().replace(/\s+/g, ' ') : '';
-                var meaningText = (cells[4] && cells[4].textContent) ? cells[4].textContent.trim().replace(/\s+/g, ' ').slice(0, 50) : '';
-                if (meaningText.length === 50) meaningText += '…';
-
-                var item = document.createElement('div');
-                item.className = 'word-select-item';
-                var cb = document.createElement('input');
-                cb.type = 'checkbox';
-                cb.id = 'word-cb-' + i;
-                cb.checked = true;
-                cb.setAttribute('data-row-index', i);
-                checkboxes.push(cb);
-                var label = document.createElement('label');
-                label.setAttribute('for', cb.id);
-                label.innerHTML = '<span class="word-text">' + escapeHtml(wordText) + '</span>' +
-                    (meaningText ? '<span class="word-meta">' + escapeHtml(meaningText) + '</span>' : '');
-                item.appendChild(cb);
-                item.appendChild(label);
-                list.appendChild(item);
-            }
-
-            var footer = document.createElement('div');
-            footer.className = 'word-select-footer';
-            var btnCancel = document.createElement('button');
-            btnCancel.type = 'button';
-            btnCancel.className = 'btn-cancel';
-            btnCancel.textContent = 'Hủy';
-            btnCancel.onclick = function() { overlay.remove(); };
-            var btnSave = document.createElement('button');
-            btnSave.type = 'button';
-            btnSave.className = 'btn-save';
-            btnSave.textContent = 'Lưu';
-            btnSave.onclick = function() {
-                applyWordSelectionAndClose(checkboxes, tbody);
-                overlay.remove();
-            };
-            footer.appendChild(btnCancel);
-            footer.appendChild(btnSave);
-
-            modal.appendChild(header);
-            modal.appendChild(toolbar);
-            modal.appendChild(list);
-            modal.appendChild(footer);
-            overlay.appendChild(modal);
-
-            overlay.onclick = function(e) {
-                if (e.target === overlay) overlay.remove();
-            };
-            modal.onclick = function(e) { e.stopPropagation(); };
-
-            document.body.appendChild(overlay);
-        }
-
-        function escapeHtml(s) {
-            if (!s) return '';
-            var div = document.createElement('div');
-            div.textContent = s;
-            return div.innerHTML;
-        }
-
-        function applyWordSelectionAndClose(checkboxes, tbody) {
-            var indicesToRemove = [];
-            checkboxes.forEach(function(cb) {
-                if (!cb.checked) {
-                    var idx = parseInt(cb.getAttribute('data-row-index'), 10);
-                    if (!isNaN(idx)) indicesToRemove.push(idx);
-                }
-            });
-            if (indicesToRemove.length === 0) return;
-
-            indicesToRemove.sort(function(a, b) { return b - a; });
-            var rows = tbody.querySelectorAll('tr');
-            indicesToRemove.forEach(function(idx) {
-                if (rows[idx] && rows[idx].parentNode) rows[idx].parentNode.removeChild(rows[idx]);
-            });
-            reindexTableFirstColumn(tbody);
-        }
-
-        function reindexTableFirstColumn(tbody) {
-            var rows = tbody.querySelectorAll('tr');
-            for (var i = 0; i < rows.length; i++) {
-                var firstCell = rows[i].querySelector('td.index-col');
-                if (firstCell) firstCell.textContent = (i + 1);
-            }
-        }
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="{{ url_for('static', path='js/share.js') }}" defer></script>
 </body>
 </html>
