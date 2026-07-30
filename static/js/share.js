@@ -9,7 +9,7 @@
     const toast = document.querySelector("#toast");
     const copyDialog = document.querySelector("#copy-dialog");
     const selectionDialog = document.querySelector("#selection-dialog");
-    const toolsDialog = document.querySelector("#tools-dialog");
+    const toolPanel = document.querySelector("#lesson-tools");
     let activeAudio = null;
     let activeAudioButton = null;
     let toastTimer = null;
@@ -144,6 +144,19 @@
         showToast("Đã khôi phục toàn bộ từ trong bài học.");
     }
 
+    function toggleTools() {
+        if (!toolPanel) return;
+        const shouldOpen = toolPanel.hidden;
+        toolPanel.hidden = !shouldOpen;
+        if (shouldOpen) {
+            toolPanel.querySelector("button")?.focus();
+            showToast("Đã mở công cụ bài học. Nhấn Alt + Shift + M để ẩn.");
+        } else {
+            document.querySelector("#lesson-title")?.focus();
+            showToast("Đã ẩn công cụ bài học.");
+        }
+    }
+
     function playAudio(button) {
         const source = button.dataset.audioSrc;
         if (!source) return showToast("Từ này chưa có audio.", true);
@@ -183,7 +196,6 @@
         if (action === "open-selection") { if (parentDialog) parentDialog.close(); buildSelectionDialog(); openDialog(selectionDialog, button); }
         if (action === "save-selection") saveSelection();
         if (action === "reset-selection") { resetSelection(); if (parentDialog) parentDialog.close(); }
-        if (action === "open-tools") openDialog(toolsDialog, button);
         if (action === "close-dialog") closeDialog(button.closest("dialog"));
     });
 
@@ -206,6 +218,12 @@
     document.addEventListener("keydown", (event) => {
         if (!(event.altKey && event.shiftKey) || event.metaKey || event.ctrlKey) return;
         const key = event.key.toLowerCase();
+        if (key === "m") {
+            if (document.querySelector("dialog[open]")) return;
+            event.preventDefault();
+            toggleTools();
+            return;
+        }
         const shortcuts = { "1": "copy-basic", "2": "copy-vietnamese", p: "print", s: "open-selection" };
         if (!shortcuts[key]) return;
         event.preventDefault();

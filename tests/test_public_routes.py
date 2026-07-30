@@ -27,6 +27,7 @@ def test_share_short_id_renders_workspace(client):
     assert response.status_code == 200
     assert "Lesson demo" in response.text
     assert "Phonetic rail" in response.text
+    assert 'id="lesson-tools" aria-label="Công cụ bài học" hidden' in response.text
     assert "is-screen-hidden" in response.text
     assert "is-print-hidden" in response.text
 

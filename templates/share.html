@@ -17,7 +17,7 @@
             <header class="lesson-hero">
                 <div>
                     <p class="lesson-eyebrow">{{ group_name or "FastENG · Bài học được chia sẻ" }}</p>
-                    <h1 class="lesson-title" id="lesson-title">{{ lesson_name }}</h1>
+                    <h1 class="lesson-title" id="lesson-title" tabindex="-1">{{ lesson_name }}</h1>
                     <p class="lesson-subtitle" id="visible-word-count">{{ words|length }} từ đang hiển thị</p>
                 </div>
                 <aside class="phonetic-rail" aria-label="Ngữ cảnh học phát âm">
@@ -26,7 +26,7 @@
                 </aside>
             </header>
 
-            <section class="tool-panel" aria-label="Công cụ bài học">
+            <section class="tool-panel" id="lesson-tools" aria-label="Công cụ bài học" hidden>
                 <div class="tool-group">
                     <span class="tool-group-label">Danh sách</span>
                     <button class="button" type="button" data-action="open-selection">
@@ -51,12 +51,8 @@
                 </div>
                 <details class="shortcut-help">
                     <summary>Phím tắt</summary>
-                    <p><kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>1</kbd>: copy cơ bản · <kbd>2</kbd>: thêm tiếng Việt · <kbd>P</kbd>: in · <kbd>S</kbd>: chọn từ.</p>
+                    <p><kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>M</kbd>: ẩn/hiện công cụ · <kbd>1</kbd>: copy cơ bản · <kbd>2</kbd>: thêm tiếng Việt · <kbd>P</kbd>: in · <kbd>S</kbd>: chọn từ.</p>
                 </details>
-            </section>
-
-            <section class="mobile-tools" aria-label="Công cụ bài học trên điện thoại">
-                <button class="button button-primary" type="button" data-action="open-tools">Mở công cụ bài học</button>
             </section>
 
             <section class="lesson-table-card" aria-label="Danh sách từ vựng">
@@ -146,18 +142,6 @@
             <div class="selection-list" id="selection-list"></div>
         </div>
         <footer class="dialog-footer"><button class="button" type="button" data-action="close-dialog">Hủy</button><button class="button button-primary" type="button" data-action="save-selection">Lưu lựa chọn</button></footer>
-    </dialog>
-
-    <dialog class="dialog tools-sheet" id="tools-dialog" aria-labelledby="tools-dialog-title">
-        <header class="dialog-header"><h2 class="dialog-title" id="tools-dialog-title">Công cụ bài học</h2><button class="icon-button" type="button" data-action="close-dialog" aria-label="Đóng">×</button></header>
-        <div class="dialog-body">
-            <button class="button" type="button" data-action="open-selection">Chọn từ hiển thị</button>
-            <button class="button" type="button" data-action="reset-selection">Khôi phục tất cả</button>
-            <button class="button" type="button" data-action="copy-basic">Sao chép Word + Meaning</button>
-            <button class="button" type="button" data-action="copy-vietnamese">Sao chép kèm tiếng Việt</button>
-            <button class="button" type="button" data-action="open-copy">Sao chép tùy chỉnh</button>
-            <button class="button button-primary" type="button" data-action="print">In / Lưu PDF</button>
-        </div>
     </dialog>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>

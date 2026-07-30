@@ -73,9 +73,6 @@
 .shortcut-help summary { cursor: pointer; }
 .shortcut-help p { max-width: 340px; margin: 8px 0 0; line-height: 1.55; }
 
-.mobile-tools { display: none; padding: 12px 14px; border: 1px solid var(--line); border-top: 0; background: var(--paper); }
-.mobile-tools .button { width: 100%; }
-
 .lesson-table-card { overflow: hidden; border: 1px solid var(--line); border-top: 0; border-radius: 0 0 var(--radius-lg) var(--radius-lg); background: var(--paper); box-shadow: var(--shadow); }
 .table-scroll { overflow: auto; }
 .table-note { margin: 0; padding: 14px 30px; border-bottom: 1px solid var(--line); color: var(--slate); background: #fff; font-size: 0.82rem; }
@@ -122,10 +119,6 @@
 .selection-item span { margin-top: 2px; color: var(--slate); font-size: 0.8rem; }
 .selection-tools { display: flex; gap: 8px; margin-bottom: 14px; }
 
-.tools-sheet { width: min(560px, 100%); margin: auto 0 0; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
-.tools-sheet .dialog-body { display: grid; gap: 8px; }
-.tools-sheet .button { justify-content: flex-start; }
-
 .toast { position: fixed; right: 20px; bottom: 20px; z-index: 20; max-width: min(360px, calc(100% - 40px)); padding: 12px 14px; border-radius: var(--radius-sm); color: #fff; background: var(--ink); box-shadow: var(--shadow); font-size: 0.87rem; opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity 180ms ease, transform 180ms ease; }
 .toast.is-visible { opacity: 1; transform: translateY(0); }
 .toast.is-error { background: var(--danger); }
@@ -134,8 +127,8 @@
     .share-shell { padding: 12px 10px 32px; }
     .lesson-hero { grid-template-columns: 1fr; gap: 18px; padding: 23px 20px; }
     .phonetic-rail { min-width: 0; padding: 12px 0 0; border-top: 2px solid var(--cobalt); border-left: 0; }
-    .tool-panel { display: none; }
-    .mobile-tools { display: block; }
+    .tool-panel:not([hidden]) { align-items: stretch; padding: 16px; gap: 16px; }
+    .tool-panel:not([hidden]) .tool-group { width: 100%; }
     .lesson-table-card { border-radius: 0 0 var(--radius-md) var(--radius-md); }
     .table-note { padding-inline: 16px; }
     .dialog { width: calc(100% - 20px); }
@@ -147,7 +140,7 @@
     body { background: #fff; }
     .share-shell { padding: 0; }
     .lesson-hero { display: block; padding: 0 0 10px; border: 0; border-radius: 0; }
-    .lesson-eyebrow, .lesson-subtitle, .phonetic-rail, .tool-panel, .mobile-tools, .shortcut-help, .audio-button, .dialog, .toast { display: none !important; }
+    .lesson-eyebrow, .lesson-subtitle, .phonetic-rail, .tool-panel, .shortcut-help, .audio-button, .dialog, .toast { display: none !important; }
     .lesson-title { margin: 0; font-size: 18pt; }
     .lesson-table-card { border: 0; border-radius: 0; box-shadow: none; }
     .table-scroll { overflow: visible; }
