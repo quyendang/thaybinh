@@ -85,9 +85,24 @@
 .lesson-table th:first-child, .lesson-table td:first-child { width: 58px; color: var(--slate); text-align: center; font-family: var(--font-data); font-size: 0.78rem; }
 .word-cell { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 136px; font-weight: 800; }
 .ipa-cell { color: var(--cobalt); font-family: var(--font-data); font-size: 0.82rem; }
-.audio-button { flex: 0 0 auto; width: 32px; height: 32px; padding: 0; border: 1px solid #c9d8f7; border-radius: 50%; color: var(--cobalt); background: #f3f7ff; cursor: pointer; }
-.audio-button:hover, .audio-button.is-playing { color: #fff; border-color: var(--cobalt); background: var(--cobalt); }
-.audio-button svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; }
+.audio-button {
+    display: inline-grid;
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    place-items: center;
+    border: 1px solid #c9d8f7;
+    border-radius: 10px;
+    color: var(--cobalt);
+    background: #f5f8ff;
+    cursor: pointer;
+    line-height: 0;
+    transition: color 140ms ease, border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+}
+.audio-button:hover { border-color: #90afea; background: #eaf1ff; }
+.audio-button.is-playing { color: #fff; border-color: var(--cobalt); background: var(--cobalt); box-shadow: 0 0 0 3px rgb(37 99 235 / 14%); }
+.audio-button svg { display: block; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.75; }
 .is-screen-hidden .cell-content { visibility: hidden; }
 .is-user-hidden { display: none; }
 

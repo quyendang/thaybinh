@@ -90,7 +90,11 @@
                                         <span>{{ word.word }}</span>
                                         {% if word.word_voice %}
                                         <button class="audio-button" type="button" data-audio-src="{{ word.word_voice }}" aria-label="Nghe phát âm từ {{ word.word }}">
-                                            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6l-5 4zm11.5-.5a5 5 0 0 1 0 5m2.5-7.5a8.5 8.5 0 0 1 0 10"/></svg>
+                                            <svg aria-hidden="true" viewBox="0 0 24 24">
+                                                <path d="M11.25 5.25 6.75 9H3.75v6h3l4.5 3.75V5.25Z"/>
+                                                <path d="M15.75 8.25a5.25 5.25 0 0 1 0 7.5"/>
+                                                <path d="M18.75 5.25a9.5 9.5 0 0 1 0 13.5"/>
+                                            </svg>
                                         </button>
                                         {% endif %}
                                     </div>
