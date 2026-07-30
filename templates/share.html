@@ -12,10 +12,49 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         .card {
+            position: relative;
             border: none;
             border-radius: 15px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .pdf-download-btn {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 9px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.88);
+            color: #6c757d;
+            font-size: 0.78rem;
+            font-weight: 500;
+            line-height: 1;
+            cursor: pointer;
+            opacity: 0.82;
+            transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
+        }
+        .pdf-download-btn:hover {
+            background: #f8f9fa;
+            color: #495057;
+            border-color: #ced4da;
+            opacity: 1;
+        }
+        .pdf-download-btn:focus-visible {
+            outline: 2px solid rgba(0, 123, 255, 0.35);
+            outline-offset: 2px;
+        }
+        .pdf-download-btn i {
+            font-size: 0.9rem;
+        }
+        .lesson-title {
+            padding-left: 64px;
+            padding-right: 64px;
         }
         .table {
             background-color: #fff;
@@ -87,7 +126,7 @@
                 font-size: 12px !important;
             }
             
-            header, footer, .speaker-btn {
+            header, footer, .speaker-btn, .pdf-download-btn {
                 display: none !important;
             }
             
@@ -334,6 +373,24 @@
             .container {
                 padding: 0 10px;
             }
+
+            .pdf-download-btn {
+                top: 10px;
+                right: 10px;
+                width: 30px;
+                height: 30px;
+                padding: 0;
+                justify-content: center;
+            }
+
+            .pdf-download-btn .pdf-download-label {
+                display: none;
+            }
+
+            .lesson-title {
+                padding-left: 36px;
+                padding-right: 36px;
+            }
             
             .card {
                 margin: 10px 0;
@@ -385,7 +442,17 @@
 <body>
     <div class="container mt-5">
         <div class="card p-4">
-            <h1 class="text-center mb-4 text-primary" style="font-size: 1.8rem;">{{ lesson_name }}</h1>
+            <button
+                type="button"
+                class="pdf-download-btn"
+                onclick="downloadPdf()"
+                aria-label="Tải bài học về PDF"
+                title="Tải về PDF"
+            >
+                <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i>
+                <span class="pdf-download-label">PDF</span>
+            </button>
+            <h1 class="lesson-title text-center mb-4 text-primary" style="font-size: 1.8rem;">{{ lesson_name }}</h1>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover align-middle">
                     <thead>
@@ -432,6 +499,10 @@
         // Global variables for column hiding
         const hideColumnsPrint = JSON.parse('{{ hide_columns_print|tojson if hide_columns_print else "[]" }}');
         
+        function downloadPdf() {
+            window.print();
+        }
+
         function playAudio(audioSrc) {
             if (!audioSrc) return;
             let finalSrc = "";
