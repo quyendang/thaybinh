@@ -52,16 +52,6 @@
         .pdf-download-btn i {
             font-size: 0.9rem;
         }
-        .pdf-download-btn:disabled {
-            cursor: wait;
-            opacity: 0.6;
-        }
-        .pdf-download-btn.is-loading i {
-            animation: pdf-spin 0.8s linear infinite;
-        }
-        @keyframes pdf-spin {
-            to { transform: rotate(360deg); }
-        }
         .lesson-title {
             padding-left: 64px;
             padding-right: 64px;
@@ -378,73 +368,6 @@
             color: #1a1a2e;
         }
 
-        /* Phần tử tạm dùng để tạo file PDF trực tiếp */
-        .pdf-export-wrapper {
-            position: fixed;
-            left: -100000px;
-            top: 0;
-            width: 1120px;
-            padding: 12px;
-            box-sizing: border-box;
-            background: #fff;
-            color: #212529;
-            z-index: 99999;
-        }
-        .pdf-export-wrapper .card {
-            border: none !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-        .pdf-export-wrapper .lesson-title {
-            padding: 0 !important;
-            margin: 0 0 16px !important;
-            color: #212529 !important;
-            font-size: 22px !important;
-        }
-        .pdf-export-wrapper .table-responsive {
-            overflow: visible !important;
-        }
-        .pdf-export-wrapper .table {
-            width: 100% !important;
-            margin: 0 !important;
-            border-collapse: collapse !important;
-            table-layout: fixed !important;
-        }
-        .pdf-export-wrapper .table th,
-        .pdf-export-wrapper .table td {
-            padding: 6px 4px !important;
-            border: 1px solid #d7d7d7 !important;
-            font-size: 11px !important;
-            line-height: 1.35 !important;
-            overflow-wrap: anywhere !important;
-            word-break: break-word !important;
-        }
-        .pdf-export-wrapper .table th {
-            background: #f0f0f0 !important;
-            color: #111 !important;
-            font-weight: 700 !important;
-        }
-        .pdf-export-wrapper .table th:nth-child(1),
-        .pdf-export-wrapper .table td:nth-child(1) { width: 3.125% !important; }
-        .pdf-export-wrapper .table th:nth-child(2),
-        .pdf-export-wrapper .table td:nth-child(2) { width: 15.625% !important; }
-        .pdf-export-wrapper .table th:nth-child(3),
-        .pdf-export-wrapper .table td:nth-child(3) { width: 6.25% !important; }
-        .pdf-export-wrapper .table th:nth-child(4),
-        .pdf-export-wrapper .table td:nth-child(4) { width: 12.5% !important; }
-        .pdf-export-wrapper .table th:nth-child(5),
-        .pdf-export-wrapper .table td:nth-child(5) { width: 25% !important; }
-        .pdf-export-wrapper .table th:nth-child(6),
-        .pdf-export-wrapper .table td:nth-child(6) { width: 25% !important; }
-        .pdf-export-wrapper .table th:nth-child(7),
-        .pdf-export-wrapper .table td:nth-child(7) { width: 12.5% !important; }
-        .pdf-export-wrapper tr {
-            break-inside: avoid !important;
-            page-break-inside: avoid !important;
-        }
-
         /* Responsive design for mobile */
         @media (max-width: 768px) {
             .container {
@@ -521,7 +444,6 @@
         <div class="card p-4">
             <button
                 type="button"
-                id="pdfDownloadButton"
                 class="pdf-download-btn"
                 onclick="downloadPdf()"
                 aria-label="Tải bài học về PDF"
@@ -573,116 +495,12 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
     <script>
         // Global variables for column hiding
         const hideColumnsPrint = JSON.parse('{{ hide_columns_print|tojson if hide_columns_print else "[]" }}');
         
-        async function downloadPdf() {
-            const button = document.getElementById('pdfDownloadButton');
-            const originalIconClass = 'bi bi-file-earmark-pdf';
-            let exportWrapper = null;
-
-            if (button && button.disabled) return;
-
-            try {
-                if (typeof html2pdf === 'undefined') {
-                    throw new Error('Thư viện tạo PDF chưa tải xong.');
-                }
-
-                if (button) {
-                    button.disabled = true;
-                    button.classList.add('is-loading');
-                    const icon = button.querySelector('i');
-                    const label = button.querySelector('.pdf-download-label');
-                    if (icon) icon.className = 'bi bi-arrow-repeat';
-                    if (label) label.textContent = 'Đang tạo';
-                }
-
-                exportWrapper = createPdfExportElement();
-                const lessonTitle = document.querySelector('.lesson-title')?.textContent?.trim() || 'lesson';
-                const fileName = sanitizePdfFileName(lessonTitle) + '.pdf';
-
-                const options = {
-                    margin: [3, 3, 3, 3],
-                    filename: fileName,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: {
-                        scale: 2,
-                        useCORS: true,
-                        backgroundColor: '#ffffff',
-                        logging: false,
-                        scrollX: 0,
-                        scrollY: 0
-                    },
-                    jsPDF: {
-                        unit: 'mm',
-                        format: 'a4',
-                        orientation: 'landscape',
-                        compress: true
-                    },
-                    pagebreak: {
-                        mode: ['css', 'legacy'],
-                        avoid: ['tr']
-                    }
-                };
-
-                await html2pdf().set(options).from(exportWrapper).save();
-            } catch (error) {
-                console.error('PDF download error:', error);
-                alert('Không thể tạo file PDF. Vui lòng kiểm tra kết nối và thử lại.');
-            } finally {
-                if (exportWrapper && exportWrapper.parentNode) {
-                    exportWrapper.parentNode.removeChild(exportWrapper);
-                }
-                if (button) {
-                    button.disabled = false;
-                    button.classList.remove('is-loading');
-                    const icon = button.querySelector('i');
-                    const label = button.querySelector('.pdf-download-label');
-                    if (icon) icon.className = originalIconClass;
-                    if (label) label.textContent = 'PDF';
-                }
-            }
-        }
-
-        function createPdfExportElement() {
-            const sourceCard = document.querySelector('.card');
-            if (!sourceCard) {
-                throw new Error('Không tìm thấy nội dung bài học.');
-            }
-
-            const wrapper = document.createElement('div');
-            wrapper.className = 'pdf-export-wrapper';
-
-            const clonedCard = sourceCard.cloneNode(true);
-            clonedCard.querySelector('.pdf-download-btn')?.remove();
-            clonedCard.querySelectorAll('.speaker-btn').forEach(function(btn) {
-                btn.remove();
-            });
-
-            // Giữ chiều rộng cột nhưng làm trống nội dung các cột được chọn ẩn khi xuất PDF.
-            hideColumnsPrint.forEach(function(col) {
-                const colIndex = Number(col) + 1;
-                clonedCard.querySelectorAll(`.table td:nth-child(${colIndex})`).forEach(function(cell) {
-                    cell.innerHTML = '';
-                    cell.style.backgroundColor = 'transparent';
-                });
-            });
-
-            wrapper.appendChild(clonedCard);
-            document.body.appendChild(wrapper);
-            return wrapper;
-        }
-
-        function sanitizePdfFileName(value) {
-            const normalized = value
-                .normalize('NFKD')
-                .replace(/[\\/:*?"<>|]+/g, '')
-                .replace(/\s+/g, ' ')
-                .trim()
-                .slice(0, 100);
-            return normalized || 'lesson';
+        function downloadPdf() {
+            window.print();
         }
 
         function playAudio(audioSrc) {
