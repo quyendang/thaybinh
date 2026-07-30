@@ -131,12 +131,11 @@
                             {% endif %}
                         </header>
                         {% if 4 not in hide_columns %}<p class="mobile-word-meaning">{{ word.meaning|default('—') }}</p>{% endif %}
-                        {% if 5 not in hide_columns or 6 not in hide_columns %}
-                        <details class="mobile-word-more">
-                            <summary>Xem thêm</summary>
-                            {% if 5 not in hide_columns %}<p><span>Example</span>{{ word.example|default('—') }}</p>{% endif %}
-                            {% if 6 not in hide_columns %}<p><span>Tiếng Việt</span>{{ word.translate|default('—') }}</p>{% endif %}
-                        </details>
+                        {% if (5 not in hide_columns and word.example) or (6 not in hide_columns and word.translate) %}
+                        <div class="mobile-word-support">
+                            {% if 5 not in hide_columns and word.example %}<p><span>Example</span>{{ word.example }}</p>{% endif %}
+                            {% if 6 not in hide_columns and word.translate %}<p><span>Tiếng Việt</span>{{ word.translate }}</p>{% endif %}
+                        </div>
                         {% endif %}
                     </li>
                     {% endfor %}

@@ -120,7 +120,7 @@
 .study-progress { margin: 0; padding: 12px 30px 0; color: var(--slate); font: 0.78rem var(--font-data); }
 .study-panel { padding: 18px 30px 30px; }
 .flash-card, .study-slide, .study-finish { width: min(680px, 100%); margin: 0 auto; border: 1px solid var(--line); border-radius: var(--radius-md); background: #fbfcfe; }
-.flash-card { padding: 22px; }
+.flash-card { display: flex; flex-direction: column; min-height: 430px; padding: 22px; will-change: transform, opacity; }
 .flash-card-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .flash-card-kicker, .slide-index { color: var(--slate); font: 700 0.75rem var(--font-data); letter-spacing: 0.04em; text-transform: uppercase; }
 .study-direction-button { min-height: 34px; padding: 6px 10px; font-size: 0.75rem; }
@@ -140,13 +140,29 @@
 .study-finish { padding: 32px; text-align: center; }
 .study-finish h3 { margin: 9px 0; font-size: 1.45rem; letter-spacing: -0.03em; }
 .study-finish > p:not(.study-eyebrow) { margin: 0; color: var(--slate); line-height: 1.55; }
-.study-slide { position: relative; padding: 30px; }
+.study-slide { position: relative; min-height: 430px; padding: 30px; will-change: transform, opacity; }
 .slide-index { display: block; margin-bottom: 22px; }
 .slide-word { font-size: clamp(2rem, 6vw, 3.8rem); }
 .study-slide > .audio-button { margin-top: 16px; }
 .slide-details { display: grid; gap: 15px; margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--line); }
 .slide-controls { justify-content: space-between; }
 .study-empty { width: min(680px, 100%); margin: 0 auto; padding: 24px; color: var(--slate); border: 1px dashed var(--line); text-align: center; }
+
+@keyframes study-enter-forward {
+    from { opacity: 0; transform: translateX(18px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes study-enter-backward {
+    from { opacity: 0; transform: translateX(-18px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes study-reveal {
+    from { opacity: 0; transform: translateY(8px) scale(0.992); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.flash-card.is-forward, .study-slide.is-forward { animation: study-enter-forward 260ms cubic-bezier(.2, .8, .2, 1) both; }
+.flash-card.is-backward, .study-slide.is-backward { animation: study-enter-backward 260ms cubic-bezier(.2, .8, .2, 1) both; }
+.flash-card.is-reveal, .flash-card.is-revealed { animation: study-reveal 210ms cubic-bezier(.2, .8, .2, 1) both; }
 
 .dialog { width: min(600px, calc(100% - 32px)); max-height: min(720px, calc(100vh - 32px)); padding: 0; border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: 0 24px 64px rgb(22 32 51 / 24%); color: var(--ink); background: var(--paper); }
 .dialog::backdrop { background: rgb(15 23 42 / 48%); }
@@ -201,10 +217,9 @@
     .mobile-word-header strong { overflow-wrap: anywhere; font-size: 1rem; }
     .mobile-word-header span:not(.mobile-word-index) { margin-top: 3px; color: var(--cobalt); font: 0.72rem/1.4 var(--font-data); }
     .mobile-word-meaning { margin: 12px 0 0 27px; color: #344054; font-size: 0.9rem; line-height: 1.55; }
-    .mobile-word-more { margin: 11px 0 0 27px; color: var(--slate); font-size: 0.82rem; }
-    .mobile-word-more summary { cursor: pointer; }
-    .mobile-word-more p { display: grid; gap: 3px; margin: 10px 0 0; line-height: 1.5; }
-    .mobile-word-more p span { color: var(--slate); font: 0.68rem var(--font-data); text-transform: uppercase; }
+    .mobile-word-support { display: grid; gap: 10px; margin: 13px 0 0 27px; padding-top: 12px; border-top: 1px solid #edf1f6; color: var(--slate); font-size: 0.82rem; }
+    .mobile-word-support p { display: grid; gap: 3px; margin: 0; line-height: 1.55; }
+    .mobile-word-support p span { color: var(--slate); font: 0.68rem var(--font-data); letter-spacing: 0.05em; text-transform: uppercase; }
     .dialog { width: calc(100% - 20px); }
     .shortcut-help { display: none; }
     .study-workspace { border-radius: 0 0 var(--radius-md) var(--radius-md); }
@@ -212,8 +227,8 @@
     .study-header .button { min-height: 36px; padding: 7px 9px; font-size: 0.75rem; }
     .study-mode-tabs, .study-progress { padding-inline: 18px; }
     .study-panel { padding: 16px 12px 24px; }
-    .flash-card, .study-slide { padding: 18px; }
-    .flash-card-prompt { min-height: 190px; padding-top: 26px; }
+    .flash-card, .study-slide { min-height: 410px; padding: 18px; }
+    .flash-card-prompt { min-height: 196px; padding-top: 26px; }
     .flash-prompt { font-size: clamp(2rem, 12vw, 3.2rem); }
     .study-actions { position: sticky; bottom: max(8px, env(safe-area-inset-bottom)); z-index: 2; padding: 10px; margin: 20px -8px -8px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: rgb(255 255 255 / 96%); backdrop-filter: blur(12px); }
     .study-actions .button, .slide-controls .button { flex: 1; min-width: 0; }

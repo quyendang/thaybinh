@@ -24,6 +24,7 @@
     let toastTimer = null;
     let lastTrigger = null;
     let studyState = null;
+    let studyMotion = "forward";
 
     const getRows = () => [...table.tBodies[0].rows];
     const readStorage = (key, fallback) => {
@@ -340,7 +341,7 @@
         }
 
         const reverseAvailable = fieldVisible(6) && words.some((item) => item.translate);
-        const card = element("article", `flash-card${studyState.revealed ? " is-revealed" : ""}`);
+        const card = element("article", `flash-card is-${studyMotion}${studyState.revealed ? " is-revealed" : ""}`);
         const cardHeader = element("div", "flash-card-header");
         cardHeader.append(element("span", "flash-card-kicker", studyState.direction === "vi-to-en" ? "Tiếng Việt → English" : "English → Meaning"));
         const directionButton = makeButton("Đổi chiều", "toggle-direction", "button button-quiet study-direction-button");
@@ -389,7 +390,7 @@
             slideContent.append(element("p", "study-empty", "Không có từ phù hợp với cấu hình link này."));
             return;
         }
-        const slide = element("article", "study-slide");
+        const slide = element("article", `study-slide is-${studyMotion}`);
         slide.append(element("span", "slide-index", String(word.index).padStart(2, "0")));
         if (fieldVisible(1)) {
             const title = element("h3", "slide-word", word.word);
@@ -473,6 +474,7 @@
     function restartStudy() {
         const direction = studyState?.direction || "en-to-meaning";
         studyState = newStudyState(direction);
+        studyMotion = "forward";
         if (resumeDialog?.open) resumeDialog.close();
         openStudyWorkspace();
         renderStudy();
@@ -483,6 +485,7 @@
         const key = studyState.queue.shift();
         if (key && !studyState.known.includes(key)) studyState.known.push(key);
         studyState.revealed = false;
+        studyMotion = "forward";
         renderStudy();
     }
 
@@ -490,6 +493,7 @@
         const key = studyState.queue.shift();
         if (key) studyState.queue.push(key);
         studyState.revealed = false;
+        studyMotion = "forward";
         renderStudy();
     }
 
@@ -497,6 +501,7 @@
         const next = studyState.slideIndex + delta;
         const total = studyWords().length;
         studyState.slideIndex = Math.max(0, Math.min(next, total - 1));
+        studyMotion = delta > 0 ? "forward" : "backward";
         renderStudy();
         slideContent.querySelector("h3")?.focus();
     }
@@ -516,9 +521,9 @@
         if (action === "exit-study") exitStudy();
         if (action === "resume-study") resumeStudy();
         if (action === "restart-study") restartStudy();
-        if (action === "set-study-mode") { studyState.mode = button.dataset.studyMode; renderStudy(); }
-        if (action === "toggle-direction") { studyState.direction = studyState.direction === "en-to-meaning" ? "vi-to-en" : "en-to-meaning"; studyState.revealed = false; renderStudy(); }
-        if (action === "flip-card") { studyState.revealed = true; renderStudy(); flashContent.querySelector('[data-action="mark-again"]')?.focus(); }
+        if (action === "set-study-mode") { studyState.mode = button.dataset.studyMode; studyMotion = "forward"; renderStudy(); }
+        if (action === "toggle-direction") { studyState.direction = studyState.direction === "en-to-meaning" ? "vi-to-en" : "en-to-meaning"; studyState.revealed = false; studyMotion = "reveal"; renderStudy(); }
+        if (action === "flip-card") { studyState.revealed = true; studyMotion = "reveal"; renderStudy(); flashContent.querySelector('[data-action="mark-again"]')?.focus(); }
         if (action === "mark-known") markKnown();
         if (action === "mark-again") markAgain();
         if (action === "previous-slide") changeSlide(-1);
@@ -571,6 +576,7 @@
         if (studyState?.mode === "flash" && !studyState.revealed && [" ", "Enter"].includes(event.key) && !event.target.closest("button")) {
             event.preventDefault();
             studyState.revealed = true;
+            studyMotion = "reveal";
             renderStudy();
         }
     });
