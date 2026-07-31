@@ -27,12 +27,16 @@ def test_share_short_id_renders_workspace(client):
     assert response.status_code == 200
     assert "Lesson demo" in response.text
     assert "Phonetic rail" in response.text
-    assert 'id="lesson-tools" aria-label="Công cụ bài học" hidden' in response.text
     assert 'data-action="start-study"' in response.text
+    assert 'data-action="download-pdf"' in response.text
+    assert 'id="pdf-options-dialog"' in response.text
+    assert 'id="shortcut-dialog"' in response.text
+    assert 'id="lesson-tools"' not in response.text
     assert 'id="study-workspace"' in response.text
     assert 'class="lesson-mobile-list"' in response.text
     assert "is-screen-hidden" in response.text
     assert "is-print-hidden" in response.text
+    assert 'data-print-hidden-columns="5"' in response.text
 
 
 def test_legacy_lesson_url_keeps_base64_column_contract(client):

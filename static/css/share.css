@@ -12,7 +12,7 @@
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
-.lesson-eyebrow, .phonetic-label, .tool-group-label {
+.lesson-eyebrow, .phonetic-label {
     margin: 0;
     color: var(--slate);
     font-size: 0.72rem;
@@ -24,8 +24,9 @@
 .lesson-title { max-width: 800px; margin: 7px 0 10px; font-size: clamp(1.7rem, 4vw, 2.7rem); line-height: 1.08; letter-spacing: -0.045em; }
 .lesson-subtitle { margin: 0; color: var(--slate); font-size: 0.93rem; }
 
-.lesson-hero-actions { display: grid; justify-items: end; gap: 14px; }
+.lesson-hero-actions { display: grid; justify-items: end; gap: 10px; grid-template-columns: 1fr auto; }
 .phonetic-rail {
+    grid-column: 1 / -1;
     display: grid;
     align-content: center;
     min-width: 164px;
@@ -34,20 +35,7 @@
 }
 .phonetic-code { margin: 8px 0 0; color: var(--cobalt); font: 700 0.85rem/1.5 var(--font-data); }
 .study-start-button { min-height: 44px; padding-inline: 16px; }
-
-.tool-panel {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: end;
-    gap: 16px 24px;
-    padding: 17px 30px;
-    border: 1px solid var(--line);
-    border-top: 0;
-    background: #fbfcfe;
-}
-.tool-panel[hidden] { display: none !important; }
-.tool-group { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.tool-group-label { width: 100%; }
+.export-pdf-button { width: 44px; min-width: 44px; min-height: 44px; padding: 0; }
 
 .button, .icon-button, .menu-button {
     display: inline-flex;
@@ -72,10 +60,6 @@
 .button-quiet { color: var(--slate); }
 .button-danger { color: var(--danger); }
 .button svg, .icon-button svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
-
-.shortcut-help { margin-left: auto; color: var(--slate); font-size: 0.79rem; }
-.shortcut-help summary { cursor: pointer; }
-.shortcut-help p { max-width: 340px; margin: 8px 0 0; line-height: 1.55; }
 
 .lesson-table-card { overflow: hidden; border: 1px solid var(--line); border-top: 0; border-radius: 0 0 var(--radius-lg) var(--radius-lg); background: var(--paper); box-shadow: var(--shadow); }
 .table-scroll { overflow: auto; }
@@ -191,6 +175,24 @@
 .selection-item strong { font-size: 0.9rem; }
 .selection-item span { margin-top: 2px; color: var(--slate); font-size: 0.8rem; }
 .selection-tools { display: flex; gap: 8px; margin-bottom: 14px; }
+.pdf-column-options { display: grid; gap: 10px; margin: 0; padding: 0; border: 0; }
+.pdf-column-options legend { margin-bottom: 12px; color: var(--ink); font-weight: 800; }
+.pdf-column-options label { display: flex; align-items: center; gap: 9px; min-height: 38px; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--ink); background: #fbfcfe; cursor: pointer; }
+.pdf-column-options input { width: 16px; height: 16px; accent-color: var(--cobalt); }
+.pdf-column-options label:has(input:disabled) { color: var(--slate); cursor: not-allowed; }
+.shortcut-list { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; color: #344054; line-height: 1.55; }
+.shortcut-list kbd { display: inline-block; padding: 1px 6px; border: 1px solid #cfd8e6; border-bottom-width: 2px; border-radius: 4px; color: var(--ink); background: #f8fafc; font: 0.72rem var(--font-data); }
+.pdf-export-surface { position: fixed; top: 0; left: -12000px; width: 1000px; padding: 42px; color: var(--ink); background: #fff; }
+.pdf-export-surface h1 { margin: 0 0 8px; font-size: 26px; letter-spacing: -0.03em; }
+.pdf-export-surface > p { margin: 0 0 24px; color: var(--slate); font-size: 13px; }
+.pdf-export-surface .lesson-table-card { overflow: visible; border: 0; border-radius: 0; box-shadow: none; }
+.pdf-export-surface .table-scroll { display: block !important; overflow: visible; }
+.pdf-export-surface .lesson-mobile-list { display: none !important; }
+.pdf-export-surface .lesson-table { min-width: 0; font-size: 11px; }
+.pdf-export-surface .lesson-table th, .pdf-export-surface .lesson-table td { padding: 7px 6px; border: 1px solid #cbd5e1; font-size: 10px; }
+.pdf-export-surface .lesson-table th { color: #111827; background: #eef2f7; }
+.pdf-export-surface .audio-button { display: none; }
+.pdf-export-surface .is-pdf-hidden .cell-content { color: transparent !important; text-shadow: none !important; }
 
 .toast { position: fixed; right: 20px; bottom: 20px; z-index: 20; max-width: min(360px, calc(100% - 40px)); padding: 12px 14px; border-radius: var(--radius-sm); color: #fff; background: var(--ink); box-shadow: var(--shadow); font-size: 0.87rem; opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity 180ms ease, transform 180ms ease; }
 .toast.is-visible { opacity: 1; transform: translateY(0); }
@@ -199,11 +201,9 @@
 @media (max-width: 760px) {
     .share-shell { padding: 12px 10px 32px; }
     .lesson-hero { grid-template-columns: 1fr; gap: 18px; padding: 23px 20px; }
-    .lesson-hero-actions { justify-items: stretch; }
+    .lesson-hero-actions { justify-items: stretch; grid-template-columns: minmax(0, 1fr) auto; }
     .phonetic-rail { min-width: 0; padding: 12px 0 0; border-top: 2px solid var(--cobalt); border-left: 0; }
     .study-start-button { width: 100%; }
-    .tool-panel:not([hidden]) { align-items: stretch; padding: 16px; gap: 16px; }
-    .tool-panel:not([hidden]) .tool-group { width: 100%; }
     .lesson-table-card { border-radius: 0 0 var(--radius-md) var(--radius-md); }
     .table-scroll { display: none; }
     .lesson-mobile-list { display: grid; gap: 0; }
@@ -219,7 +219,6 @@
     .mobile-word-support p { display: grid; gap: 3px; margin: 0; line-height: 1.55; }
     .mobile-word-support p span { color: var(--slate); font: 0.68rem var(--font-data); letter-spacing: 0.05em; text-transform: uppercase; }
     .dialog { width: calc(100% - 20px); }
-    .shortcut-help { display: none; }
     .study-workspace { border-radius: 0 0 var(--radius-md) var(--radius-md); }
     .study-header { align-items: start; padding: 20px 18px 14px; }
     .study-header .button { min-height: 36px; padding: 7px 9px; font-size: 0.75rem; }
@@ -245,7 +244,7 @@
     body { background: #fff; }
     .share-shell { padding: 0; }
     .lesson-hero { display: block; padding: 0 0 10px; border: 0; border-radius: 0; }
-    .lesson-eyebrow, .lesson-subtitle, .lesson-hero-actions, .tool-panel, .shortcut-help, .audio-button, .dialog, .toast, .study-workspace, .lesson-mobile-list { display: none !important; }
+    .lesson-eyebrow, .lesson-subtitle, .lesson-hero-actions, .audio-button, .dialog, .toast, .study-workspace, .lesson-mobile-list { display: none !important; }
     .lesson-title { margin: 0; font-size: 18pt; }
     .lesson-table-card { border: 0; border-radius: 0; box-shadow: none; }
     .table-scroll { overflow: visible; }

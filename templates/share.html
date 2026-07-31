@@ -28,41 +28,15 @@
                     <button class="button button-primary study-start-button" type="button" data-action="start-study" aria-controls="study-workspace" aria-expanded="false">
                         Bắt đầu học
                     </button>
+                    <button class="icon-button button-quiet export-pdf-button" type="button" data-action="download-pdf" aria-label="Tải bài học dạng PDF" title="Tải PDF">
+                        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 3.75h8.25L18 7.5v12.75H6z"/><path d="M14.25 3.75V7.5H18M12 11.25v5.5m0 0-2.25-2.25M12 16.75l2.25-2.25"/></svg>
+                    </button>
                 </div>
             </header>
 
-            <section class="tool-panel" id="lesson-tools" aria-label="Công cụ bài học" hidden>
-                <div class="tool-group">
-                    <span class="tool-group-label">Danh sách</span>
-                    <button class="button" type="button" data-action="open-selection">
-                        Chọn từ hiển thị
-                    </button>
-                    <button class="button button-quiet" type="button" data-action="reset-selection">
-                        Khôi phục tất cả
-                    </button>
-                </div>
-                <div class="tool-group">
-                    <span class="tool-group-label">Sao chép</span>
-                    <button class="button" type="button" data-action="copy-basic">Word + Meaning</button>
-                    <button class="button" type="button" data-action="copy-vietnamese">Thêm tiếng Việt</button>
-                    <button class="button" type="button" data-action="open-copy">Tùy chỉnh</button>
-                </div>
-                <div class="tool-group">
-                    <span class="tool-group-label">Xuất</span>
-                    <button class="button button-primary" type="button" data-action="print">
-                        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4V10h16v8h-2M7 14h10v7H7z"/></svg>
-                        In / Lưu PDF
-                    </button>
-                </div>
-                <details class="shortcut-help">
-                    <summary>Phím tắt</summary>
-                    <p><kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>M</kbd>: ẩn/hiện công cụ · <kbd>1</kbd>: copy cơ bản · <kbd>2</kbd>: thêm tiếng Việt · <kbd>P</kbd>: in · <kbd>S</kbd>: chọn từ.</p>
-                </details>
-            </section>
-
             <section class="lesson-table-card" id="lesson-list" aria-label="Danh sách từ vựng">
                 <div class="table-scroll">
-                    <table class="lesson-table" data-lesson-id="{{ lesson_id }}" data-hidden-columns="{{ hide_columns|join(',') }}">
+                    <table class="lesson-table" data-lesson-id="{{ lesson_id }}" data-hidden-columns="{{ hide_columns|join(',') }}" data-print-hidden-columns="{{ hide_columns_print|join(',') }}">
                         <caption class="visually-hidden">Danh sách từ vựng của bài học {{ lesson_name }}</caption>
                         <thead>
                             <tr>
@@ -195,6 +169,44 @@
         <footer class="dialog-footer"><button class="button" type="button" data-action="close-dialog">Hủy</button><button class="button button-primary" type="button" data-action="save-selection">Lưu lựa chọn</button></footer>
     </dialog>
 
+    <dialog class="dialog" id="pdf-options-dialog" aria-labelledby="pdf-options-dialog-title">
+        <header class="dialog-header">
+            <div><h2 class="dialog-title" id="pdf-options-dialog-title">Tải PDF</h2><p class="dialog-description">Chọn nội dung cần che trong file. Các cột bị ẩn bởi link chia sẻ sẽ luôn được giữ nguyên.</p></div>
+            <button class="icon-button" type="button" data-action="close-dialog" aria-label="Đóng hộp thoại">×</button>
+        </header>
+        <div class="dialog-body">
+            <fieldset class="pdf-column-options" id="pdf-column-options">
+                <legend>Ẩn nội dung cột</legend>
+                <label><input type="checkbox" value="1"> Word</label>
+                <label><input type="checkbox" value="2"> Type</label>
+                <label><input type="checkbox" value="3"> IPA</label>
+                <label><input type="checkbox" value="4"> Meaning</label>
+                <label><input type="checkbox" value="5"> Example</label>
+                <label><input type="checkbox" value="6"> Vietnamese</label>
+            </fieldset>
+        </div>
+        <footer class="dialog-footer"><button class="button" type="button" data-action="close-dialog">Hủy</button><button class="button button-primary" type="button" data-action="confirm-download-pdf">Tải PDF</button></footer>
+    </dialog>
+
+    <dialog class="dialog" id="shortcut-dialog" aria-labelledby="shortcut-dialog-title">
+        <header class="dialog-header">
+            <div><h2 class="dialog-title" id="shortcut-dialog-title">Phím tắt</h2><p class="dialog-description">Các phím tắt chỉ hoạt động khi không nhập văn bản.</p></div>
+            <button class="icon-button" type="button" data-action="close-dialog" aria-label="Đóng hộp thoại">×</button>
+        </header>
+        <div class="dialog-body">
+            <ul class="shortcut-list">
+                <li><kbd>P</kbd> × 3 trong 1 giây: Chọn từ hiển thị</li>
+                <li><kbd>P</kbd> × 4 trong 1 giây: Khôi phục tất cả</li>
+                <li><kbd>Control</kbd> + <kbd>W</kbd>: Sao chép Word + Meaning + Vietnamese</li>
+                <li><kbd>Control</kbd> + <kbd>Q</kbd>: Sao chép Word + Meaning</li>
+                <li><kbd>Control</kbd> + <kbd>E</kbd>: Mở Sao chép theo format</li>
+                <li><kbd>Control</kbd> + <kbd>H</kbd>: Mở trợ giúp này</li>
+                <li><kbd>Shift</kbd> + nhấn biểu tượng PDF: Chọn cột cần che</li>
+            </ul>
+        </div>
+        <footer class="dialog-footer"><button class="button button-primary" type="button" data-action="close-dialog">Đóng</button></footer>
+    </dialog>
+
     <dialog class="dialog" id="resume-dialog" aria-labelledby="resume-dialog-title">
         <header class="dialog-header">
             <div><h2 class="dialog-title" id="resume-dialog-title">Tiếp tục lượt học?</h2><p class="dialog-description" id="resume-dialog-description">Bạn vẫn còn một lượt học đang dở.</p></div>
@@ -203,6 +215,7 @@
     </dialog>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
     <script src="/static/js/share.js" defer></script>
 </body>
 </html>

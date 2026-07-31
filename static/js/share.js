@@ -8,11 +8,13 @@
     const formatKey = `${storagePrefix}:copy-format`;
     const studyKey = `${storagePrefix}:study-state`;
     const hiddenColumns = new Set((table.dataset.hiddenColumns || "").split(",").filter(Boolean).map(Number));
+    const printHiddenColumns = new Set((table.dataset.printHiddenColumns || "").split(",").filter(Boolean).map(Number));
     const toast = document.querySelector("#toast");
     const copyDialog = document.querySelector("#copy-dialog");
     const selectionDialog = document.querySelector("#selection-dialog");
+    const pdfOptionsDialog = document.querySelector("#pdf-options-dialog");
+    const shortcutDialog = document.querySelector("#shortcut-dialog");
     const resumeDialog = document.querySelector("#resume-dialog");
-    const toolPanel = document.querySelector("#lesson-tools");
     const lessonList = document.querySelector("#lesson-list");
     const studyWorkspace = document.querySelector("#study-workspace");
     const flashContent = document.querySelector("#flash-content");
@@ -25,6 +27,9 @@
     let lastTrigger = null;
     let studyState = null;
     let studyMotion = "forward";
+    let pShortcutCount = 0;
+    let pShortcutStartedAt = 0;
+    let pShortcutTimer = null;
 
     const getRows = () => [...table.tBodies[0].rows];
     const readStorage = (key, fallback) => {
@@ -195,17 +200,109 @@
         showToast("Đã khôi phục toàn bộ từ trong bài học.");
     }
 
-    function toggleTools() {
-        if (!toolPanel) return;
-        const shouldOpen = toolPanel.hidden;
-        toolPanel.hidden = !shouldOpen;
-        if (shouldOpen) {
-            toolPanel.querySelector("button")?.focus();
-            showToast("Đã mở công cụ bài học. Nhấn Alt + Shift + M để ẩn.");
-        } else {
-            document.querySelector("#lesson-title")?.focus();
-            showToast("Đã ẩn công cụ bài học.");
+    function triggerForShortcut() {
+        return document.activeElement instanceof HTMLElement ? document.activeElement : studyStartButton;
+    }
+
+    function openSelectionDialog(trigger = triggerForShortcut()) {
+        buildSelectionDialog();
+        openDialog(selectionDialog, trigger);
+    }
+
+    function openCopyDialog(trigger = triggerForShortcut()) {
+        openDialog(copyDialog, trigger);
+    }
+
+    function lockedPdfColumns() {
+        return new Set([...hiddenColumns, ...printHiddenColumns]);
+    }
+
+    function buildPdfOptionsDialog() {
+        const locked = lockedPdfColumns();
+        pdfOptionsDialog.querySelectorAll("input[type=checkbox]").forEach((input) => {
+            const column = Number(input.value);
+            input.checked = locked.has(column);
+            input.disabled = locked.has(column);
+            input.parentElement.title = input.disabled ? "Cột này đã được ẩn bởi link chia sẻ." : "";
+        });
+    }
+
+    function selectedPdfHiddenColumns() {
+        return new Set([...lockedPdfColumns(), ...[...pdfOptionsDialog.querySelectorAll("input[type=checkbox]:checked")].map((input) => Number(input.value))]);
+    }
+
+    function createPdfSurface(hiddenPdfColumns) {
+        const surface = element("section", "pdf-export-surface");
+        const title = document.querySelector("#lesson-title")?.textContent?.trim() || "FastENG lesson";
+        surface.append(element("h1", "", title), element("p", "", `${selectedRows().length} từ vựng`));
+        const lessonCopy = lessonList.cloneNode(true);
+        lessonCopy.removeAttribute("id");
+        lessonCopy.querySelector(".lesson-mobile-list")?.remove();
+        lessonCopy.querySelectorAll(".is-user-hidden").forEach((node) => node.remove());
+        hiddenPdfColumns.forEach((column) => {
+            lessonCopy.querySelectorAll(`.lesson-table tbody td:nth-child(${column + 1}) .cell-content`).forEach((cell) => {
+                cell.classList.add("is-pdf-hidden");
+            });
+        });
+        surface.append(lessonCopy);
+        document.body.append(surface);
+        return { surface, title };
+    }
+
+    function pdfFilename(title) {
+        const safeTitle = title.replace(/[\\/:*?"<>|]/g, "-").trim() || "fasteng-lesson";
+        return `${safeTitle}.pdf`;
+    }
+
+    async function downloadPdf(hiddenPdfColumns = lockedPdfColumns()) {
+        if (typeof window.html2pdf !== "function") {
+            showToast("Không thể tải trình tạo PDF. Hãy kiểm tra kết nối Internet rồi thử lại.", true);
+            return;
         }
+        const { surface, title } = createPdfSurface(hiddenPdfColumns);
+        try {
+            showToast("Đang tạo PDF…");
+            await document.fonts?.ready;
+            await window.html2pdf().set({
+                margin: 8,
+                filename: pdfFilename(title),
+                image: { type: "jpeg", quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", windowWidth: 1000 },
+                jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+                pagebreak: { mode: ["css", "legacy"] },
+            }).from(surface).save();
+            showToast("PDF đã được tải xuống.");
+        } catch {
+            showToast("Không thể tạo PDF trên thiết bị này.", true);
+        } finally {
+            surface.remove();
+        }
+    }
+
+    function resetPShortcut() {
+        pShortcutCount = 0;
+        pShortcutStartedAt = 0;
+        clearTimeout(pShortcutTimer);
+        pShortcutTimer = null;
+    }
+
+    function handlePShortcut() {
+        const now = Date.now();
+        if (!pShortcutStartedAt || now - pShortcutStartedAt > 1000) {
+            resetPShortcut();
+            pShortcutStartedAt = now;
+        }
+        pShortcutCount += 1;
+        if (pShortcutCount === 4) {
+            resetPShortcut();
+            resetSelection();
+            return;
+        }
+        clearTimeout(pShortcutTimer);
+        pShortcutTimer = setTimeout(() => {
+            if (pShortcutCount === 3) openSelectionDialog();
+            resetPShortcut();
+        }, Math.max(0, 1000 - (now - pShortcutStartedAt)));
     }
 
     function playAudio(button) {
@@ -528,11 +625,21 @@
         if (action === "mark-again") markAgain();
         if (action === "previous-slide") changeSlide(-1);
         if (action === "next-slide") changeSlide(1);
-        if (action === "print") { if (parentDialog) parentDialog.close(); window.print(); }
-        if (action === "copy-basic") { copyFormat("2-t-5", "Word + Meaning"); if (parentDialog) parentDialog.close(); }
-        if (action === "copy-vietnamese") { copyFormat("2-t-5-[7]", "Word + Meaning + Vietnamese"); if (parentDialog) parentDialog.close(); }
-        if (action === "open-copy") { if (parentDialog) parentDialog.close(); openDialog(copyDialog, button); }
-        if (action === "open-selection") { if (parentDialog) parentDialog.close(); buildSelectionDialog(); openDialog(selectionDialog, button); }
+        if (action === "download-pdf") {
+            if (event.shiftKey) {
+                buildPdfOptionsDialog();
+                openDialog(pdfOptionsDialog, button);
+            } else {
+                downloadPdf();
+            }
+        }
+        if (action === "confirm-download-pdf") {
+            const hiddenPdfColumns = selectedPdfHiddenColumns();
+            closeDialog(pdfOptionsDialog);
+            downloadPdf(hiddenPdfColumns);
+        }
+        if (action === "open-copy") { if (parentDialog) parentDialog.close(); openCopyDialog(button); }
+        if (action === "open-selection") { if (parentDialog) parentDialog.close(); openSelectionDialog(button); }
         if (action === "save-selection") saveSelection();
         if (action === "reset-selection") { resetSelection(); if (parentDialog) parentDialog.close(); }
         if (action === "close-dialog") closeDialog(button.closest("dialog"));
@@ -555,22 +662,31 @@
     document.querySelector("#custom-format-input").value = readStorage(formatKey, "1-t-4-t-5");
 
     document.addEventListener("keydown", (event) => {
-        if (event.altKey && event.shiftKey && !event.metaKey && !event.ctrlKey) {
-            if (event.code === "KeyM") {
-                if (document.querySelector("dialog[open]")) return;
-                event.preventDefault();
-                toggleTools();
-                return;
-            }
-            const key = event.key.toLowerCase();
-            const shortcuts = { "1": "copy-basic", "2": "copy-vietnamese", p: "print", s: "open-selection" };
+        const key = event.key.toLowerCase();
+        const isTyping = event.target.matches("input, textarea, select, [contenteditable=true]");
+        if (isTyping || document.querySelector("dialog[open]")) return;
+
+        if (event.ctrlKey && !event.metaKey && !event.altKey) {
+            const shortcuts = {
+                w: () => copyFormat("2-t-5-[7]", "Word + Meaning + Vietnamese"),
+                q: () => copyFormat("2-t-5", "Word + Meaning"),
+                e: () => openCopyDialog(),
+                h: () => openDialog(shortcutDialog, triggerForShortcut()),
+            };
             if (shortcuts[key]) {
                 event.preventDefault();
-                document.querySelector(`[data-action="${shortcuts[key]}"]`)?.click();
+                shortcuts[key]();
+                return;
             }
+        }
+
+        if (!event.ctrlKey && !event.metaKey && !event.altKey && !event.repeat && key === "p") {
+            event.preventDefault();
+            handlePShortcut();
             return;
         }
-        if (studyWorkspace.hidden || document.querySelector("dialog[open]") || event.target.matches("input, textarea, select")) return;
+
+        if (studyWorkspace.hidden) return;
         if (studyState?.mode === "slide" && event.key === "ArrowLeft") { event.preventDefault(); changeSlide(-1); }
         if (studyState?.mode === "slide" && event.key === "ArrowRight") { event.preventDefault(); changeSlide(1); }
         if (studyState?.mode === "flash" && !studyState.revealed && [" ", "Enter"].includes(event.key) && !event.target.closest("button")) {
