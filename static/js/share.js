@@ -231,59 +231,148 @@
         return new Set([...lockedPdfColumns(), ...[...pdfOptionsDialog.querySelectorAll("input[type=checkbox]:checked")].map((input) => Number(input.value))]);
     }
 
-    function createPdfSurface(hiddenPdfColumns) {
-        const surface = element("section", "pdf-export-surface");
-        const title = document.querySelector("#lesson-title")?.textContent?.trim() || "FastENG lesson";
-        surface.append(element("h1", "", title), element("p", "", `${selectedRows().length} từ vựng`));
-        const headers = ["#", "Word", "Type", "IPA", "Meaning", "Example", "Vietnamese"];
-        const fields = ["word", "type", "ipa", "meaning", "example", "translate"];
-        const pdfTable = element("table", "pdf-export-table");
-        const tableHead = document.createElement("thead");
-        const headerRow = document.createElement("tr");
-        headers.forEach((header) => headerRow.append(element("th", "", header)));
-        tableHead.append(headerRow);
-        const tableBody = document.createElement("tbody");
-        selectedRows().forEach((row) => {
-            const tableRow = document.createElement("tr");
-            tableRow.append(element("td", "pdf-index", row.dataset.index || ""));
-            fields.forEach((field, index) => {
-                const cell = element("td", hiddenPdfColumns.has(index + 1) ? "is-pdf-hidden" : "", hiddenPdfColumns.has(index + 1) ? "" : row.dataset[field] || "—");
-                tableRow.append(cell);
-            });
-            tableBody.append(tableRow);
-        });
-        pdfTable.append(tableHead, tableBody);
-        surface.append(pdfTable);
-        return { surface, title };
-    }
-
     function pdfFilename(title) {
         const safeTitle = title.replace(/[\\/:*?"<>|]/g, "-").trim() || "fasteng-lesson";
         return `${safeTitle}.pdf`;
     }
 
+    function wrapPdfText(context, value, maxWidth) {
+        const text = String(value || "").trim();
+        if (!text) return [];
+        const lines = [];
+        let current = "";
+        for (const character of text) {
+            const candidate = current + character;
+            if (current && context.measureText(candidate).width > maxWidth) {
+                lines.push(current.trimEnd());
+                current = character === " " ? "" : character;
+            } else {
+                current = candidate;
+            }
+        }
+        if (current.trim()) lines.push(current.trimEnd());
+        return lines;
+    }
+
+    function createPdfCanvas(title, wordCount, pageNumber) {
+        const canvas = document.createElement("canvas");
+        canvas.width = 1400;
+        // html2pdf rounds A4's printable height down to 1,979 px at this width.
+        // Matching that exact raster size prevents it from adding a near-empty extra page.
+        canvas.height = 1979;
+        const context = canvas.getContext("2d");
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = "#162033";
+        context.font = '700 42px Manrope, "Segoe UI", sans-serif';
+        context.fillText(title, 60, 82);
+        context.fillStyle = "#667085";
+        context.font = '500 18px "IBM Plex Mono", ui-monospace, monospace';
+        context.fillText(`${wordCount} từ vựng · Trang ${pageNumber}`, 60, 116);
+        context.fillStyle = "#2563eb";
+        context.fillRect(60, 142, 1280, 3);
+        return { canvas, context, y: 172 };
+    }
+
+    function drawPdfTableHeader(context, y, columns) {
+        let x = 60;
+        context.fillStyle = "#eef2f7";
+        context.fillRect(x, y, 1280, 38);
+        context.strokeStyle = "#cbd5e1";
+        context.lineWidth = 1;
+        context.font = '700 15px Manrope, "Segoe UI", sans-serif';
+        context.fillStyle = "#162033";
+        columns.forEach((column) => {
+            context.strokeRect(x, y, column.width, 38);
+            context.fillText(column.label, x + 8, y + 24);
+            x += column.width;
+        });
+        return y + 38;
+    }
+
+    function drawPdfRow(context, y, cells, columns) {
+        const lineHeight = 23;
+        context.font = '500 17px Manrope, "Segoe UI", "PingFang SC", sans-serif';
+        const lines = cells.map((cell, index) => wrapPdfText(context, cell, columns[index].width - 16));
+        const rowHeight = Math.max(48, ...lines.map((cellLines) => cellLines.length * lineHeight + 18));
+        let x = 60;
+        context.strokeStyle = "#cbd5e1";
+        context.lineWidth = 1;
+        context.fillStyle = "#263247";
+        columns.forEach((column, index) => {
+            context.strokeRect(x, y, column.width, rowHeight);
+            context.save();
+            context.beginPath();
+            context.rect(x + 6, y + 6, column.width - 12, rowHeight - 12);
+            context.clip();
+            lines[index].forEach((line, lineIndex) => {
+                const textX = index === 0 ? x + (column.width - context.measureText(line).width) / 2 : x + 8;
+                context.fillText(line, textX, y + 24 + lineIndex * lineHeight);
+            });
+            context.restore();
+            x += column.width;
+        });
+        return rowHeight;
+    }
+
+    async function appendPdfPage(pdf, canvas) {
+        if (pdf) {
+            pdf.addPage();
+            pdf.addImage(canvas.toDataURL("image/jpeg", 0.94), "JPEG", 0, 0, 595.28, 841.89);
+            return pdf;
+        }
+
+        // html2pdf bundles jsPDF but intentionally does not expose it as a browser global.
+        // Initialising the first page through its Worker gives us that same local PDF instance,
+        // then later pages can be appended without ever reading the responsive lesson table.
+        const worker = window.html2pdf().set({
+            margin: 0,
+            image: { type: "jpeg", quality: 0.94 },
+            jsPDF: { unit: "pt", format: "a4", orientation: "portrait", compress: true },
+        }).from(canvas, "canvas").toPdf();
+        return worker.get("pdf");
+    }
+
     async function downloadPdf(hiddenPdfColumns = lockedPdfColumns()) {
         if (typeof window.html2pdf !== "function") {
-            showToast("Không thể tải trình tạo PDF. Hãy kiểm tra kết nối Internet rồi thử lại.", true);
+            showToast("Không thể tải trình tạo PDF. Hãy tải lại trang rồi thử lại.", true);
             return;
         }
-        const { surface, title } = createPdfSurface(hiddenPdfColumns);
         try {
             showToast("Đang tạo PDF…");
             await document.fonts?.ready;
-            await window.html2pdf().set({
-                margin: 8,
-                filename: pdfFilename(title),
-                image: { type: "jpeg", quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", windowWidth: 1000 },
-                jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-                pagebreak: { mode: ["css", "legacy"] },
-            }).from(surface).save();
+            const title = document.querySelector("#lesson-title")?.textContent?.trim() || "FastENG lesson";
+            const rows = selectedRows();
+            const columns = [
+                { label: "#", width: 42, field: "index" },
+                { label: "Word", width: 175, field: "word", hidden: 1 },
+                { label: "Type", width: 110, field: "type", hidden: 2 },
+                { label: "IPA", width: 170, field: "ipa", hidden: 3 },
+                { label: "Meaning", width: 260, field: "meaning", hidden: 4 },
+                { label: "Example", width: 270, field: "example", hidden: 5 },
+                { label: "Vietnamese", width: 253, field: "translate", hidden: 6 },
+            ];
+            let pdf;
+            let pageNumber = 1;
+            let page = createPdfCanvas(title, rows.length, pageNumber);
+            let y = drawPdfTableHeader(page.context, page.y, columns);
+            for (const row of rows) {
+                const cells = columns.map((column) => column.hidden && hiddenPdfColumns.has(column.hidden) ? "" : row.dataset[column.field] || "—");
+                page.context.font = '500 17px Manrope, "Segoe UI", "PingFang SC", sans-serif';
+                const rowHeight = Math.max(48, ...cells.map((cell, index) => wrapPdfText(page.context, cell, columns[index].width - 16).length * 23 + 18));
+                if (y + rowHeight > page.canvas.height - 67) {
+                    pdf = await appendPdfPage(pdf, page.canvas);
+                    pageNumber += 1;
+                    page = createPdfCanvas(title, rows.length, pageNumber);
+                    y = drawPdfTableHeader(page.context, page.y, columns);
+                }
+                y += drawPdfRow(page.context, y, cells, columns);
+            }
+            pdf = await appendPdfPage(pdf, page.canvas);
+            pdf.save(pdfFilename(title));
             showToast("PDF đã được tải xuống.");
         } catch {
             showToast("Không thể tạo PDF trên thiết bị này.", true);
-        } finally {
-            surface.remove();
         }
     }
 
