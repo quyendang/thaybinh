@@ -80,7 +80,6 @@
 .lesson-table-card { overflow: hidden; border: 1px solid var(--line); border-top: 0; border-radius: 0 0 var(--radius-lg) var(--radius-lg); background: var(--paper); box-shadow: var(--shadow); }
 .table-scroll { overflow: auto; }
 .lesson-mobile-list { display: none; margin: 0; padding: 0; list-style: none; }
-.table-note { margin: 0; padding: 14px 30px; border-bottom: 1px solid var(--line); color: var(--slate); background: #fff; font-size: 0.82rem; }
 .lesson-table { width: 100%; min-width: 890px; border-collapse: collapse; }
 .lesson-table th { padding: 13px 14px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); color: var(--slate); background: #f8fafc; text-align: left; font-size: 0.72rem; letter-spacing: 0.07em; text-transform: uppercase; }
 .lesson-table td { padding: 15px 14px; border-bottom: 1px solid #edf1f6; vertical-align: top; color: #263247; font-size: 0.9rem; line-height: 1.52; }
@@ -206,7 +205,6 @@
     .tool-panel:not([hidden]) { align-items: stretch; padding: 16px; gap: 16px; }
     .tool-panel:not([hidden]) .tool-group { width: 100%; }
     .lesson-table-card { border-radius: 0 0 var(--radius-md) var(--radius-md); }
-    .table-note { padding-inline: 16px; }
     .table-scroll { display: none; }
     .lesson-mobile-list { display: grid; gap: 0; }
     .mobile-word-item { padding: 16px; border-bottom: 1px solid var(--line); }
@@ -252,7 +250,6 @@
     .lesson-table-card { border: 0; border-radius: 0; box-shadow: none; }
     .table-scroll { overflow: visible; }
     .lesson-table { min-width: 0; font-size: 9pt; }
-    .table-note { display: none; }
     .lesson-table th, .lesson-table td { padding: 5px 4px; border: 1px solid #cbd5e1; font-size: 8.5pt; }
     .lesson-table th { color: #111827; background: #eef2f7; }
     .is-print-hidden .cell-content { color: transparent !important; text-shadow: none !important; }
