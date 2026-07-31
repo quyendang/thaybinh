@@ -494,6 +494,27 @@
         container.append(block);
     }
 
+    function appendLexicalMeta(container, word, className = "") {
+        const metadata = element("div", `lexical-meta ${className}`.trim());
+        let hasMetadata = false;
+        if (fieldVisible(2) && word.type) {
+            metadata.append(element("span", "lexical-type", word.type));
+            hasMetadata = true;
+        }
+        if (fieldVisible(3) && word.ipa) {
+            metadata.append(element("span", "lexical-ipa", word.ipa));
+            hasMetadata = true;
+        }
+        if (hasMetadata) container.append(metadata);
+    }
+
+    function appendFlashContext(container, word) {
+        const context = element("div", "flash-card-context");
+        if (fieldVisible(4)) appendDetail(context, "Meaning", word.meaning, "study-detail-primary");
+        if (fieldVisible(5)) appendDetail(context, "Example", word.example, "study-detail-example");
+        if (context.childElementCount) container.append(context);
+    }
+
     function setModeTabs() {
         const mode = studyState?.mode || "flash";
         document.querySelectorAll("[data-study-mode]").forEach((tab) => {
@@ -537,7 +558,7 @@
         const reverseAvailable = fieldVisible(6) && words.some((item) => item.translate);
         const card = element("article", `flash-card is-${studyMotion}${studyState.revealed ? " is-revealed" : ""}`);
         const cardHeader = element("div", "flash-card-header");
-        cardHeader.append(element("span", "flash-card-kicker", studyState.direction === "vi-to-en" ? "Tiếng Việt → English" : "English → Meaning"));
+        cardHeader.append(element("span", "flash-card-kicker", studyState.direction === "vi-to-en" ? "Tiếng Việt → English" : "English → Tiếng Việt"));
         const directionButton = makeButton("Đổi chiều", "toggle-direction", "button button-quiet study-direction-button");
         directionButton.disabled = !reverseAvailable;
         if (!reverseAvailable) directionButton.title = "Lesson này chưa có phần tiếng Việt để đổi chiều.";
@@ -548,26 +569,30 @@
         const promptText = studyState.direction === "vi-to-en" ? word.translate : word.word;
         prompt.append(element("p", "flash-prompt", promptText));
         if (studyState.direction === "en-to-meaning") {
-            const metadata = [fieldVisible(2) && word.type, fieldVisible(3) && word.ipa].filter(Boolean).join(" · ");
-            if (metadata) prompt.append(element("p", "flash-meta", metadata));
+            appendLexicalMeta(prompt, word, "flash-lexical-meta");
             if (fieldVisible(1)) prompt.append(makeAudioButton(word));
         }
+        const hasVietnameseAnswer = studyState.direction === "en-to-meaning" && fieldVisible(6) && Boolean(word.translate);
+        if (hasVietnameseAnswer) appendFlashContext(prompt, word);
         card.append(prompt);
 
         if (!studyState.revealed) {
-            card.append(element("p", "flash-hint", "Tự trả lời trước khi lật đáp án."));
-            card.append(makeButton("Lật đáp án", "flip-card", "button button-primary flash-flip-button"));
+            card.append(element("p", "flash-hint", hasVietnameseAnswer ? "Hãy đoán nghĩa tiếng Việt trước khi mở." : "Tự trả lời trước khi lật đáp án."));
+            card.append(makeButton(hasVietnameseAnswer ? "Xem nghĩa tiếng Việt" : "Lật đáp án", "flip-card", "button button-primary flash-flip-button"));
         } else {
             const answer = element("div", "flash-card-answer");
             if (studyState.direction === "vi-to-en") {
                 answer.append(element("p", "study-detail-label", "English"), element("p", "flash-answer-word", word.word));
-                const metadata = [fieldVisible(2) && word.type, fieldVisible(3) && word.ipa].filter(Boolean).join(" · ");
-                if (metadata) answer.append(element("p", "flash-meta", metadata));
+                appendLexicalMeta(answer, word, "flash-answer-meta");
                 if (fieldVisible(1)) answer.append(makeAudioButton(word));
             }
-            if (fieldVisible(4)) appendDetail(answer, "Meaning", word.meaning, "study-detail-primary");
-            if (fieldVisible(6)) appendDetail(answer, "Tiếng Việt", word.translate);
-            if (fieldVisible(5)) appendDetail(answer, "Example", word.example);
+            if (hasVietnameseAnswer) {
+                appendDetail(answer, "Tiếng Việt", word.translate, "study-detail-reveal");
+            } else {
+                if (fieldVisible(4)) appendDetail(answer, "Meaning", word.meaning, "study-detail-primary");
+                if (studyState.direction === "en-to-meaning" && fieldVisible(6)) appendDetail(answer, "Tiếng Việt", word.translate, "study-detail-reveal");
+                if (fieldVisible(5)) appendDetail(answer, "Example", word.example, "study-detail-example");
+            }
             card.append(answer);
             const actions = element("div", "study-actions flash-rating-actions");
             actions.append(makeButton("Chưa nhớ", "mark-again", "button button-quiet"), makeButton("Đã nhớ", "mark-known", "button button-primary"));
@@ -591,8 +616,7 @@
             title.tabIndex = -1;
             slide.append(title);
         }
-        const metadata = [fieldVisible(2) && word.type, fieldVisible(3) && word.ipa].filter(Boolean).join(" · ");
-        if (metadata) slide.append(element("p", "flash-meta", metadata));
+        appendLexicalMeta(slide, word, "slide-lexical-meta");
         if (fieldVisible(1)) slide.append(makeAudioButton(word));
         const details = element("div", "slide-details");
         if (fieldVisible(4)) appendDetail(details, "Meaning", word.meaning, "study-detail-primary");
