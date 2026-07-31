@@ -185,14 +185,18 @@
 .pdf-export-surface { width: 100%; padding: 42px; color: var(--ink); background: #fff; }
 .pdf-export-surface h1 { margin: 0 0 8px; font-size: 26px; letter-spacing: -0.03em; }
 .pdf-export-surface > p { margin: 0 0 24px; color: var(--slate); font-size: 13px; }
-.pdf-export-surface .lesson-table-card { overflow: visible; border: 0; border-radius: 0; box-shadow: none; }
-.pdf-export-surface .table-scroll { display: block !important; overflow: visible; }
-.pdf-export-surface .lesson-mobile-list { display: none !important; }
-.pdf-export-surface .lesson-table { min-width: 0; font-size: 11px; }
-.pdf-export-surface .lesson-table th, .pdf-export-surface .lesson-table td { padding: 7px 6px; border: 1px solid #cbd5e1; font-size: 10px; }
-.pdf-export-surface .lesson-table th { color: #111827; background: #eef2f7; }
-.pdf-export-surface .audio-button { display: none; }
-.pdf-export-surface .is-pdf-hidden .cell-content { color: transparent !important; text-shadow: none !important; }
+.pdf-export-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 10px; }
+.pdf-export-table th, .pdf-export-table td { padding: 7px 6px; border: 1px solid #cbd5e1; overflow-wrap: anywhere; vertical-align: top; line-height: 1.45; }
+.pdf-export-table th { color: #111827; background: #eef2f7; font-size: 9px; letter-spacing: 0.04em; text-align: left; text-transform: uppercase; }
+.pdf-export-table th:nth-child(1), .pdf-export-table td:nth-child(1) { width: 5%; text-align: center; }
+.pdf-export-table th:nth-child(2) { width: 14%; }
+.pdf-export-table th:nth-child(3) { width: 10%; }
+.pdf-export-table th:nth-child(4) { width: 14%; }
+.pdf-export-table th:nth-child(5), .pdf-export-table th:nth-child(6) { width: 22%; }
+.pdf-export-table th:nth-child(7) { width: 13%; }
+.pdf-export-table tr { break-inside: avoid; page-break-inside: avoid; }
+.pdf-export-table .pdf-index { color: var(--slate); font-family: var(--font-data); }
+.pdf-export-table .is-pdf-hidden { color: transparent !important; text-shadow: none !important; }
 
 .toast { position: fixed; right: 20px; bottom: 20px; z-index: 20; max-width: min(360px, calc(100% - 40px)); padding: 12px 14px; border-radius: var(--radius-sm); color: #fff; background: var(--ink); box-shadow: var(--shadow); font-size: 0.87rem; opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity 180ms ease, transform 180ms ease; }
 .toast.is-visible { opacity: 1; transform: translateY(0); }

@@ -235,16 +235,25 @@
         const surface = element("section", "pdf-export-surface");
         const title = document.querySelector("#lesson-title")?.textContent?.trim() || "FastENG lesson";
         surface.append(element("h1", "", title), element("p", "", `${selectedRows().length} từ vựng`));
-        const lessonCopy = lessonList.cloneNode(true);
-        lessonCopy.removeAttribute("id");
-        lessonCopy.querySelector(".lesson-mobile-list")?.remove();
-        lessonCopy.querySelectorAll(".is-user-hidden").forEach((node) => node.remove());
-        hiddenPdfColumns.forEach((column) => {
-            lessonCopy.querySelectorAll(`.lesson-table tbody td:nth-child(${column + 1}) .cell-content`).forEach((cell) => {
-                cell.classList.add("is-pdf-hidden");
+        const headers = ["#", "Word", "Type", "IPA", "Meaning", "Example", "Vietnamese"];
+        const fields = ["word", "type", "ipa", "meaning", "example", "translate"];
+        const pdfTable = element("table", "pdf-export-table");
+        const tableHead = document.createElement("thead");
+        const headerRow = document.createElement("tr");
+        headers.forEach((header) => headerRow.append(element("th", "", header)));
+        tableHead.append(headerRow);
+        const tableBody = document.createElement("tbody");
+        selectedRows().forEach((row) => {
+            const tableRow = document.createElement("tr");
+            tableRow.append(element("td", "pdf-index", row.dataset.index || ""));
+            fields.forEach((field, index) => {
+                const cell = element("td", hiddenPdfColumns.has(index + 1) ? "is-pdf-hidden" : "", hiddenPdfColumns.has(index + 1) ? "" : row.dataset[field] || "—");
+                tableRow.append(cell);
             });
+            tableBody.append(tableRow);
         });
-        surface.append(lessonCopy);
+        pdfTable.append(tableHead, tableBody);
+        surface.append(pdfTable);
         return { surface, title };
     }
 
