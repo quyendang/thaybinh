@@ -254,15 +254,21 @@
         return lines;
     }
 
+    const PDF_CANVAS_SCALE = 2;
+    const PDF_CANVAS_WIDTH = 2800;
+    // 2,800 x 3,959 maps exactly to A4 in html2pdf (about 339 DPI).
+    const PDF_CANVAS_HEIGHT = 3959;
+    const PDF_LOGICAL_HEIGHT = PDF_CANVAS_HEIGHT / PDF_CANVAS_SCALE;
+
     function createPdfCanvas(title, wordCount, pageNumber) {
         const canvas = document.createElement("canvas");
-        canvas.width = 1400;
-        // html2pdf rounds A4's printable height down to 1,979 px at this width.
-        // Matching that exact raster size prevents it from adding a near-empty extra page.
-        canvas.height = 1979;
+        canvas.width = PDF_CANVAS_WIDTH;
+        // Matching html2pdf's A4 rounding prevents it from adding a near-empty extra page.
+        canvas.height = PDF_CANVAS_HEIGHT;
         const context = canvas.getContext("2d");
+        context.scale(PDF_CANVAS_SCALE, PDF_CANVAS_SCALE);
         context.fillStyle = "#ffffff";
-        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillRect(0, 0, canvas.width / PDF_CANVAS_SCALE, canvas.height / PDF_CANVAS_SCALE);
         context.fillStyle = "#162033";
         context.font = '700 42px Manrope, "Segoe UI", sans-serif';
         context.fillText(title, 60, 82);
@@ -318,7 +324,9 @@
     async function appendPdfPage(pdf, canvas) {
         if (pdf) {
             pdf.addPage();
-            pdf.addImage(canvas.toDataURL("image/jpeg", 0.94), "JPEG", 0, 0, 595.28, 841.89);
+            pdf.addImage(canvas, "PNG", 0, 0, 595.28, 841.89);
+            canvas.width = 1;
+            canvas.height = 1;
             return pdf;
         }
 
@@ -327,10 +335,13 @@
         // then later pages can be appended without ever reading the responsive lesson table.
         const worker = window.html2pdf().set({
             margin: 0,
-            image: { type: "jpeg", quality: 0.94 },
+            image: { type: "png" },
             jsPDF: { unit: "pt", format: "a4", orientation: "portrait", compress: true },
         }).from(canvas, "canvas").toPdf();
-        return worker.get("pdf");
+        const generatedPdf = await worker.get("pdf");
+        canvas.width = 1;
+        canvas.height = 1;
+        return generatedPdf;
     }
 
     async function downloadPdf(hiddenPdfColumns = lockedPdfColumns()) {
@@ -360,7 +371,7 @@
                 const cells = columns.map((column) => column.hidden && hiddenPdfColumns.has(column.hidden) ? "" : row.dataset[column.field] || "—");
                 page.context.font = '500 17px Manrope, "Segoe UI", "PingFang SC", sans-serif';
                 const rowHeight = Math.max(48, ...cells.map((cell, index) => wrapPdfText(page.context, cell, columns[index].width - 16).length * 23 + 18));
-                if (y + rowHeight > page.canvas.height - 67) {
+                if (y + rowHeight > PDF_LOGICAL_HEIGHT - 67) {
                     pdf = await appendPdfPage(pdf, page.canvas);
                     pageNumber += 1;
                     page = createPdfCanvas(title, rows.length, pageNumber);
