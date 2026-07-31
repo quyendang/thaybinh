@@ -182,7 +182,7 @@
 .pdf-column-options label:has(input:disabled) { color: var(--slate); cursor: not-allowed; }
 .shortcut-list { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; color: #344054; line-height: 1.55; }
 .shortcut-list kbd { display: inline-block; padding: 1px 6px; border: 1px solid #cfd8e6; border-bottom-width: 2px; border-radius: 4px; color: var(--ink); background: #f8fafc; font: 0.72rem var(--font-data); }
-.pdf-export-surface { position: fixed; top: 0; left: -12000px; width: 1000px; padding: 42px; color: var(--ink); background: #fff; }
+.pdf-export-surface { width: 100%; padding: 42px; color: var(--ink); background: #fff; }
 .pdf-export-surface h1 { margin: 0 0 8px; font-size: 26px; letter-spacing: -0.03em; }
 .pdf-export-surface > p { margin: 0 0 24px; color: var(--slate); font-size: 13px; }
 .pdf-export-surface .lesson-table-card { overflow: visible; border: 0; border-radius: 0; box-shadow: none; }

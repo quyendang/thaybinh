@@ -245,7 +245,6 @@
             });
         });
         surface.append(lessonCopy);
-        document.body.append(surface);
         return { surface, title };
     }
 
