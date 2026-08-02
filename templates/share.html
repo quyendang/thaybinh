@@ -8,8 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/tokens.css">
-    <link rel="stylesheet" href="/static/css/share.css">
+    <link rel="stylesheet" href="/static/css/tokens.css?v={{ share_asset_version }}">
+    <link rel="stylesheet" href="/static/css/share.css?v={{ share_asset_version }}">
 </head>
 <body>
     <main class="share-shell">
@@ -216,6 +216,6 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="/static/vendor/html2pdf.bundle.min.js" defer></script>
-    <script src="/static/js/share.js" defer></script>
+    <script src="/static/js/share.js?v={{ share_asset_version }}" defer></script>
 </body>
 </html>

@@ -33,6 +33,7 @@ def decode_columns(value: str) -> list[int]:
 
 
 def render_template(request: Request, name: str, context: dict, status_code: int = 200):
+    context = {**context, "share_asset_version": request.app.state.share_asset_version}
     return request.app.state.templates.TemplateResponse(
         request,
         name,

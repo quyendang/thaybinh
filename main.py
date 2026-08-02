@@ -1,3 +1,4 @@
+import hashlib
 import logging
 import os
 from pathlib import Path
@@ -15,10 +16,23 @@ logging.basicConfig(level=logging.INFO)
 BASE_DIR = Path(__file__).resolve().parent
 
 
+def share_asset_version() -> str:
+    digest = hashlib.sha256()
+    asset_paths = (
+        "static/css/tokens.css",
+        "static/css/share.css",
+        "static/js/share.js",
+    )
+    for relative_path in asset_paths:
+        digest.update((BASE_DIR / relative_path).read_bytes())
+    return digest.hexdigest()[:12]
+
+
 def create_app() -> FastAPI:
     settings = Settings.from_environment()
     app = FastAPI(title="FastENG")
     app.state.base_dir = BASE_DIR
+    app.state.share_asset_version = share_asset_version()
     app.state.settings = settings
     app.state.logger = logging.getLogger("fasteng")
     app.state.supabase = create_client(settings.supabase_url, settings.supabase_key)
