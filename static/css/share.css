@@ -96,6 +96,7 @@
 .study-workspace { border: 1px solid var(--line); border-radius: 0 0 var(--radius-lg) var(--radius-lg); background: var(--paper); box-shadow: var(--shadow); }
 .study-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px 30px 18px; border-bottom: 1px solid var(--line); }
 .study-header h2 { margin: 5px 0 0; font-size: clamp(1.35rem, 3vw, 1.85rem); letter-spacing: -0.035em; }
+.study-lesson-name { display: none; }
 .study-eyebrow { margin: 0; color: var(--slate); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
 .study-mode-tabs { display: flex; gap: 6px; padding: 14px 30px 0; }
 .study-mode-tab { min-height: 38px; padding: 8px 11px; border: 0; border-bottom: 2px solid transparent; color: var(--slate); background: transparent; font: 800 0.82rem var(--font-ui); cursor: pointer; }
@@ -229,18 +230,38 @@
     .mobile-word-support p span { color: var(--slate); font: 0.68rem var(--font-data); letter-spacing: 0.05em; text-transform: uppercase; }
     .dialog { width: calc(100% - 20px); }
     .study-workspace { border-radius: 0 0 var(--radius-md) var(--radius-md); }
+    .share-shell.is-study-open { min-height: 100dvh; padding: 0; }
+    .share-shell.is-study-open .share-workspace { width: 100%; }
+    .share-shell.is-study-open .lesson-hero { display: none; }
+    .share-shell.is-study-open .study-workspace { min-height: 100dvh; border: 0; border-radius: 0; box-shadow: none; }
+    .share-shell.is-study-open .study-header { min-height: 64px; align-items: center; padding: 10px 16px; }
+    .share-shell.is-study-open .study-eyebrow { display: none; }
+    .share-shell.is-study-open .study-header h2 { margin: 0; font-size: 1rem; letter-spacing: -0.02em; }
+    .share-shell.is-study-open .study-title-label { display: none; }
+    .share-shell.is-study-open .study-lesson-name { display: block; max-width: 196px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .share-shell.is-study-open .study-header .button { min-height: 44px; padding: 9px 10px; }
+    .share-shell.is-study-open .study-mode-tabs { min-height: 44px; padding: 4px 16px 0; }
+    .share-shell.is-study-open .study-mode-tab { min-height: 40px; padding: 8px 10px; }
+    .share-shell.is-study-open .study-progress { padding: 7px 16px 0; }
+    .share-shell.is-study-open .study-panel { padding: 10px 12px 16px; }
     .study-header { align-items: start; padding: 20px 18px 14px; }
     .study-header .button { min-height: 36px; padding: 7px 9px; font-size: 0.75rem; }
     .study-mode-tabs, .study-progress { padding-inline: 18px; }
     .study-panel { padding: 16px 12px 24px; }
-    .flash-card { block-size: clamp(360px, calc(100dvh - 260px), 520px); padding: 18px; }
+    .flash-card { block-size: clamp(392px, calc(100dvh - 176px), 536px); padding: 16px; }
     .study-slide { min-height: 410px; padding: 18px; }
-    .flash-card-prompt { padding-top: 26px; }
-    .flash-prompt { font-size: clamp(2rem, 12vw, 3.2rem); }
+    .flash-card-stage { overflow: visible; scrollbar-gutter: auto; }
+    .flash-card-prompt { gap: 7px; padding: 14px 4px 8px; }
+    .flash-prompt { font-size: clamp(2rem, 11vw, 3rem); }
     .lexical-meta { display: grid; justify-items: center; gap: 7px; }
     .lexical-ipa { padding-left: 0; border-left: 0; }
     .slide-lexical-meta { justify-items: start; }
-    .flash-card-context { margin-top: 10px; padding-left: 13px; }
+    .flash-card-context { gap: 8px; margin-top: 8px; padding: 4px 0 4px 12px; }
+    .flash-card.is-revealed .flash-card-context .study-detail-example { display: none; }
+    .flash-answer-slot { min-block-size: 82px; padding: 0 4px 8px; }
+    .flash-card-answer { gap: 8px; padding: 10px 0 2px; }
+    .study-detail-reveal { padding: 10px 12px; }
+    .flash-card-footer { min-height: 58px; padding-top: 10px; }
     .study-actions { position: sticky; bottom: max(8px, env(safe-area-inset-bottom)); z-index: 2; padding: 10px; margin: 20px -8px -8px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: rgb(255 255 255 / 96%); backdrop-filter: blur(12px); }
     .flash-card-footer.study-actions { position: static; z-index: auto; min-height: 60px; margin: 0; padding: 12px 0 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; backdrop-filter: none; }
     .study-actions .button, .slide-controls .button { flex: 1; min-width: 0; }

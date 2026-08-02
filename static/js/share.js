@@ -2,6 +2,7 @@
     const table = document.querySelector(".lesson-table");
     if (!table) return;
 
+    const shareShell = document.querySelector(".share-shell");
     const lessonId = table.dataset.lessonId;
     const storagePrefix = `fasteng:share:${lessonId}`;
     const hiddenWordsKey = `${storagePrefix}:hidden-words`;
@@ -574,7 +575,7 @@
         }
 
         const reverseAvailable = fieldVisible(6) && words.some((item) => item.translate);
-        const card = element("article", "flash-card");
+        const card = element("article", `flash-card${studyState.revealed ? " is-revealed" : ""}`);
         const cardHeader = element("div", "flash-card-header");
         cardHeader.append(element("span", "flash-card-kicker", studyState.direction === "vi-to-en" ? "Tiếng Việt → English" : "English → Tiếng Việt"));
         const directionButton = makeButton("Đổi chiều", "toggle-direction", "button button-quiet study-direction-button");
@@ -676,6 +677,7 @@
     function openStudyWorkspace() {
         lessonList.hidden = true;
         studyWorkspace.hidden = false;
+        shareShell?.classList.add("is-study-open");
         studyStartButton.hidden = true;
         studyStartButton?.setAttribute("aria-expanded", "true");
         requestAnimationFrame(() => {
@@ -690,6 +692,7 @@
         if (resumeDialog?.open) resumeDialog.close();
         saveStudyState();
         studyWorkspace.hidden = true;
+        shareShell?.classList.remove("is-study-open");
         lessonList.hidden = false;
         studyStartButton.hidden = false;
         studyStartButton?.setAttribute("aria-expanded", "false");
