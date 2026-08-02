@@ -94,15 +94,16 @@
 .is-user-hidden { display: none; }
 
 .study-workspace { border: 1px solid var(--line); border-radius: 0 0 var(--radius-lg) var(--radius-lg); background: var(--paper); box-shadow: var(--shadow); }
-.study-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px 30px 18px; border-bottom: 1px solid var(--line); }
-.study-header h2 { margin: 5px 0 0; font-size: clamp(1.35rem, 3vw, 1.85rem); letter-spacing: -0.035em; }
+.study-header { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 16px 28px; padding: 15px 30px; border-bottom: 1px solid var(--line); }
+.study-header h2 { margin: 4px 0 0; font-size: clamp(1.25rem, 2.4vw, 1.65rem); letter-spacing: -0.035em; }
 .study-lesson-name { display: none; }
 .study-eyebrow { margin: 0; color: var(--slate); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
-.study-mode-tabs { display: flex; gap: 6px; padding: 14px 30px 0; }
+.study-mode-tabs { display: flex; gap: 6px; align-self: stretch; padding: 0; }
 .study-mode-tab { min-height: 38px; padding: 8px 11px; border: 0; border-bottom: 2px solid transparent; color: var(--slate); background: transparent; font: 800 0.82rem var(--font-ui); cursor: pointer; }
 .study-mode-tab[aria-selected="true"] { border-color: var(--cobalt); color: var(--cobalt); }
-.study-progress { margin: 0; padding: 12px 30px 0; color: var(--slate); font: 0.78rem var(--font-data); }
-.study-panel { padding: 18px 30px 30px; }
+.study-header-actions { display: flex; align-items: center; justify-content: end; gap: 18px; }
+.study-progress { margin: 0; color: var(--slate); font: 0.78rem var(--font-data); white-space: nowrap; }
+.study-panel { padding: 14px 30px 26px; }
 .flash-card, .study-slide, .study-finish { width: min(680px, 100%); margin: 0 auto; border: 1px solid var(--line); border-radius: var(--radius-md); background: #fbfcfe; }
 .flash-card {
     display: grid;
@@ -234,15 +235,17 @@
     .share-shell.is-study-open .share-workspace { width: 100%; }
     .share-shell.is-study-open .lesson-hero { display: none; }
     .share-shell.is-study-open .study-workspace { min-height: 100dvh; border: 0; border-radius: 0; box-shadow: none; }
-    .share-shell.is-study-open .study-header { min-height: 64px; align-items: center; padding: 10px 16px; }
+    .share-shell.is-study-open .study-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; min-height: 64px; align-items: center; gap: 0 10px; padding: 10px 16px; }
+    .share-shell.is-study-open .study-heading { grid-column: 1; grid-row: 1; }
+    .share-shell.is-study-open .study-header-actions { display: contents; }
     .share-shell.is-study-open .study-eyebrow { display: none; }
     .share-shell.is-study-open .study-header h2 { margin: 0; font-size: 1rem; letter-spacing: -0.02em; }
     .share-shell.is-study-open .study-title-label { display: none; }
     .share-shell.is-study-open .study-lesson-name { display: block; max-width: 196px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .share-shell.is-study-open .study-header .button { min-height: 44px; padding: 9px 10px; }
-    .share-shell.is-study-open .study-mode-tabs { min-height: 44px; padding: 4px 16px 0; }
+    .share-shell.is-study-open .study-header .button { grid-column: 2; grid-row: 1; min-height: 44px; padding: 9px 10px; }
+    .share-shell.is-study-open .study-mode-tabs { grid-column: 1 / -1; grid-row: 2; min-height: 44px; padding: 4px 16px 0; }
     .share-shell.is-study-open .study-mode-tab { min-height: 40px; padding: 8px 10px; }
-    .share-shell.is-study-open .study-progress { padding: 7px 16px 0; }
+    .share-shell.is-study-open .study-progress { grid-column: 1 / -1; grid-row: 3; padding: 7px 16px 0; }
     .share-shell.is-study-open .study-panel { padding: 10px 12px 16px; }
     .study-header { align-items: start; padding: 20px 18px 14px; }
     .study-header .button { min-height: 36px; padding: 7px 9px; font-size: 0.75rem; }
@@ -277,6 +280,10 @@
     .share-workspace { width: min(100%, 920px); }
     .lesson-table th:first-child, .lesson-table td:first-child { position: sticky; left: 0; z-index: 1; background: inherit; }
     .lesson-table thead th:first-child { background: #f8fafc; }
+}
+
+@media (min-width: 761px) {
+    .flash-card { block-size: clamp(520px, calc(100dvh - 154px), 760px); }
 }
 
 @media print {

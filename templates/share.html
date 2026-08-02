@@ -117,17 +117,19 @@
 
             <section class="study-workspace" id="study-workspace" aria-labelledby="study-title" hidden>
                 <header class="study-header">
-                    <div>
+                    <div class="study-heading">
                         <p class="study-eyebrow">FastENG study desk</p>
                         <h2 id="study-title"><span class="study-title-label">Học từ vựng</span><span class="study-lesson-name">{{ lesson_name }}</span></h2>
                     </div>
-                    <button class="button button-quiet" type="button" data-action="exit-study">Quay lại danh sách</button>
+                    <nav class="study-mode-tabs" role="tablist" aria-label="Chế độ học">
+                        <button class="study-mode-tab" id="flash-tab" type="button" role="tab" aria-selected="true" aria-controls="flash-panel" data-action="set-study-mode" data-study-mode="flash">Flash card</button>
+                        <button class="study-mode-tab" id="slide-tab" type="button" role="tab" aria-selected="false" aria-controls="slide-panel" data-action="set-study-mode" data-study-mode="slide">Slide</button>
+                    </nav>
+                    <div class="study-header-actions">
+                        <p class="study-progress" id="study-progress" aria-live="polite"></p>
+                        <button class="button button-quiet" type="button" data-action="exit-study">Quay lại danh sách</button>
+                    </div>
                 </header>
-                <nav class="study-mode-tabs" role="tablist" aria-label="Chế độ học">
-                    <button class="study-mode-tab" id="flash-tab" type="button" role="tab" aria-selected="true" aria-controls="flash-panel" data-action="set-study-mode" data-study-mode="flash">Flash card</button>
-                    <button class="study-mode-tab" id="slide-tab" type="button" role="tab" aria-selected="false" aria-controls="slide-panel" data-action="set-study-mode" data-study-mode="slide">Slide</button>
-                </nav>
-                <p class="study-progress" id="study-progress" aria-live="polite"></p>
                 <section class="study-panel" id="flash-panel" role="tabpanel" aria-labelledby="flash-tab"><div id="flash-content"></div></section>
                 <section class="study-panel" id="slide-panel" role="tabpanel" aria-labelledby="slide-tab" hidden><div id="slide-content"></div></section>
             </section>
