@@ -88,6 +88,11 @@
         return button;
     }
 
+    function appendAudioButton(container, word) {
+        const button = makeAudioButton(word);
+        if (button) container.append(button);
+    }
+
     function setRowVisibility(rowKey, hidden) {
         document.querySelectorAll(`[data-row-key="${CSS.escape(rowKey)}"]`).forEach((node) => {
             node.classList.toggle("is-user-hidden", hidden);
@@ -569,7 +574,7 @@
         }
 
         const reverseAvailable = fieldVisible(6) && words.some((item) => item.translate);
-        const card = element("article", `flash-card is-${studyMotion}${studyState.revealed ? " is-revealed" : ""}`);
+        const card = element("article", "flash-card");
         const cardHeader = element("div", "flash-card-header");
         cardHeader.append(element("span", "flash-card-kicker", studyState.direction === "vi-to-en" ? "Tiếng Việt → English" : "English → Tiếng Việt"));
         const directionButton = makeButton("Đổi chiều", "toggle-direction", "button button-quiet study-direction-button");
@@ -578,26 +583,30 @@
         cardHeader.append(directionButton);
         card.append(cardHeader);
 
+        const stage = element("div", `flash-card-stage is-${studyMotion}${studyState.revealed ? " is-revealed" : ""}`);
         const prompt = element("div", "flash-card-prompt");
         const promptText = studyState.direction === "vi-to-en" ? word.translate : word.word;
         prompt.append(element("p", "flash-prompt", promptText));
         if (studyState.direction === "en-to-meaning") {
             appendLexicalMeta(prompt, word, "flash-lexical-meta");
-            if (fieldVisible(1)) prompt.append(makeAudioButton(word));
+            if (fieldVisible(1)) appendAudioButton(prompt, word);
         }
         const hasVietnameseAnswer = studyState.direction === "en-to-meaning" && fieldVisible(6) && Boolean(word.translate);
         if (hasVietnameseAnswer) appendFlashContext(prompt, word);
-        card.append(prompt);
+        stage.append(prompt);
 
+        // Keep this slot mounted before and after reveal so the card shell never changes height.
+        const answerSlot = element("div", "flash-answer-slot");
+        answerSlot.setAttribute("aria-live", "polite");
+        answerSlot.setAttribute("aria-atomic", "true");
         if (!studyState.revealed) {
-            card.append(element("p", "flash-hint", hasVietnameseAnswer ? "Hãy đoán nghĩa tiếng Việt trước khi mở." : "Tự trả lời trước khi lật đáp án."));
-            card.append(makeButton(hasVietnameseAnswer ? "Xem nghĩa tiếng Việt" : "Lật đáp án", "flip-card", "button button-primary flash-flip-button"));
+            answerSlot.append(element("p", "flash-hint", hasVietnameseAnswer ? "Hãy đoán nghĩa tiếng Việt trước khi mở." : "Tự trả lời trước khi lật đáp án."));
         } else {
             const answer = element("div", "flash-card-answer");
             if (studyState.direction === "vi-to-en") {
                 answer.append(element("p", "study-detail-label", "English"), element("p", "flash-answer-word", word.word));
                 appendLexicalMeta(answer, word, "flash-answer-meta");
-                if (fieldVisible(1)) answer.append(makeAudioButton(word));
+                if (fieldVisible(1)) appendAudioButton(answer, word);
             }
             if (hasVietnameseAnswer) {
                 appendDetail(answer, "Tiếng Việt", word.translate, "study-detail-reveal");
@@ -606,11 +615,19 @@
                 if (studyState.direction === "en-to-meaning" && fieldVisible(6)) appendDetail(answer, "Tiếng Việt", word.translate, "study-detail-reveal");
                 if (fieldVisible(5)) appendDetail(answer, "Example", word.example, "study-detail-example");
             }
-            card.append(answer);
-            const actions = element("div", "study-actions flash-rating-actions");
-            actions.append(makeButton("Chưa nhớ", "mark-again", "button button-quiet"), makeButton("Đã nhớ", "mark-known", "button button-primary"));
-            card.append(actions);
+            answerSlot.append(answer);
         }
+        stage.append(answerSlot);
+        card.append(stage);
+
+        const footer = element("footer", "flash-card-footer study-actions");
+        if (!studyState.revealed) {
+            footer.append(makeButton(hasVietnameseAnswer ? "Xem nghĩa tiếng Việt" : "Lật đáp án", "flip-card", "button button-primary flash-flip-button"));
+        } else {
+            footer.classList.add("flash-rating-actions");
+            footer.append(makeButton("Chưa nhớ", "mark-again", "button button-quiet"), makeButton("Đã nhớ", "mark-known", "button button-primary"));
+        }
+        card.append(footer);
         flashContent.append(card);
     }
 
@@ -630,7 +647,7 @@
             slide.append(title);
         }
         appendLexicalMeta(slide, word, "slide-lexical-meta");
-        if (fieldVisible(1)) slide.append(makeAudioButton(word));
+        if (fieldVisible(1)) appendAudioButton(slide, word);
         const details = element("div", "slide-details");
         if (fieldVisible(4)) appendDetail(details, "Meaning", word.meaning, "study-detail-primary");
         if (fieldVisible(6)) appendDetail(details, "Tiếng Việt", word.translate);
@@ -661,6 +678,12 @@
         studyWorkspace.hidden = false;
         studyStartButton.hidden = true;
         studyStartButton?.setAttribute("aria-expanded", "true");
+        requestAnimationFrame(() => {
+            studyWorkspace.scrollIntoView({
+                block: "start",
+                behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+            });
+        });
     }
 
     function exitStudy() {
@@ -718,6 +741,7 @@
         studyState.revealed = false;
         studyMotion = "forward";
         renderStudy();
+        flashContent.querySelector('[data-action="flip-card"], [data-action="restart-study"]')?.focus();
     }
 
     function markAgain() {
@@ -726,6 +750,7 @@
         studyState.revealed = false;
         studyMotion = "forward";
         renderStudy();
+        flashContent.querySelector('[data-action="flip-card"], [data-action="restart-study"]')?.focus();
     }
 
     function changeSlide(delta) {
@@ -828,6 +853,7 @@
             studyState.revealed = true;
             studyMotion = "reveal";
             renderStudy();
+            flashContent.querySelector('[data-action="mark-again"]')?.focus();
         }
     });
 

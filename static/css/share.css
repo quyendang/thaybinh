@@ -103,19 +103,28 @@
 .study-progress { margin: 0; padding: 12px 30px 0; color: var(--slate); font: 0.78rem var(--font-data); }
 .study-panel { padding: 18px 30px 30px; }
 .flash-card, .study-slide, .study-finish { width: min(680px, 100%); margin: 0 auto; border: 1px solid var(--line); border-radius: var(--radius-md); background: #fbfcfe; }
-.flash-card { display: flex; flex-direction: column; min-height: 430px; padding: 22px; will-change: transform, opacity; }
+.flash-card {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    min-height: 0;
+    block-size: clamp(470px, 62dvh, 580px);
+    overflow: hidden;
+    padding: 22px;
+}
 .flash-card-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .flash-card-kicker, .slide-index { color: var(--slate); font: 700 0.75rem var(--font-data); letter-spacing: 0.04em; text-transform: uppercase; }
 .study-direction-button { min-height: 34px; padding: 6px 10px; font-size: 0.75rem; }
-.flash-card-prompt { display: grid; justify-items: center; gap: 10px; min-height: 220px; padding: 30px 12px 14px; text-align: center; }
+.flash-card-stage { min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+.flash-card-prompt { display: grid; justify-items: center; gap: 10px; padding: 30px 12px 14px; text-align: center; }
 .flash-prompt, .flash-answer-word, .slide-word { margin: 0; color: var(--ink); font-size: clamp(2rem, 7vw, 4.6rem); font-weight: 800; line-height: 1.03; letter-spacing: -0.055em; overflow-wrap: anywhere; }
 .lexical-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 7px 10px; min-height: 24px; }
 .lexical-type { padding: 4px 8px; border: 1px solid #f1d5a7; border-radius: 4px; color: #9a5c07; background: #fff9ed; font: 800 0.66rem/1 var(--font-ui); letter-spacing: 0.08em; text-transform: uppercase; }
 .lexical-ipa { padding-left: 10px; border-left: 1px solid #bed1f8; color: var(--cobalt); font: 0.82rem/1.35 var(--font-data); }
 .flash-card-context { display: grid; width: min(100%, 530px); gap: 13px; margin-top: 12px; padding: 5px 0 5px 16px; border-left: 2px solid #c9d9f5; text-align: left; }
-.flash-hint { margin: 2px 0 16px; color: var(--slate); text-align: center; font-size: 0.86rem; }
+.flash-answer-slot { display: grid; min-block-size: 124px; align-content: center; padding: 0 12px 16px; }
+.flash-hint { margin: 2px 0; color: var(--slate); text-align: center; font-size: 0.86rem; }
 .flash-flip-button { display: flex; width: min(320px, 100%); margin: 0 auto; }
-.flash-card-answer { display: grid; gap: 15px; padding: 18px 0 4px; border-top: 1px solid var(--line); }
+.flash-card-answer { display: grid; gap: 15px; width: min(100%, 530px); margin: 0 auto; padding: 18px 0 4px; border-top: 1px solid var(--line); }
 .flash-answer-word { font-size: clamp(1.75rem, 5vw, 2.75rem); }
 .flash-answer-meta { justify-content: start; margin-top: -7px; }
 .study-detail { display: grid; gap: 4px; }
@@ -128,6 +137,8 @@
 .study-detail-reveal p { color: #0a4f48; font-size: clamp(1.06rem, 3vw, 1.32rem); font-weight: 800; line-height: 1.42; }
 .study-actions, .slide-controls { display: flex; justify-content: center; gap: 8px; margin-top: 22px; }
 .study-actions .button, .slide-controls .button { min-width: 126px; }
+.flash-card-footer { min-height: 64px; margin: 0; padding-top: 14px; border-top: 1px solid var(--line); align-items: center; }
+.flash-card-footer .flash-flip-button { margin: 0 auto; }
 .study-finish { padding: 32px; text-align: center; }
 .study-finish h3 { margin: 9px 0; font-size: 1.45rem; letter-spacing: -0.03em; }
 .study-finish > p:not(.study-eyebrow) { margin: 0; color: var(--slate); line-height: 1.55; }
@@ -152,9 +163,9 @@
     from { opacity: 0; transform: translateY(8px) scale(0.992); }
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
-.flash-card.is-forward, .study-slide.is-forward { animation: study-enter-forward 260ms cubic-bezier(.2, .8, .2, 1) both; }
-.flash-card.is-backward, .study-slide.is-backward { animation: study-enter-backward 260ms cubic-bezier(.2, .8, .2, 1) both; }
-.flash-card.is-reveal, .flash-card.is-revealed { animation: study-reveal 210ms cubic-bezier(.2, .8, .2, 1) both; }
+.flash-card-stage.is-forward, .study-slide.is-forward { animation: study-enter-forward 220ms cubic-bezier(.2, .8, .2, 1) both; }
+.flash-card-stage.is-backward, .study-slide.is-backward { animation: study-enter-backward 220ms cubic-bezier(.2, .8, .2, 1) both; }
+.flash-card-stage.is-reveal, .flash-card-stage.is-revealed { animation: study-reveal 180ms cubic-bezier(.2, .8, .2, 1) both; }
 
 .dialog { width: min(600px, calc(100% - 32px)); max-height: min(720px, calc(100vh - 32px)); padding: 0; border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: 0 24px 64px rgb(22 32 51 / 24%); color: var(--ink); background: var(--paper); }
 .dialog::backdrop { background: rgb(15 23 42 / 48%); }
@@ -222,17 +233,23 @@
     .study-header .button { min-height: 36px; padding: 7px 9px; font-size: 0.75rem; }
     .study-mode-tabs, .study-progress { padding-inline: 18px; }
     .study-panel { padding: 16px 12px 24px; }
-    .flash-card, .study-slide { min-height: 410px; padding: 18px; }
-    .flash-card-prompt { min-height: 196px; padding-top: 26px; }
+    .flash-card { block-size: clamp(360px, calc(100dvh - 260px), 520px); padding: 18px; }
+    .study-slide { min-height: 410px; padding: 18px; }
+    .flash-card-prompt { padding-top: 26px; }
     .flash-prompt { font-size: clamp(2rem, 12vw, 3.2rem); }
     .lexical-meta { display: grid; justify-items: center; gap: 7px; }
     .lexical-ipa { padding-left: 0; border-left: 0; }
     .slide-lexical-meta { justify-items: start; }
     .flash-card-context { margin-top: 10px; padding-left: 13px; }
     .study-actions { position: sticky; bottom: max(8px, env(safe-area-inset-bottom)); z-index: 2; padding: 10px; margin: 20px -8px -8px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: rgb(255 255 255 / 96%); backdrop-filter: blur(12px); }
+    .flash-card-footer.study-actions { position: static; z-index: auto; min-height: 60px; margin: 0; padding: 12px 0 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; backdrop-filter: none; }
     .study-actions .button, .slide-controls .button { flex: 1; min-width: 0; }
     .study-finish { padding: 26px 18px; }
     .slide-controls { position: sticky; bottom: max(8px, env(safe-area-inset-bottom)); padding: 10px; margin: 22px -8px -8px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: rgb(255 255 255 / 96%); backdrop-filter: blur(12px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .flash-card-stage, .study-slide { animation: none !important; }
 }
 
 @media (min-width: 761px) and (max-width: 1023px) {
