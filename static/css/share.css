@@ -251,7 +251,7 @@
     .study-header .button { min-height: 36px; padding: 7px 9px; font-size: 0.75rem; }
     .study-mode-tabs, .study-progress { padding-inline: 18px; }
     .study-panel { padding: 16px 12px 24px; }
-    .flash-card { block-size: clamp(392px, calc(100dvh - 176px), 536px); padding: 16px; }
+    .flash-card { block-size: clamp(420px, calc(100dvh - 148px), 536px); padding: 16px; }
     .study-slide { min-height: 410px; padding: 18px; }
     .flash-card-stage { overflow: visible; scrollbar-gutter: auto; }
     .flash-card-prompt { gap: 7px; padding: 14px 4px 8px; }
@@ -260,7 +260,6 @@
     .lexical-ipa { padding-left: 0; border-left: 0; }
     .slide-lexical-meta { justify-items: start; }
     .flash-card-context { gap: 8px; margin-top: 8px; padding: 4px 0 4px 12px; }
-    .flash-card.is-revealed .flash-card-context .study-detail-example { display: none; }
     .flash-answer-slot { min-block-size: 82px; padding: 0 4px 8px; }
     .flash-card-answer { gap: 8px; padding: 10px 0 2px; }
     .study-detail-reveal { padding: 10px 12px; }
