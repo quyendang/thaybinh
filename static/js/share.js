@@ -231,9 +231,10 @@
         return new Set([...lockedPdfColumns(), ...[...pdfOptionsDialog.querySelectorAll("input[type=checkbox]:checked")].map((input) => Number(input.value))]);
     }
 
-    function pdfFilename(title) {
-        const safeTitle = title.replace(/[\\/:*?"<>|]/g, "-").trim() || "fasteng-lesson";
-        return `${safeTitle}.pdf`;
+    function pdfFilename(groupName, lessonName) {
+        const safePart = (value) => String(value || "").replace(/[\\/:*?"<>|]/g, "-").replace(/\s+/g, " ").trim();
+        const parts = [safePart(groupName), safePart(lessonName)].filter(Boolean);
+        return `${parts.join(" - ") || "fasteng-lesson"}.pdf`;
     }
 
     function wrapPdfText(context, value, maxWidth) {
@@ -353,6 +354,7 @@
             showToast("Đang tạo PDF…");
             await document.fonts?.ready;
             const title = document.querySelector("#lesson-title")?.textContent?.trim() || "FastENG lesson";
+            const groupName = document.querySelector(".share-workspace")?.dataset.groupName || "";
             const rows = selectedRows();
             const columns = [
                 { label: "#", width: 42, field: "index" },
@@ -380,7 +382,7 @@
                 y += drawPdfRow(page.context, y, cells, columns);
             }
             pdf = await appendPdfPage(pdf, page.canvas);
-            pdf.save(pdfFilename(title));
+            pdf.save(pdfFilename(groupName, title));
             showToast("PDF đã được tải xuống.");
         } catch {
             showToast("Không thể tạo PDF trên thiết bị này.", true);
