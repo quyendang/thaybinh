@@ -443,6 +443,16 @@
         activeAudio.play().catch(() => showToast("Trình duyệt đã chặn phát audio.", true));
     }
 
+    function playFlashAudio() {
+        const word = activeWord();
+        if (!word?.voice) return showToast("Từ này chưa có audio.", true);
+        const visibleButton = flashContent.querySelector("[data-audio-src]");
+        if (visibleButton?.dataset.audioSrc === word.voice) return playAudio(visibleButton);
+        const audioTrigger = document.createElement("button");
+        audioTrigger.dataset.audioSrc = word.voice;
+        playAudio(audioTrigger);
+    }
+
     function studyWords() {
         return selectedRows().map((row) => ({
             key: row.dataset.rowKey,
@@ -756,6 +766,14 @@
         flashContent.querySelector('[data-action="flip-card"], [data-action="restart-study"]')?.focus();
     }
 
+    function revealFlashCard() {
+        if (!studyState || studyState.revealed) return;
+        studyState.revealed = true;
+        studyMotion = "reveal";
+        renderStudy();
+        flashContent.querySelector('[data-action="mark-again"]')?.focus();
+    }
+
     function changeSlide(delta) {
         const next = studyState.slideIndex + delta;
         const total = studyWords().length;
@@ -782,7 +800,7 @@
         if (action === "restart-study") restartStudy();
         if (action === "set-study-mode") { studyState.mode = button.dataset.studyMode; studyMotion = "forward"; renderStudy(); }
         if (action === "toggle-direction") { studyState.direction = studyState.direction === "en-to-meaning" ? "vi-to-en" : "en-to-meaning"; studyState.revealed = false; studyMotion = "reveal"; renderStudy(); }
-        if (action === "flip-card") { studyState.revealed = true; studyMotion = "reveal"; renderStudy(); flashContent.querySelector('[data-action="mark-again"]')?.focus(); }
+        if (action === "flip-card") revealFlashCard();
         if (action === "mark-known") markKnown();
         if (action === "mark-again") markAgain();
         if (action === "previous-slide") changeSlide(-1);
@@ -848,16 +866,33 @@
             return;
         }
 
-        if (studyWorkspace.hidden) return;
+        if (studyWorkspace.hidden || !studyState) return;
+        if (studyState.mode === "flash") {
+            if (event.repeat) return;
+            if (event.key === "Enter") {
+                event.preventDefault();
+                playFlashAudio();
+                return;
+            }
+            if (event.key === " ") {
+                event.preventDefault();
+                revealFlashCard();
+                return;
+            }
+            if (!studyState.revealed) return;
+            if (event.key === "ArrowRight") {
+                event.preventDefault();
+                markKnown();
+                return;
+            }
+            if (event.key === "ArrowLeft") {
+                event.preventDefault();
+                markAgain();
+                return;
+            }
+        }
         if (studyState?.mode === "slide" && event.key === "ArrowLeft") { event.preventDefault(); changeSlide(-1); }
         if (studyState?.mode === "slide" && event.key === "ArrowRight") { event.preventDefault(); changeSlide(1); }
-        if (studyState?.mode === "flash" && !studyState.revealed && [" ", "Enter"].includes(event.key) && !event.target.closest("button")) {
-            event.preventDefault();
-            studyState.revealed = true;
-            studyMotion = "reveal";
-            renderStudy();
-            flashContent.querySelector('[data-action="mark-again"]')?.focus();
-        }
     });
 
     restoreSelection();
