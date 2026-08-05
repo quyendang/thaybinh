@@ -626,7 +626,7 @@
             footer.append(makeButton(hasVietnameseAnswer ? "Xem nghĩa tiếng Việt" : "Lật đáp án", "flip-card", "button button-primary flash-flip-button"));
         } else {
             footer.classList.add("flash-rating-actions");
-            footer.append(makeButton("Chưa nhớ", "mark-again", "button button-quiet"), makeButton("Đã nhớ", "mark-known", "button button-primary"));
+            footer.append(makeButton("Quay lại", "mark-again", "button button-quiet"), makeButton("Tiếp theo", "mark-known", "button button-primary"));
         }
         card.append(footer);
         flashContent.append(card);
