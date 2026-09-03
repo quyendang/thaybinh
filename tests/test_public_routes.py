@@ -31,6 +31,8 @@ def test_share_short_id_renders_workspace(client):
     assert 'data-action="download-pdf"' in response.text
     assert 'id="pdf-options-dialog"' in response.text
     assert 'id="shortcut-dialog"' in response.text
+    assert "Sao chép Tên Lesson, Link" in response.text
+    assert "Sao chép Tên Group, Tên Lesson, Link" in response.text
     assert 'id="lesson-tools"' not in response.text
     assert 'id="study-workspace"' in response.text
     assert 'class="lesson-mobile-list"' in response.text

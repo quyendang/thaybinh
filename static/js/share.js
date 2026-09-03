@@ -170,6 +170,13 @@
         copyText(text, `${label} đã được sao chép.`);
     }
 
+    function copyLessonInfo(includeGroup) {
+        const lessonName = document.querySelector("#lesson-title")?.textContent?.trim() || "";
+        const groupName = document.querySelector(".share-workspace")?.dataset.groupName?.trim() || "";
+        const values = includeGroup ? [groupName, lessonName, window.location.href] : [lessonName, window.location.href];
+        copyText(values.join(","), includeGroup ? "Thông tin nhóm và bài học đã được sao chép." : "Thông tin bài học đã được sao chép.");
+    }
+
     function buildSelectionDialog() {
         const list = selectionDialog.querySelector("#selection-list");
         const hiddenKeys = new Set(readStorage(hiddenWordsKey, []));
@@ -852,6 +859,8 @@
                 q: () => copyFormat("2-t-5", "Word + Meaning"),
                 e: () => openCopyDialog(),
                 h: () => openDialog(shortcutDialog, triggerForShortcut()),
+                y: () => copyLessonInfo(false),
+                u: () => copyLessonInfo(true),
             };
             if (shortcuts[key]) {
                 event.preventDefault();
