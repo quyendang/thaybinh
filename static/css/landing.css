@@ -39,6 +39,7 @@
 .site-nav { min-height: 90px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-size: 27px; font-weight: 700; letter-spacing: -.04em; white-space: nowrap; }
 .landing .brand-symbol { width: 36px; height: 36px; color: var(--blue); }
+.brand-category { display: block; margin-top: 3px; color: var(--muted); font-size: 13px; font-weight: 600; line-height: 1; letter-spacing: .04em; }
 .brand-dot { color: var(--blue); }
 .nav-tools { display: flex; align-items: center; gap: 30px; }
 .nav-links { display: flex; align-items: center; gap: 30px; margin: 0; padding: 0; list-style: none; }

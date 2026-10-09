@@ -16,8 +16,8 @@
         root.dataset.language = language;
         document.documentElement.lang = language;
         document.title = language === "en"
-            ? "Thay Binh · Education technology built in Vietnam"
-            : "Thay Binh · Công nghệ cho giáo dục";
+            ? "Thay Binh EdTech · Education technology built in Vietnam"
+            : "Thay Binh EdTech · Công nghệ cho giáo dục";
         languageButtons.forEach((button) => {
             button.setAttribute("aria-pressed", String(button.dataset.setLanguage === language));
         });
