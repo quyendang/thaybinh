@@ -18,6 +18,7 @@
                 <div>
                     <p class="lesson-eyebrow">{{ group_name or "FastENG · Bài học được chia sẻ" }}</p>
                     <h1 class="lesson-title" id="lesson-title" tabindex="-1">{{ lesson_name }}</h1>
+                    <p class="lesson-print-title">{% if group_name %}{{ group_name }} · {% endif %}{{ lesson_name }}</p>
                     <p class="lesson-subtitle" id="visible-word-count">{{ words|length }} từ đang hiển thị</p>
                 </div>
                 <div class="lesson-hero-actions">

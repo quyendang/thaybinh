@@ -22,6 +22,7 @@
 }
 
 .lesson-title { max-width: 800px; margin: 7px 0 10px; font-size: clamp(1.7rem, 4vw, 2.7rem); line-height: 1.08; letter-spacing: -0.045em; }
+.lesson-print-title { display: none; }
 .lesson-subtitle { margin: 0; color: var(--slate); font-size: 0.93rem; }
 
 .lesson-hero-actions { display: grid; justify-items: end; gap: 10px; grid-template-columns: 1fr auto; }
@@ -291,7 +292,8 @@
     .share-shell { padding: 0; }
     .lesson-hero { display: block; padding: 0 0 10px; border: 0; border-radius: 0; }
     .lesson-eyebrow, .lesson-subtitle, .lesson-hero-actions, .audio-button, .dialog, .toast, .study-workspace, .lesson-mobile-list { display: none !important; }
-    .lesson-title { margin: 0; font-size: 18pt; }
+    .lesson-title { display: none; }
+    .lesson-print-title { display: block; margin: 0; font-size: 18pt; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
     .lesson-table-card { border: 0; border-radius: 0; box-shadow: none; }
     .table-scroll { overflow: visible; }
     .lesson-table { min-width: 0; font-size: 9pt; }
