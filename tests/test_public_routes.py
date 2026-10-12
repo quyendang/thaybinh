@@ -20,6 +20,43 @@ def test_landing_renders(client):
     response = client.get("/")
     assert response.status_code == 200
     assert "Học ít nhiễu hơn" in response.text
+    assert "Learning Trajectory Architect" in response.text
+    assert "Đang xây dựng MVP" in response.text
+    assert "32 Hai Bà Trưng" in response.text
+    assert 'href="tel:+84387578730"' in response.text
+    assert "8408941671" in response.text
+    assert '<html lang="en">' in response.text
+    assert 'data-language="en"' in response.text
+    assert 'id="architecture"' in response.text
+    assert 'data-agent="reflection"' in response.text
+    assert "Phase 2 · Outside the MVP" in response.text
+    assert response.text.index('id="architecture"') < response.text.index(
+        'id="products"'
+    )
+
+
+@pytest.mark.parametrize("image", ["ai-neural-network", "ai-learning-path"])
+def test_local_ai_artwork_is_available(client, image):
+    response = client.get(f"/static/images/{image}.webp")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/webp"
+
+
+def test_flagship_project_is_a_page_not_a_lesson_lookup(client, monkeypatch):
+    def unexpected_lookup(*args):
+        pytest.fail("Project reading must not query the lesson service")
+
+    monkeypatch.setattr(
+        client.app.state.lesson_service, "by_short_id", unexpected_lookup
+    )
+    response = client.get("/projects/learning-trajectory-architect")
+    assert response.status_code == 200
+    assert "MVP đang được xây dựng" in response.text
+    assert "Orchestrator Agent" in response.text
+    assert 'id="risks"' in response.text
+    source = client.get("/static/documents/learning-trajectory-architect.md")
+    assert source.status_code == 200
+    assert "## 6. Rủi ro" in source.text
 
 
 def test_share_short_id_renders_workspace(client):

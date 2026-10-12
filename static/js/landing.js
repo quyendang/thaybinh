@@ -15,28 +15,36 @@
         if (language !== "vi" && language !== "en") return;
         root.dataset.language = language;
         document.documentElement.lang = language;
-        document.title = language === "en"
-            ? "Thay Binh EdTech · Education technology built in Vietnam"
-            : "Thay Binh EdTech · Công nghệ cho giáo dục";
+        document.title = "Learning Trajectory Architect · Thay Binh EdTech";
         languageButtons.forEach((button) => {
             button.setAttribute("aria-pressed", String(button.dataset.setLanguage === language));
         });
         root.querySelectorAll("[data-label-vi][data-label-en]").forEach((element) => {
             element.setAttribute("aria-label", element.dataset[language === "vi" ? "labelVi" : "labelEn"]);
         });
+        root.querySelectorAll("[data-alt-vi][data-alt-en]").forEach((element) => {
+            element.alt = element.dataset[language === "vi" ? "altVi" : "altEn"];
+        });
         closeMenu();
-        try { localStorage.setItem("thaybinh.home.language", language); } catch { /* Preferences are optional. */ }
     };
-    let language = "vi";
+    // A new key discards the previous automatically saved Vietnamese default.
+    // Only an explicit choice is saved; fresh visits are English-first.
+    const languagePreference = "thaybinh.home.language.v2";
+    let language = "en";
     try {
-        const saved = localStorage.getItem("thaybinh.home.language");
+        const saved = localStorage.getItem(languagePreference);
         if (saved === "vi" || saved === "en") language = saved;
     } catch { /* The page works when storage is unavailable. */ }
     setLanguage(language);
     if (languageSwitch) languageSwitch.hidden = false;
     if (toggle) toggle.hidden = false;
+    root.dataset.menuReady = "true";
     languageButtons.forEach((button) => {
-        button.addEventListener("click", () => setLanguage(button.dataset.setLanguage));
+        button.addEventListener("click", () => {
+            const choice = button.dataset.setLanguage;
+            setLanguage(choice);
+            try { localStorage.setItem(languagePreference, choice); } catch { /* Preferences are optional. */ }
+        });
     });
     toggle?.addEventListener("click", () => {
         const isOpen = links?.classList.toggle("is-open") ?? false;
@@ -56,4 +64,19 @@
     });
     const desktop = window.matchMedia("(min-width: 761px)");
     desktop.addEventListener("change", closeMenu);
+
+    const agentButtons = root.querySelectorAll("[data-agent]");
+    const agentPanels = root.querySelectorAll(".agent-explanation");
+    const selectAgent = (key) => {
+        agentButtons.forEach((button) => {
+            button.setAttribute("aria-pressed", String(button.dataset.agent === key));
+        });
+        agentPanels.forEach((panel) => { panel.hidden = panel.id !== `agent-${key}`; });
+    };
+    if (agentButtons.length) {
+        selectAgent("profile");
+        agentButtons.forEach((button) => {
+            button.addEventListener("click", () => selectAgent(button.dataset.agent));
+        });
+    }
 })();

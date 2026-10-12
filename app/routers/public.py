@@ -134,6 +134,11 @@ async def share_lesson(
     )
 
 
+@router.get("/projects/learning-trajectory-architect", response_class=HTMLResponse)
+async def learning_trajectory_page(request: Request):
+    return render_template(request, "learning-trajectory.html", {})
+
+
 @router.get("/privacy", response_class=HTMLResponse)
 @router.get("/privacypolicy", response_class=HTMLResponse)
 async def privacy_page(request: Request):

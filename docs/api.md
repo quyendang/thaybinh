@@ -15,3 +15,5 @@
 `GET /users`, `GET /user`, `DELETE /removeData`, `DELETE /remove` cần `X-API-Key`. Không đặt key trong URL/browser. `/remove` clear app data trước rồi xóa Auth user; caller phải xử lý lỗi partial theo response 500.
 
 `/firebase`, `/keys`, `/geteid`, `/code` không còn API contract và trả 404.
+
+- `GET /projects/learning-trajectory-architect`: trang đọc đề án trọng tâm VI/EN, không truy vấn Supabase; không cần API key.

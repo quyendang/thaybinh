@@ -25,3 +25,5 @@ Browser → FastAPI/Jinja (`main.py`)
 - `GET /users`, `/user`, `DELETE /removeData`, `/remove`: admin API, cần `X-API-Key`.
 
 `firebase`, `keys`, `geteid`, `code` là path retired, luôn 404. Catch-all phải đứng cuối; `!` trên short ID xáo trộn từ. `c/p` là CSV cột ẩn, còn legacy `column/print` là CSV base64 URL-safe.
+
+- `GET /projects/learning-trajectory-architect`: trang đọc đề án trọng tâm VI/EN, không truy vấn Supabase; không cần API key.

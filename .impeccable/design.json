@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-12T04:23:52.890187+00:00",
+  "title": "Design System: Thay Binh EdTech",
+  "extensions": {
+    "shadows": [],
+    "motion": [
+      {
+        "name": "cta-transition",
+        "value": "background-color .2s ease, color .2s ease",
+        "purpose": "Đổi màu CTA; tắt khi prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-desktop",
+        "value": "1100px"
+      },
+      {
+        "name": "reading-compact",
+        "value": "1150px"
+      },
+      {
+        "name": "mobile",
+        "value": "760px"
+      },
+      {
+        "name": "narrow",
+        "value": "359px"
+      },
+      {
+        "name": "mindmap-compact",
+        "value": "1000px"
+      }
+    ],
+    "focus": {
+      "value": "3px solid #aa77ec",
+      "offset": "5px",
+      "hero": "var(--paper)"
+    },
+    "provenance": {
+      "mode": "scan",
+      "sourceFiles": [
+        "static/css/landing.css",
+        "static/js/landing.js",
+        "templates/landing.html",
+        "templates/learning-trajectory.html",
+        "docs/frontend.md",
+        "docs/image-credits.md"
+      ],
+      "scope": "Landing và trang dự án; không áp dụng cho Share.",
+      "qualitativeApproval": "Chưa có tên Creative North Star do người dùng chọn; mô tả được trích xuất từ hiện trạng."
+    },
+    "language": {
+      "default": "en",
+      "preferenceKey": "thaybinh.home.language.v2",
+      "persist": "Chỉ ghi lựa chọn chủ động; không đọc key cũ tự lưu VI."
+    },
+    "imagery": {
+      "credits": "docs/image-credits.md",
+      "assets": [
+        "static/images/ai-neural-network.webp",
+        "static/images/ai-learning-path.webp"
+      ],
+      "purpose": "Artwork AI từ nguồn stock, không phải ảnh sản phẩm hoặc quan hệ đối tác.",
+      "loading": "Hero ưu tiên tải; ảnh dưới hero và banner trang dự án lazy-load."
+    }
+  },
+  "components": [
+    {
+      "name": "Nút xanh",
+      "kind": "button",
+      "refersTo": "button-blue",
+      "description": "Liên kết hành động của Landing.",
+      "html": "<a class=\"ds-button-blue\" href=\"#project\">Khám phá dự án</a>",
+      "css": ".ds-button-blue {font-family: \"Source Sans 3\", \"Segoe UI\", sans-serif;display:inline-flex;align-items:center;justify-content:center;min-height:54px;padding:14px 22px;border-radius:8px;background:var(--blue, #2448dc);color:var(--paper, #ffffff);font-size:17px;font-weight:600;text-decoration:none;transition:background-color .2s ease,color .2s ease;} .ds-button-blue:hover {background:var(--blue-deep, #1937b7);} .ds-button-blue:focus-visible {outline:3px solid #aa77ec;outline-offset:5px;} @media(prefers-reduced-motion:reduce){.ds-button-blue{transition:none;}}"
+    },
+    {
+      "name": "Nút trắng",
+      "kind": "button",
+      "refersTo": "button-white",
+      "description": "Liên kết hành động của Landing.",
+      "html": "<a class=\"ds-button-white\" href=\"#project\">Khám phá dự án</a>",
+      "css": ".ds-button-white {font-family: \"Source Sans 3\", \"Segoe UI\", sans-serif;display:inline-flex;align-items:center;justify-content:center;min-height:54px;padding:14px 22px;border-radius:8px;background:var(--paper, #ffffff);color:var(--blue, #2448dc);font-size:17px;font-weight:600;text-decoration:none;transition:background-color .2s ease,color .2s ease;} .ds-button-white:hover {background:var(--lilac, #e4dffc);} .ds-button-white:focus-visible {outline:3px solid var(--paper, #ffffff);outline-offset:5px;} @media(prefers-reduced-motion:reduce){.ds-button-white{transition:none;}}"
+    },
+    {
+      "name": "Chuyển ngôn ngữ",
+      "kind": "nav",
+      "description": "VI/EN với trạng thái aria-pressed.",
+      "html": "<div class=\"ds-language\" role=\"group\" aria-label=\"Ngôn ngữ\"><button aria-pressed=\"true\">VI</button><button aria-pressed=\"false\">EN</button></div>",
+      "css": ".ds-language{display:inline-flex;padding:3px;border-radius:8px;background:var(--cloud,#f5f7ff)}.ds-language button{font-family: \"Source Sans 3\", \"Segoe UI\", sans-serif;min-width:44px;min-height:44px;padding:5px;border:0;border-radius:5px;background:transparent;color:var(--muted,#53617a);font-size:14px;font-weight:700;cursor:pointer}.ds-language button[aria-pressed=\"true\"]{background:var(--blue,#2448dc);color:var(--paper,#ffffff)}.ds-language button:hover{text-decoration:underline}.ds-language button:focus-visible{outline:3px solid #aa77ec;outline-offset:5px;}"
+    },
+    {
+      "name": "Mục lục trang đọc",
+      "kind": "nav",
+      "description": "Danh sách liên kết tới các phần trong đề án.",
+      "html": "<nav class=\"ds-reading\" aria-label=\"Mục lục\"><a href=\"#overview\">Ý tưởng & người học</a><a href=\"#mvp\">MVP đang được xây dựng</a></nav>",
+      "css": ".ds-reading a{font-family: \"Source Sans 3\", \"Segoe UI\", sans-serif;display:block;padding:9px 0;color:var(--ink,#182651);text-decoration:none;font-size:16px;font-weight:600}.ds-reading a:hover{color:var(--blue,#2448dc);text-decoration:underline}.ds-reading a:focus-visible{outline:3px solid #aa77ec;outline-offset:5px;}"
+    },
+    {
+      "name": "Nhãn trạng thái",
+      "kind": "chip",
+      "description": "Thông tin trạng thái, không phải bộ lọc hay nút.",
+      "html": "<span class=\"ds-status\">Đang xây MVP</span>",
+      "css": ".ds-status{font-family: \"Source Sans 3\", \"Segoe UI\", sans-serif;display:inline-block;padding:4px 10px;border:1px solid #aaafc0;border-radius:6px;color:var(--ink,#182651);font-size:13px;font-weight:600;line-height:1.6}"
+    },
+    {
+      "name": "Node agent",
+      "kind": "custom",
+      "refersTo": "mindmap-node",
+      "description": "Node button với trạng thái chọn; trang thật dùng JavaScript để đổi panel vai trò.",
+      "html": "<button class=\"ds-agent\" type=\"button\" aria-pressed=\"true\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"8\" r=\"3\"/><path d=\"M5 21v-3a7 7 0 0 1 14 0v3\"/></svg><strong>Profiler Agent</strong><span>Understand the starting point</span><small>Learner profile</small></button>",
+      "css": ".ds-agent{font-family:\"Source Sans 3\",\"Segoe UI\",sans-serif;display:grid;grid-template-columns:26px minmax(0,1fr);column-gap:12px;align-content:start;max-width:320px;min-height:140px;padding:20px;border:1px solid var(--line,#d9dfed);border-radius:12px;background:var(--paper,#fff);color:var(--ink,#182651);text-align:left;cursor:pointer;transition:border-color .2s ease,background-color .2s ease}.ds-agent svg{width:22px;height:22px;color:var(--blue,#2448dc)}.ds-agent strong{font-size:17px;font-weight:600;line-height:1.35}.ds-agent span,.ds-agent small{grid-column:2;display:block}.ds-agent span{margin-top:7px;color:var(--muted,#53617a);font-size:15px;line-height:1.4}.ds-agent small{margin-top:10px;color:var(--blue-deep,#1937b7);font-size:12px}.ds-agent:hover{border-color:var(--blue,#2448dc);background:#f0f3ff}.ds-agent[aria-pressed=\"true\"]{border-color:var(--blue,#2448dc);background:var(--lilac,#e4dffc)}.ds-agent:focus-visible{outline:3px solid #aa77ec;outline-offset:5px}@media(prefers-reduced-motion:reduce){.ds-agent{transition:none}}"
+    }
+  ],
+  "narrative": {
+    "overview": "Tài liệu mô tả hệ thống đã triển khai của Landing và trang đọc dự án, dựa trên `static/css/landing.css`, `static/js/landing.js`, `templates/landing.html` và `templates/learning-trajectory.html`. Đây là bản trích xuất từ mã và ảnh kiểm chứng, không phải seed hay tuyên bố rằng người dùng đã phê duyệt một concept mới. Chưa có tên Creative North Star do người dùng chọn.\n\nNền trắng, mảng xanh đậm và khoảng trống rộng tổ chức nội dung giới thiệu giáo dục. Tiêu đề có trọng lượng rõ ràng; nội dung dài dùng chữ dễ đọc; màu pastel làm rõ cấu trúc và trạng thái chọn. Mindmap HTML/CSS/SVG giải thích kiến trúc agent; ảnh AI có nguồn cụ thể hỗ trợ kể chuyện, không đóng vai trò ảnh sản phẩm. Hệ thống này có phạm vi riêng, không thay thế token hoặc tương tác của Share.",
+    "keyCharacteristics": [
+      "Xanh chủ đạo đi cùng nền trắng và chữ xanh mực.",
+      "Be Vietnam Pro cho tiêu đề, Source Sans 3 cho nội dung.",
+      "Bề mặt phẳng, góc mềm, đường chia mảnh.",
+      "Tiếng Anh mặc định, lựa chọn VI/EN và điều hướng có hỗ trợ bàn phím."
+    ],
+    "rules": [],
+    "dos": [
+      "**Do** lấy màu, chữ và bề mặt của Landing từ hệ thống đã trích xuất này khi mở rộng website giới thiệu.",
+      "**Do** giữ tiếng Anh mặc định, lựa chọn VI/EN rõ ràng, focus nhìn thấy, skip link, menu bàn phím và reduced motion.",
+      "**Do** đặt hành vi trong file JavaScript riêng; dùng HTML/CSS cho sơ đồ có ý nghĩa nội dung.",
+      "**Do** ghi rõ trạng thái MVP và phân biệt đề xuất với tính năng đã phát hành.",
+      "**Do** giữ attribution, provenance và cách tải ảnh phù hợp vị trí hiển thị."
+    ],
+    "donts": [
+      "**Don't** áp hệ thống Landing này lên Share hoặc thay đổi các hợp đồng lesson URL.",
+      "**Don't** thêm CTA/social placeholder hay link ngoài chưa xác thực.",
+      "**Don't** đưa dữ liệu request/Supabase vào inline JavaScript.",
+      "**Don't** dùng artwork AI hay mindmap như bằng chứng về giao diện sản phẩm đã phát hành hoặc quan hệ đối tác."
+    ]
+  }
+}
