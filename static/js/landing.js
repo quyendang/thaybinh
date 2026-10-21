@@ -13,6 +13,9 @@
     };
     const setLanguage = (language) => {
         if (language !== "vi" && language !== "en") return;
+        const profile = root.querySelector("#pi-profile");
+        const profileBounds = profile?.getBoundingClientRect();
+        const keepProfilePosition = profileBounds && profileBounds.top < window.innerHeight && profileBounds.bottom > 90;
         root.dataset.language = language;
         document.documentElement.lang = language;
         document.title = "Learning Trajectory Architect · Thay Binh EdTech";
@@ -26,6 +29,12 @@
             element.alt = element.dataset[language === "vi" ? "altVi" : "altEn"];
         });
         closeMenu();
+        // The profile follows long bilingual sections; keep it in view on translation.
+        if (keepProfilePosition) {
+            requestAnimationFrame(() => {
+                profile.scrollIntoView({ block: "start", behavior: "instant" });
+            });
+        }
     };
     // A new key discards the previous automatically saved Vietnamese default.
     // Only an explicit choice is saved; fresh visits are English-first.

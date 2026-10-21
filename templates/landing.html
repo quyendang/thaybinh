@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#2448dc">
+    {% if profile_preview %}
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <link rel="stylesheet" href="/static/css/research-profile.css?v=20261021">
+    {% endif %}
     <title>Learning Trajectory Architect · Thay Binh EdTech</title>
     <meta name="description" content="Meet Learning Trajectory Architect, Thay Binh EdTech’s flagship multi-agent AI project for personalized learning. Explore the agent architecture and our MVP in development.">
     <link rel="canonical" href="https://thaybinh.vn/">
@@ -20,7 +24,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/landing.css?v=20261012b">
     <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "@id": "https://thaybinh.vn/#organization", "name": "Thay Binh EdTech", "url": "https://thaybinh.vn/", "email": "contact@thaybinh.vn", "description": "Thay Binh EdTech develops education technology in Vietnam. Its flagship project Learning Trajectory Architect is currently in MVP development. Released products include FastENG and FastScores.", "foundingDate": "2025-05-18", "founder": {"@type": "Person", "name": "Đặng Ngọc Quyên"}, "address": {"@type": "PostalAddress", "streetAddress": "32 Hai Ba Trung", "addressLocality": "Di Linh", "addressRegion": "Lam Dong", "addressCountry": "VN"}, "knowsAbout": ["Education technology", "English language learning", "Educational software development", "Classroom management software"], "telephone": "0387578730", "taxID": "8408941671"}</script>
-    <script src="/static/js/landing.js?v=20261012b" defer></script>
+    <script src="/static/js/landing.js?v=20261021" defer></script>
 </head>
 <body class="landing homepage" data-language="en">
     <a class="skip-link" href="#main"><span class="copy-vi" lang="vi">Đi đến nội dung</span><span class="copy-en" lang="en">Skip to content</span></a>
@@ -35,6 +39,7 @@
 <li><a href="#architecture"><span class="copy-vi" lang="vi">Kiến trúc AI</span><span class="copy-en" lang="en">AI architecture</span></a></li>
 <li><a href="/projects/learning-trajectory-architect"><span class="copy-vi" lang="vi">Đề án dự án</span><span class="copy-en" lang="en">Project overview</span></a></li>
 <li><a href="#about"><span class="copy-vi" lang="vi">Về chúng tôi</span><span class="copy-en" lang="en">About us</span></a></li>
+{% if profile_preview %}<li><a href="#pi-profile"><span class="copy-vi" lang="vi">Hồ sơ</span><span class="copy-en" lang="en">Profile</span></a></li>{% endif %}
 </ul>
                 <div class="language-switch" role="group" aria-label="Ngôn ngữ / Language" hidden>
                     <button type="button" data-set-language="vi" lang="vi" aria-label="Tiếng Việt" aria-pressed="false">VI</button>
@@ -96,6 +101,7 @@
             <div class="company-profile"><h3><span class="copy-vi" lang="vi">Thông tin startup</span><span class="copy-en" lang="en">Startup profile</span></h3><dl><div><dt><span class="copy-vi" lang="vi">Tên</span><span class="copy-en" lang="en">Name</span></dt><dd>Thay Binh EdTech</dd></div><div><dt><span class="copy-vi" lang="vi">Lĩnh vực</span><span class="copy-en" lang="en">Industry</span></dt><dd><span class="copy-vi" lang="vi">Công nghệ giáo dục · EdTech</span><span class="copy-en" lang="en">Education technology · EdTech</span></dd></div><div><dt><span class="copy-vi" lang="vi">Ngày thành lập</span><span class="copy-en" lang="en">Founded</span></dt><dd><time datetime="2025-05-18"><span class="copy-vi" lang="vi">18 tháng 5, 2025</span><span class="copy-en" lang="en">May 18, 2025</span></time></dd></div><div><dt><span class="copy-vi" lang="vi">Người sáng lập</span><span class="copy-en" lang="en">Founder</span></dt><dd>Đặng Ngọc Quyên</dd></div><div><dt><span class="copy-vi" lang="vi">Địa chỉ</span><span class="copy-en" lang="en">Address</span></dt><dd><span class="copy-vi" lang="vi">32 Hai Bà Trưng, Di Linh, Lâm Đồng, Việt Nam</span><span class="copy-en" lang="en">32 Hai Ba Trung, Di Linh, Lam Dong, Viet Nam</span></dd></div><div><dt><span class="copy-vi" lang="vi">Nguồn hỗ trợ ban đầu</span><span class="copy-en" lang="en">Early funding support</span></dt><dd><span class="copy-vi" lang="vi">2.000 USD từ gia đình</span><span class="copy-en" lang="en">US$2,000 from family</span><small><time datetime="2026-01-01"><span class="copy-vi" lang="vi">Ngày 1 tháng 1, 2026</span><span class="copy-en" lang="en">January 1, 2026</span></time></small></dd></div><div><dt><span class="copy-vi" lang="vi">Email doanh nghiệp</span><span class="copy-en" lang="en">Business email</span></dt><dd><a href="mailto:contact@thaybinh.vn">contact@thaybinh.vn</a></dd></div><div><dt><span class="copy-vi" lang="vi">Điện thoại</span><span class="copy-en" lang="en">Phone</span></dt><dd><a href="tel:+84387578730">0387578730</a></dd></div><div><dt><span class="copy-vi" lang="vi">Mã số đăng ký / MST</span><span class="copy-en" lang="en">Registration / Tax ID</span></dt><dd>8408941671</dd></div></dl></div>
         </section>
 
+        {% if profile_preview %}{% include "partials/research-profile.html" %}{% endif %}
         <section class="contact-section" id="contact" aria-labelledby="contact-title"><div class="wrap contact-layout"><div><h2 id="contact-title"><span class="copy-vi" lang="vi">Cùng xây dựng <br>điều hữu ích cho giáo dục.</span><span class="copy-en" lang="en">Let’s build something <br>useful for education.</span></h2><p><span class="copy-vi" lang="vi">Bạn là giáo viên, trường học hay muốn trao đổi về các dự án của Thay Binh EdTech? Chúng tôi mong được nghe từ bạn.</span><span class="copy-en" lang="en">Are you a teacher, a school, or interested in our educational projects? We’d like to hear from you.</span></p></div><a class="contact-email" href="mailto:contact@thaybinh.vn"><span>contact@thaybinh.vn</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></section>
     </main>
     <footer class="site-footer wrap"><div><a class="brand footer-brand" href="/">Thay Binh EdTech</a><p>© 2026 Thay Binh EdTech · <span class="copy-vi" lang="vi">Công nghệ cho giáo dục</span><span class="copy-en" lang="en">Technology for education</span></p></div><div class="footer-links"><a href="/projects/learning-trajectory-architect">Learning Trajectory Architect</a><a href="tel:+84387578730">0387578730</a><a href="#about"><span class="copy-vi" lang="vi">Thông tin startup</span><span class="copy-en" lang="en">Startup profile</span></a><a href="mailto:contact@thaybinh.vn"><span class="copy-vi" lang="vi">Liên hệ</span><span class="copy-en" lang="en">Contact</span></a></div></footer>

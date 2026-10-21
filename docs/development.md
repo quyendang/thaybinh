@@ -19,3 +19,10 @@ python3 -m py_compile main.py
 Smoke test staging: landing, một URL legacy lesson, `/share`, short ID, short ID `!`, `c/p`, audio, copy, selection/localStorage, print preview và admin API không có/sai/có key. Không gọi delete user để smoke test production.
 
 `requirements.txt` ghi dependency trực tiếp; `requirements.lock` là lockfile đã kiểm chứng trên Python 3.12 và được CI dùng qua `requirements-dev.txt`.
+
+## Xem trước hồ sơ nghiên cứu
+
+Chạy `python3 scripts/preview_research_profile.py` bằng môi trường dependency của
+dự án, mở `http://127.0.0.1:10001/#pi-profile`. Đây là server local riêng, không
+cần `.env` hoặc Supabase. Hồ sơ chưa bật trên app production. Nguồn nội dung,
+giới hạn xác minh và bước duyệt: `docs/research-profile-review.md`.
