@@ -107,7 +107,7 @@ async def homepage(
 ):
     del userid, groupid, sort
     if not lessonid:
-        return render_template(request, "landing.html", {})
+        return render_template(request, "landing.html", {"show_research_profile": True})
     lesson_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, lessonid + SALT))
     return await render_lesson(
         request,

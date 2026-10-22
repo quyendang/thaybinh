@@ -28,3 +28,14 @@ Thông tin doanh nghiệp hiển thị và Organization JSON-LD: 32 Hai Ba Trung
 - Mindmap dùng nội dung HTML và connector SVG; mobile chuyển thành cấu trúc hai cột. Print hiển thị mọi vai trò agent, kể cả panel đang ẩn trên màn hình.
 - FastENG/FastScores nằm trong mục Other projects thu gọn, giữ link App Store/pháp lý. Các định hướng khác đặt trong `details` đóng mặc định.
 - Hai ảnh WebP lưu local, khai báo kích thước, ảnh hero ưu tiên tải, ảnh phía dưới lazy-load. Nguồn/giấy phép và provenance ở `docs/image-credits.md` và sidecar ảnh. Ảnh chỉ minh họa AI, không phải giao diện sản phẩm hay chứng nhận hợp tác Google DeepMind.
+
+### Hồ sơ người sáng lập (23/10/2026)
+
+- Trang chủ hiển thị hồ sơ Đặng Ngọc Quyên song ngữ tại `/#pi-profile`, có mục
+  Profile trong menu và ảnh chân dung local. Giữ các nội dung, liên kết đã có;
+  không bổ sung học vị, vai trò PI hoặc liên kết trường/viện.
+- `show_research_profile` điều khiển CSS, navigation và include hồ sơ, độc lập
+  với `profile_preview`. Chỉ server local truyền `profile_preview=True` để
+  hiện ghi chú duyệt nội bộ và `noindex`; query string không thay đổi chế độ này.
+- Trang chủ public giữ canonical hiện tại và không nhận `noindex` của preview.
+  Lesson, Share và trang đề án không include hồ sơ hoặc stylesheet hồ sơ.

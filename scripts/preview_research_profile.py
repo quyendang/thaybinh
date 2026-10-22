@@ -28,7 +28,9 @@ async def prevent_indexing(request: Request, call_next):
 @app.get("/", response_class=HTMLResponse)
 async def preview(request: Request):
     return templates.TemplateResponse(
-        request, "landing.html", {"profile_preview": True}
+        request,
+        "landing.html",
+        {"show_research_profile": True, "profile_preview": True},
     )
 
 

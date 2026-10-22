@@ -24,5 +24,7 @@ Smoke test staging: landing, một URL legacy lesson, `/share`, short ID, short 
 
 Chạy `python3 scripts/preview_research_profile.py` bằng môi trường dependency của
 dự án, mở `http://127.0.0.1:10001/#pi-profile`. Đây là server local riêng, không
-cần `.env` hoặc Supabase. Hồ sơ chưa bật trên app production. Nguồn nội dung,
-giới hạn xác minh và bước duyệt: `docs/research-profile-review.md`.
+cần `.env` hoặc Supabase. Hồ sơ đã được bật trên trang chủ tại `/#pi-profile`;
+server xem trước vẫn giữ ghi chú duyệt nội bộ và `noindex`. Trang chủ public
+không render ghi chú này và không nhận chế độ preview qua query string.
+Nguồn nội dung và giới hạn xác minh: `docs/research-profile-review.md`.

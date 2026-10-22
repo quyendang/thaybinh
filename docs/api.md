@@ -2,6 +2,10 @@
 
 ## Lesson URLs
 
+`GET /` khi không có `lessonid` hiển thị Landing kèm hồ sơ người sáng lập
+VI/EN tại `#pi-profile`, không truy vấn Supabase cho nội dung hồ sơ. Query string
+`profile_preview` hoặc `preview` không bật chế độ duyệt nội bộ hay `noindex`.
+
 | Route | Hành vi |
 | --- | --- |
 | `GET /?lessonid=&column=&print=` | Legacy share URL, chuyển lesson ID qua UUID v5. |

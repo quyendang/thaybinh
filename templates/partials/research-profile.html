@@ -1,10 +1,12 @@
-{# Review-only: rendered by scripts/preview_research_profile.py, never a public route. #}
+{# Public profile; internal review notes are exclusive to the local preview. #}
 <section class="research-profile section-space" id="pi-profile" aria-labelledby="profile-name">
     <div class="wrap">
+        {% if profile_preview %}
         <div class="profile-draft-note">
             <p><strong><span class="copy-vi" lang="vi">Bản nháp để duyệt nội dung.</span><span class="copy-en" lang="en">Draft for content review.</span></strong> <span class="copy-vi" lang="vi">Chưa xuất bản. Một số thông tin cần được chủ hồ sơ xác nhận.</span><span class="copy-en" lang="en">Not published. Some details still need confirmation from the profile owner.</span></p>
             <a href="#profile-review"><span class="copy-vi" lang="vi">Xem thông tin còn thiếu</span><span class="copy-en" lang="en">View outstanding details</span></a>
         </div>
+        {% endif %}
 
         <div class="profile-heading">
             <div>
@@ -25,7 +27,9 @@
                     <div><dt><span class="copy-vi" lang="vi">Lĩnh vực hoạt động</span><span class="copy-en" lang="en">Area of work</span></dt><dd><span class="copy-vi" lang="vi">Công nghệ giáo dục</span><span class="copy-en" lang="en">Education technology</span></dd></div>
                     <div><dt><span class="copy-vi" lang="vi">Email liên hệ doanh nghiệp</span><span class="copy-en" lang="en">Business contact email</span></dt><dd><a href="mailto:contact@thaybinh.vn">contact@thaybinh.vn</a></dd></div>
                 </dl>
+                {% if profile_preview %}
                 <p class="profile-site-context"><span class="copy-vi" lang="vi">Hồ sơ trên website Thay Binh EdTech. Chưa có xác nhận liên kết trường/viện hoặc khoa/lab.</span><span class="copy-en" lang="en">A profile on the Thay Binh EdTech website. No university, research institute or lab affiliation has been confirmed.</span></p>
+                {% endif %}
             </aside>
 
             <div class="profile-body">
@@ -47,7 +51,9 @@
 
                 <section class="profile-block" aria-labelledby="profile-projects-title">
                     <h3 id="profile-projects-title"><span class="copy-vi" lang="vi">Các dự án của Thay Binh EdTech</span><span class="copy-en" lang="en">Thay Binh EdTech projects</span></h3>
+                    {% if profile_preview %}
                     <p class="profile-source"><span class="copy-vi" lang="vi">Vai trò cá nhân trong từng dự án chưa được xác nhận. Không suy diễn vai trò PI hoặc trưởng nhóm nghiên cứu từ vai trò sáng lập.</span><span class="copy-en" lang="en">Individual project roles have not been confirmed. A founder role does not establish PI or research team leadership.</span></p>
+                    {% endif %}
                     <article class="profile-project">
                         <div class="profile-project-heading"><h4>Learning Trajectory Architect</h4><span class="status"><span class="copy-vi" lang="vi">Đang xây MVP</span><span class="copy-en" lang="en">MVP in development</span></span></div>
                         <p><span class="copy-vi" lang="vi">Đề án hệ thống AI đa tác nhân nhằm hiểu người học, thiết kế lộ trình và điều chỉnh theo tiến độ. Chức năng và lộ trình trong đề án là kế hoạch, chưa phải kết quả nghiên cứu hoặc sản phẩm hoàn chỉnh.</span><span class="copy-en" lang="en">A proposed multi-agent AI system to understand learners, design learning paths and adapt to progress. Features and milestones in the proposal are plans, rather than research findings or a finished product.</span></p>
@@ -77,12 +83,14 @@
             </div>
         </div>
 
+        {% if profile_preview %}
         <aside class="profile-review profile-block" id="profile-review" aria-labelledby="profile-review-title">
             <h3 id="profile-review-title"><span class="copy-vi" lang="vi">Thông tin cần bổ sung trước khi xuất bản</span><span class="copy-en" lang="en">Details to resolve before publication</span></h3>
             <p><span class="copy-vi" lang="vi">Cần xác nhận chức danh hiện tại, vai trò trong từng dự án và loại website (cá nhân hay doanh nghiệp). Chưa có hồ sơ trường/viện, khoa/lab, ORCID, Google Scholar hoặc GitHub được xác minh. Chưa có công bố và cộng tác viên được cung cấp nên các mục này được bỏ khỏi hồ sơ.</span><span class="copy-en" lang="en">Confirm the current title, individual project roles and whether the site is personal or business-owned. No institutional or lab profile, ORCID, Google Scholar or GitHub has been verified. Publications and collaborators have not been supplied, so those sections are omitted.</span></p>
             <p><strong><span class="copy-vi" lang="vi">Claude Team for Scientists: chưa có đủ bằng chứng đáp ứng điều kiện.</span><span class="copy-en" lang="en">Claude Team for Scientists: eligibility is not established.</span></strong> <span class="copy-vi" lang="vi">Chương trình yêu cầu PI hoặc tương đương tại đại học được công nhận hoặc viện nghiên cứu phi lợi nhuận. Thông tin hiện có chưa chứng minh vai trò và đơn vị này.</span><span class="copy-en" lang="en">The program requires a PI or equivalent at an accredited university or nonprofit research institute. The available information does not establish either requirement.</span> <a href="https://claude.com/programs/team-plan-for-scientists"><span class="copy-vi" lang="vi">Đọc điều kiện chính thức</span><span class="copy-en" lang="en">Read the official eligibility criteria</span></a>.</p>
         </aside>
+        {% endif %}
 
-        <div class="profile-updated"><p><span class="copy-vi" lang="vi">Bản nháp cập nhật: </span><span class="copy-en" lang="en">Draft updated: </span><time datetime="2026-10-21"><span class="copy-vi" lang="vi">21 tháng 10, 2026</span><span class="copy-en" lang="en">October 21, 2026</span></time></p><a href="#profile-name"><span class="copy-vi" lang="vi">Về đầu hồ sơ</span><span class="copy-en" lang="en">Back to profile</span></a></div>
+        <div class="profile-updated"><p><span class="copy-vi" lang="vi">Cập nhật: </span><span class="copy-en" lang="en">Updated: </span><time datetime="2026-10-23"><span class="copy-vi" lang="vi">23 tháng 10, 2026</span><span class="copy-en" lang="en">October 23, 2026</span></time></p><a href="#profile-name"><span class="copy-vi" lang="vi">Về đầu hồ sơ</span><span class="copy-en" lang="en">Back to profile</span></a></div>
     </div>
 </section>

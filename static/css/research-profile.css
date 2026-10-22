@@ -1,4 +1,4 @@
-/* Review-only extension of the existing Landing design system. */
+/* Public profile extension of the existing Landing design system. */
 /* Language changes restore the profile position in landing.js. */
 .homepage { overflow-anchor: none; }
 .research-profile { background: var(--cloud); }

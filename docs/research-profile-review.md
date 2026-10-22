@@ -1,4 +1,8 @@
-# Hồ sơ Đặng Ngọc Quyên — bản nháp 21/10/2026
+# Hồ sơ Đặng Ngọc Quyên — bật trên trang chủ 23/10/2026
+
+Người dùng yêu cầu bật hồ sơ trên trang chủ và push lên GitHub ngày 23/10/2026.
+Giữ nội dung VI/EN đã có và các giới hạn về nguồn bên dưới; không tự thêm thông
+tin chưa được cung cấp. Các ghi chú duyệt nội bộ chỉ xuất hiện ở server preview.
 
 ## Xem trước
 
@@ -8,9 +12,10 @@ không khởi tạo Supabase, không có route quản trị. Header `X-Robots-Ta
 `Cache-Control: no-store` và meta robots ngăn lưu cache/lập chỉ mục;
 đây không thay thế xác thực nếu ai đó tự đưa preview lên Internet.
 
-Trang chủ production không truyền `profile_preview`, nên không render hồ sơ,
-navigation mới hoặc stylesheet mới. Query string không bật được bản nháp.
-Không deploy server xem trước bằng Procfile.
+Trang chủ production truyền `show_research_profile=True` để render hồ sơ,
+navigation và stylesheet. Cờ này độc lập với `profile_preview`; trang public
+không có ghi chú bản nháp hoặc `noindex`. Query string không bật được chế độ
+duyệt nội bộ. Không deploy server xem trước bằng Procfile.
 
 ## Nguồn nội dung
 
@@ -29,15 +34,16 @@ Không tìm người có tên gần giống để tự gán ORCID, Scholar, GitH
 trường/viện, lab, công bố hoặc cộng tác viên. Không thêm các mục chưa có nguồn.
 Ảnh chân dung được người dùng bổ sung sau lần xem trước đầu tiên; không dùng ảnh AI.
 
-## Cần duyệt trước khi công khai
+## Giới hạn nội dung và bổ sung sau này
 
 - Chức danh hiện tại và vai trò cá nhân trong từng dự án.
 - Website thuộc cá nhân hay doanh nghiệp. Hiện chỉ mô tả đúng branding Thay Binh
   EdTech đang có, không gọi đây là website trường/viện.
 - Email mong muốn công khai; đơn vị/khoa/lab và liên kết chính thức nếu có.
 - ORCID/Scholar/GitHub chỉ thêm sau khi xác minh đúng chủ hồ sơ.
-- Duyệt cả hai bản VI/EN, sau đó mới bật include trong trang public và bỏ ghi chú
-  nội bộ. Anchor kỹ thuật `pi-profile` không xác nhận chức danh PI.
+- Yêu cầu xuất bản áp dụng cho nội dung VI/EN hiện có. Không suy diễn yêu cầu này
+  thành xác nhận vai trò PI hoặc liên kết trường/viện. Anchor kỹ thuật
+  `pi-profile` không xác nhận chức danh PI.
 
 ## Thiết kế và SEO
 
@@ -50,8 +56,8 @@ lazy-load và có alt VI/EN. `DESIGN.md` giữ nguyên vì không đổi hệ th
 Nội dung VI/EN được server-render, các mục có heading và anchor ổn định. Giữ
 canonical trang chủ hiện có vì `#pi-profile` là fragment của trang chủ, không phải
 một URL tài liệu độc lập. Không tạo Person/academic schema chưa được duyệt.
-SEO public và structured data sẽ được duyệt cùng nội dung khi xuất bản;
-bản nháp luôn noindex.
+Giữ Organization JSON-LD và canonical hiện có; không thêm Person/academic schema.
+Chỉ server xem trước có `noindex`; trang chủ public không có chỉ thị này.
 
 ## Kiểm chứng bản nháp
 
@@ -60,4 +66,16 @@ bản nháp luôn noindex.
   khung nhìn; menu mobile, Escape trả focus, Tab và link nội bộ hoạt động.
 - Không tràn ngang ở 1440, 1280, 390 và 320px; có CSS print và reduced motion.
 - Chưa smoke test Supabase staging, screen reader thực tế hoặc hộp thoại print/PDF.
-  Bản xem trước không truy vấn Supabase; production/Share không bị thay đổi nội dung.
+  Bản xem trước không truy vấn Supabase; đợt bản nháp chưa đổi production/Share.
+
+## Kiểm chứng bật public (23/10/2026)
+
+- `ruff check .`, `pytest` (16 passed), `python3 -m py_compile main.py` và
+  `git diff --check`: đạt. Test xác nhận hồ sơ public không truy vấn lesson service,
+  không có ghi chú nội bộ/`noindex`, query string không bật preview, và lesson/trang
+  đề án không include hồ sơ. Preview vẫn giữ ghi chú nội bộ và chặn lập chỉ mục.
+- Trình duyệt local dùng dữ liệu lesson giả: VI/EN, alt và tải ảnh chân dung,
+  menu mobile, Enter vào hồ sơ, Escape trả focus; không tràn ngang ở 320, 390,
+  768, 1024 và 1280px.
+- Chưa smoke test Supabase staging, screen reader thực tế hoặc hộp thoại in/PDF.
+  Không thay đổi database, RLS/RPC, admin API hoặc hành vi Share.
