@@ -16,4 +16,4 @@
 
 `/firebase`, `/keys`, `/geteid`, `/code` không còn API contract và trả 404.
 
-- `GET /projects/learning-trajectory-architect`: trang đọc đề án trọng tâm VI/EN, không truy vấn Supabase; không cần API key.
+- `GET /projects/learning-trajectory-architect`: trang đọc đề án trọng tâm VI/EN, không truy vấn Supabase; không cần API key
