@@ -34,6 +34,17 @@ def test_public_profile_is_visible_without_preview_or_indexing_restrictions(
         assert "Individual project roles have not been confirmed" not in response.text
         assert 'alt="Portrait of Đặng Ngọc Quyên"' in response.text
         assert 'data-alt-vi="Ảnh chân dung Đặng Ngọc Quyên"' in response.text
+        assert "Master’s degree in Information Technology" in response.text
+        assert 'datetime="2026-02"' in response.text
+        assert "Graduated in 2017" in response.text
+        assert 'href="https://fce.uit.edu.vn/"' in response.text
+        assert "Current organization" in response.text
+        assert "Self-published on the same Thay Binh EdTech website" in response.text
+        assert (
+            "experimental data or learning-outcome evaluation results" in response.text
+        )
+        assert 'id="profile-research-title"' in response.text
+        assert 'id="profile-outputs-title"' in response.text
 
 
 def test_public_profile_does_not_appear_on_lessons_or_project_page(client):
@@ -67,7 +78,8 @@ def test_local_review_is_bilingual_and_not_indexable(monkeypatch, client):
         assert "Draft for content review." in response.text
         assert "Bản nháp để duyệt nội dung." in response.text
         assert "eligibility is not established" in response.text
-        assert "Individual project roles have not been confirmed" in response.text
+        assert "The profile owner has confirmed" in response.text
+        assert "No evidence of a current university" in response.text
         assert 'alt="Portrait of Đặng Ngọc Quyên"' in response.text
         portrait = preview.get("/static/images/dang-ngoc-quyen-portrait.webp")
         assert portrait.status_code == 200

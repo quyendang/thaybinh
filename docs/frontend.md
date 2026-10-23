@@ -32,10 +32,20 @@ Thông tin doanh nghiệp hiển thị và Organization JSON-LD: 32 Hai Ba Trung
 ### Hồ sơ người sáng lập (23/10/2026)
 
 - Trang chủ hiển thị hồ sơ Đặng Ngọc Quyên song ngữ tại `/#pi-profile`, có mục
-  Profile trong menu và ảnh chân dung local. Giữ các nội dung, liên kết đã có;
-  không bổ sung học vị, vai trò PI hoặc liên kết trường/viện.
+  Profile trong menu và ảnh chân dung local. Học vị và học vấn được bổ sung theo
+  thông tin người dùng cung cấp; không tự thêm vai trò PI hoặc liên kết nghiên
+  cứu hiện tại với trường/viện.
 - `show_research_profile` điều khiển CSS, navigation và include hồ sơ, độc lập
   với `profile_preview`. Chỉ server local truyền `profile_preview=True` để
   hiện ghi chú duyệt nội bộ và `noindex`; query string không thay đổi chế độ này.
 - Trang chủ public giữ canonical hiện tại và không nhận `noindex` của preview.
   Lesson, Share và trang đề án không include hồ sơ hoặc stylesheet hồ sơ.
+- Theo xác nhận ngày 23/10/2026: thạc sĩ Công nghệ thông tin; tốt nghiệp UIT,
+  Khoa Kỹ thuật Máy tính năm 2017; phụ trách nhóm nghiên cứu Thay Binh EdTech
+  từ tháng 2/2026; thực hiện chính Learning Trajectory Architect và đóng góp
+  xuyên suốt các công đoạn. Không gán năm 2017 cho bằng thạc sĩ khi chưa có xác nhận.
+- Trang đề án có mục `#research-lead`, mục lục và link về `/#pi-profile`.
+  Trang đề án cùng website là nguồn tự công bố; link khoa UIT giới thiệu đơn vị
+  đào tạo, không xác minh bằng cấp cá nhân hoặc quan hệ nghiên cứu hiện tại.
+- Mục tài liệu/tiến độ dẫn đến đề án, kiến trúc, phạm vi MVP và tiêu chí đánh giá
+  dự kiến. Không tự tạo bài báo, ORCID/Scholar, DOI hoặc kết quả thực nghiệm.

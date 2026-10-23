@@ -54,6 +54,16 @@ def test_flagship_project_is_a_page_not_a_lesson_lookup(client, monkeypatch):
     assert "MVP đang được xây dựng" in response.text
     assert "Orchestrator Agent" in response.text
     assert 'id="risks"' in response.text
+    assert 'id="research-lead"' in response.text
+    assert 'href="#research-lead"' in response.text
+    assert (
+        "Research Group Lead at Thay Binh EdTech since February 2026" in response.text
+    )
+    assert "is the lead implementer of Learning Trajectory Architect" in response.text
+    assert (
+        "experimental results have not yet been reported on this page" in response.text
+    )
+    assert 'href="/#pi-profile"' in response.text
     source = client.get("/static/documents/learning-trajectory-architect.md")
     assert source.status_code == 200
     assert "## 6. Rủi ro" in source.text
