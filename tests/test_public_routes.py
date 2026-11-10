@@ -76,6 +76,7 @@ def test_share_short_id_renders_workspace(client):
     assert "Phonetic rail" in response.text
     assert 'data-action="start-study"' in response.text
     assert 'data-action="download-pdf"' in response.text
+    assert "nhấn hai lần để in phiếu bài tập kèm đáp án" in response.text
     assert 'id="pdf-options-dialog"' in response.text
     assert 'id="shortcut-dialog"' in response.text
     assert "Sao chép Tên Lesson, Link" in response.text
@@ -86,6 +87,14 @@ def test_share_short_id_renders_workspace(client):
     assert "is-screen-hidden" in response.text
     assert "is-print-hidden" in response.text
     assert 'data-print-hidden-columns="5"' in response.text
+
+
+def test_worksheet_print_styles_are_available(client):
+    response = client.get("/static/css/worksheet.css")
+    assert response.status_code == 200
+    assert "text/css" in response.headers["content-type"]
+    assert "size: A4" in response.text
+    assert ".answers { break-before: page; }" in response.text
 
 
 def test_legacy_lesson_url_keeps_base64_column_contract(client):

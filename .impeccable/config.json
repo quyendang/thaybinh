@@ -1,0 +1,35 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font",
+        "value": "manrope",
+        "createdAt": "2026-11-10T06:40:25.208Z",
+        "reason": "Agent review: docs/frontend.md defines Manrope for Share; DESIGN.md explicitly excludes Share.",
+        "files": [
+          "templates/share.html"
+        ]
+      },
+      {
+        "rule": "design-system-font",
+        "value": "ibm plex mono",
+        "createdAt": "2026-11-10T06:40:25.230Z",
+        "reason": "Agent review: docs/frontend.md defines IBM Plex Mono for Share data; DESIGN.md explicitly excludes Share.",
+        "files": [
+          "templates/share.html"
+        ]
+      },
+      {
+        "rule": "tiny-text",
+        "value": "*",
+        "files": [
+          "templates/share.html"
+        ],
+        "createdAt": "2026-11-10T06:40:25.269Z",
+        "reason": "Agent review: 11.52px comes from existing 0.72rem metadata/table headings in share.css, not body content; this action change adds no text sizes."
+      }
+    ]
+  }
+}

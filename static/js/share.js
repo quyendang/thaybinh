@@ -31,6 +31,7 @@
     let pShortcutCount = 0;
     let pShortcutStartedAt = 0;
     let pShortcutTimer = null;
+    let pdfClickTimer = null;
 
     const getRows = () => [...table.tBodies[0].rows];
     const readStorage = (key, fallback) => {
@@ -228,6 +229,78 @@
 
     function lockedPdfColumns() {
         return new Set([...hiddenColumns, ...printHiddenColumns]);
+    }
+
+    function printWorksheet() {
+        const rows = selectedRows();
+        if (!rows.length) return showToast("Không có từ đang hiển thị để tạo phiếu.", true);
+        const headers = [...table.tHead.rows[0].cells].map((cell) => cell.textContent.trim());
+        const list = headers.map((header, index) => `${index}. ${header}`).join("\n");
+        const parseColumns = (value) => [...new Set(value.split(/[ ,]+/).map(Number)
+            .filter((column) => Number.isInteger(column) && column > 0 && column < headers.length))];
+        // Open during the click so time spent answering prompts cannot trigger popup blocking.
+        const popup = window.open("", "_blank");
+        if (!popup) return showToast("Hãy cho phép cửa sổ bật lên để in phiếu bài tập.", true);
+        popup.opener = null;
+        const blankInput = window.prompt(`Cột nào để TRỐNG cho học sinh điền? (nhập số, cách nhau dấu phẩy)\n${list}`, [...printHiddenColumns].join(",") || "1");
+        if (blankInput === null) { popup.close(); return; }
+        const chosenBlankColumns = parseColumns(blankInput);
+        const blankColumns = new Set([...lockedPdfColumns(), ...chosenBlankColumns].filter((column) => column > 0 && column < headers.length));
+        const answerInput = window.prompt(`Đáp án hiện cột nào? (nhập số, cách nhau dấu phẩy)\n${list}`, String(chosenBlankColumns[0] || ""));
+        if (answerInput === null) { popup.close(); return; }
+        let answerColumns = parseColumns(answerInput);
+        if (!answerColumns.length) answerColumns = chosenBlankColumns;
+        const data = rows.map((row, index) => headers.map((_, column) => column === 0
+            ? String(index + 1) : hiddenColumns.has(column) ? "" : rowValue(row, column + 1).trim()));
+        const title = document.title;
+        const worksheet = element("table", "worksheet");
+        const head = element("thead");
+        const headingRow = element("tr");
+        headers.forEach((header) => {
+            const cell = element("th", "", header);
+            cell.scope = "col";
+            headingRow.append(cell);
+        });
+        head.append(headingRow);
+        const body = element("tbody");
+        data.forEach((values) => {
+            const row = element("tr");
+            values.forEach((value, column) => row.append(element("td", column === 0 ? "n" : "", blankColumns.has(column) ? "" : value)));
+            body.append(row);
+        });
+        worksheet.append(head, body);
+        const answers = element("section", "answers");
+        answers.append(element("h2", "", `ĐÁP ÁN – ${title}`), element("div", "sub", `${data.length} từ vựng`));
+        for (let start = 0; start < data.length; start += 120) {
+            const part = data.slice(start, start + 120);
+            const rowCount = Math.ceil(part.length / 3);
+            const key = element("table", "key");
+            for (let index = 0; index < rowCount; index += 1) {
+                const row = element("tr");
+                for (let column = 0; column < 3; column += 1) {
+                    const position = column * rowCount + index;
+                    const cell = element("td");
+                    if (position < part.length) {
+                        cell.append(element("b", "", `${start + position + 1}.`), ` ${answerColumns.map((answer) => part[position][answer]).join(" – ")}`);
+                    }
+                    row.append(cell);
+                }
+                key.append(row);
+            }
+            answers.append(key);
+        }
+        popup.document.documentElement.lang = "vi";
+        popup.document.title = title;
+        popup.document.body.replaceChildren(
+            element("h2", "", title), element("div", "sub", `${data.length} từ vựng`),
+            element("div", "info", "Họ tên: ................................................ Lớp: .........."), worksheet, answers,
+        );
+        const stylesheet = element("link");
+        stylesheet.rel = "stylesheet";
+        stylesheet.href = new URL("/static/css/worksheet.css", window.location.href).href;
+        stylesheet.onload = () => { if (!popup.closed) { popup.focus(); popup.print(); } };
+        stylesheet.onerror = () => { popup.close(); showToast("Không thể tải định dạng phiếu bài tập. Hãy thử lại.", true); };
+        popup.document.head.append(stylesheet);
     }
 
     function buildPdfOptionsDialog() {
@@ -813,11 +886,21 @@
         if (action === "previous-slide") changeSlide(-1);
         if (action === "next-slide") changeSlide(1);
         if (action === "download-pdf") {
+            event.preventDefault();
             if (event.shiftKey) {
+                clearTimeout(pdfClickTimer);
+                pdfClickTimer = null;
                 buildPdfOptionsDialog();
                 openDialog(pdfOptionsDialog, button);
+            } else if (pdfClickTimer !== null) {
+                clearTimeout(pdfClickTimer);
+                pdfClickTimer = null;
+                printWorksheet();
             } else {
-                downloadPdf();
+                pdfClickTimer = setTimeout(() => {
+                    pdfClickTimer = null;
+                    downloadPdf();
+                }, 500);
             }
         }
         if (action === "confirm-download-pdf") {

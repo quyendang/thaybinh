@@ -36,7 +36,7 @@
 }
 .phonetic-code { margin: 8px 0 0; color: var(--cobalt); font: 700 0.85rem/1.5 var(--font-data); }
 .study-start-button { min-height: 44px; padding-inline: 16px; }
-.export-pdf-button { width: 44px; min-width: 44px; min-height: 44px; padding: 0; }
+.export-pdf-button { width: 44px; min-width: 44px; min-height: 44px; padding: 0; touch-action: manipulation; }
 
 .button, .icon-button, .menu-button {
     display: inline-flex;
