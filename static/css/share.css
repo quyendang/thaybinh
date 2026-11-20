@@ -309,7 +309,8 @@
 }
 
 @media print {
-    [data-col].is-covered { color: inherit !important; background: none; }
+    /* Covered columns print as blanks for students to fill in; the header stays. */
+    [data-col].is-covered, [data-col].is-lifted { color: transparent !important; background: none; }
     @page { margin: 8mm; }
     body { background: #fff; }
     .share-shell { padding: 0; }

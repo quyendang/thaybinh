@@ -113,7 +113,19 @@
         }
     }
 
+    // Numbers follow what is on screen: 1..n over the picked words, in the current (maybe shuffled) order.
+    function renumber() {
+        selectedRows().forEach((row, i) => {
+            const n = String(i + 1);
+            row.dataset.index = n;
+            row.cells[0].textContent = n;
+            const mobileIndex = document.querySelector(`.mobile-word-item[data-row-key="${CSS.escape(row.dataset.rowKey)}"] .mobile-word-index`);
+            if (mobileIndex) mobileIndex.textContent = n;
+        });
+    }
+
     function updateVisibleCount() {
+        renumber();
         const label = document.querySelector("#visible-word-count");
         if (label) label.textContent = `${selectedRows().length} từ đang hiển thị`;
         const badge = document.querySelector("#pick-badge");
@@ -257,6 +269,7 @@
             table.tBodies[0].append(byKey(table.tBodies[0], key));
             if (mobileList) mobileList.append(byKey(mobileList, key));
         });
+        renumber();
         showToast("Đã xáo trộn thứ tự từ.");
     }
 
