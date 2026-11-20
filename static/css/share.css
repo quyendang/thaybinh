@@ -98,20 +98,15 @@
 .hero-tools { display: flex; align-items: center; gap: 8px; }
 .hero-tools .icon-button { position: relative; width: 44px; min-width: 44px; min-height: 44px; }
 .tool-badge { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; color: #fff; background: var(--cobalt); font: 700 0.68rem/18px var(--font-ui); text-align: center; }
-.icon-button:focus-visible, .cover-pop button:focus-visible, [data-col][tabindex]:focus-visible { outline: 2px solid var(--cobalt); outline-offset: 2px; }
-.cover-menu { position: relative; }
-.cover-menu > summary { list-style: none; }
-.cover-menu > summary::-webkit-details-marker { display: none; }
-.cover-menu[open] > summary { border-color: var(--cobalt); color: var(--cobalt); background: #f3f7ff; }
-.cover-pop { position: absolute; z-index: 10; top: calc(100% + 6px); right: 0; display: grid; min-width: 190px; padding: 6px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--paper); box-shadow: 0 16px 40px rgb(22 32 51 / 16%); }
-.cover-pop-title { margin: 0; padding: 6px 10px 4px; color: var(--slate); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
-.cover-pop button { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 40px; padding: 0 10px; border: 0; border-radius: var(--radius-sm); color: var(--ink); background: none; font: 700 0.88rem var(--font-ui); text-align: left; cursor: pointer; }
-.cover-pop button::after { content: ""; width: 16px; height: 16px; border: 1.5px solid #b9c5d7; border-radius: 4px; }
-.cover-pop button:hover:not(:disabled) { background: #f3f7ff; }
-.cover-pop button[aria-pressed="true"] { color: var(--cobalt-dark); }
-.cover-pop button[aria-pressed="true"]::after { border-color: var(--cobalt); background: var(--cobalt) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m4 8.5 2.5 2.5L12 5.5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 14px no-repeat; }
-.cover-pop button:disabled { opacity: .4; cursor: not-allowed; }
-.share-shell.is-study-open .hero-tools > :not(.export-pdf-button) { display: none; }
+.icon-button:focus-visible, .cover-chips button:focus-visible, [data-col][tabindex]:focus-visible { outline: 2px solid var(--cobalt); outline-offset: 2px; }
+.cover-chips { display: flex; align-items: center; gap: 4px; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.cover-chips::-webkit-scrollbar { display: none; }
+.cover-chips-label { flex: none; padding-right: 4px; color: var(--slate); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.cover-chips button { flex: none; min-height: 34px; padding: 0 11px; border: 1px solid var(--line); border-radius: 999px; color: var(--slate); background: var(--paper); font: 700 0.8rem var(--font-ui); white-space: nowrap; cursor: pointer; transition: border-color 160ms ease, background 160ms ease, color 160ms ease; }
+.cover-chips button:hover:not(:disabled) { border-color: #abc1ea; color: var(--ink); background: #f3f7ff; }
+.cover-chips button[aria-pressed="true"] { border-color: var(--cobalt); color: var(--cobalt-dark); background: #e8efff; }
+.cover-chips button:disabled { opacity: .4; cursor: not-allowed; }
+.share-shell.is-study-open .hero-tools > :not(.export-pdf-button), .share-shell.is-study-open .cover-chips { display: none; }
 /* A covered cell is tape over the text; tap to lift it. */
 [data-col].is-covered { color: transparent !important; background: #dfe7f7; border-radius: 4px; cursor: pointer; user-select: none; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 [data-col].is-lifted { cursor: pointer; }
@@ -247,6 +242,7 @@
     .phonetic-rail { display: none; }
     .hero-tools { gap: 6px; }
     .hero-tools .study-start-button { flex: 1; min-width: 0; }
+    .cover-chips { justify-self: start; width: calc(100% + 40px); max-width: none; margin-inline: -20px; padding-inline: 20px; }
     .mobile-word-header strong { overflow-wrap: anywhere; font-size: 1rem; }
     .mobile-word-header span:not(.mobile-word-index, [data-col]) { margin-top: 3px; color: var(--cobalt); font: 0.72rem/1.4 var(--font-data); }
     .mobile-word-meaning { margin: 12px 0 0 27px; color: #344054; font-size: 0.9rem; line-height: 1.55; }

@@ -227,8 +227,6 @@
             node.classList.remove("is-lifted");
             if (on) { node.tabIndex = 0; node.setAttribute("role", "button"); } else { node.removeAttribute("tabindex"); node.removeAttribute("role"); }
         });
-        const coverBadge = document.querySelector("#cover-badge");
-        if (coverBadge) { coverBadge.textContent = covered.size; coverBadge.hidden = covered.size === 0; }
         document.querySelectorAll("[data-cover]").forEach((button) => {
             const column = Number(button.dataset.cover);
             button.disabled = hiddenColumns.has(column);
@@ -968,8 +966,6 @@
     document.addEventListener("click", (event) => {
         const cell = event.target.closest("[data-col].is-covered, [data-col].is-lifted");
         if (cell && !event.target.closest("button")) liftCell(cell);
-        const menu = document.querySelector(".cover-menu[open]");
-        if (menu && !menu.contains(event.target)) menu.open = false;
     });
 
     document.querySelector("#custom-format-copy")?.addEventListener("click", () => {
@@ -992,12 +988,6 @@
         const key = event.key.toLowerCase();
         const isTyping = event.target.matches("input, textarea, select, [contenteditable=true]");
         if (isTyping || document.querySelector("dialog[open]")) return;
-        const openMenu = document.querySelector(".cover-menu[open]");
-        if (openMenu && event.key === "Escape") {
-            openMenu.open = false;
-            openMenu.querySelector("summary").focus();
-            return;
-        }
         if (event.target.matches("[data-col][tabindex]") && (event.key === "Enter" || event.key === " ")) {
             event.preventDefault();
             liftCell(event.target);
