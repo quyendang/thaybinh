@@ -8,6 +8,7 @@
     const hiddenWordsKey = `${storagePrefix}:hidden-words`;
     const formatKey = `${storagePrefix}:copy-format`;
     const studyKey = `${storagePrefix}:study-state`;
+    const coverKey = "fasteng:share:cover"; // shared by every lesson, like the FastENG web app
     const hiddenColumns = new Set((table.dataset.hiddenColumns || "").split(",").filter(Boolean).map(Number));
     const printHiddenColumns = new Set((table.dataset.printHiddenColumns || "").split(",").filter(Boolean).map(Number));
     const toast = document.querySelector("#toast");
@@ -57,6 +58,7 @@
     };
     const selectedRows = () => getRows().filter((row) => !row.classList.contains("is-user-hidden"));
     const fieldVisible = (column) => !hiddenColumns.has(column);
+    let covered = new Set(readStorage(coverKey, []).filter((column) => !hiddenColumns.has(column)));
 
     function element(tag, className, text) {
         const node = document.createElement(tag);
@@ -114,6 +116,9 @@
     function updateVisibleCount() {
         const label = document.querySelector("#visible-word-count");
         if (label) label.textContent = `${selectedRows().length} từ đang hiển thị`;
+        const badge = document.querySelector("#pick-badge");
+        const off = getRows().length - selectedRows().length;
+        if (badge) { badge.textContent = off; badge.hidden = off === 0; }
     }
 
     async function copyText(text, successMessage) {
@@ -212,6 +217,47 @@
         writeStorage(hiddenWordsKey, []);
         restoreSelection();
         showToast("Đã khôi phục toàn bộ từ trong bài học.");
+    }
+
+    // A covered column is tape over each cell; a tap lifts one cell, a second tap covers it again.
+    function applyCover() {
+        document.querySelectorAll("[data-col]").forEach((node) => {
+            const on = covered.has(Number(node.dataset.col));
+            node.classList.toggle("is-covered", on);
+            node.classList.remove("is-lifted");
+            if (on) { node.tabIndex = 0; node.setAttribute("role", "button"); } else { node.removeAttribute("tabindex"); node.removeAttribute("role"); }
+        });
+        document.querySelectorAll("[data-cover]").forEach((button) => {
+            const column = Number(button.dataset.cover);
+            button.disabled = hiddenColumns.has(column);
+            button.setAttribute("aria-pressed", String(covered.has(column)));
+        });
+    }
+
+    function toggleCover(column) {
+        covered.has(column) ? covered.delete(column) : covered.add(column);
+        writeStorage(coverKey, [...covered]);
+        applyCover();
+    }
+
+    function liftCell(node) {
+        node.classList.toggle("is-covered");
+        node.classList.toggle("is-lifted");
+    }
+
+    function shuffleRows() {
+        const order = getRows().map((row) => row.dataset.rowKey);
+        for (let i = order.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [order[i], order[j]] = [order[j], order[i]];
+        }
+        const mobileList = document.querySelector(".lesson-mobile-list");
+        const byKey = (parent, key) => parent.querySelector(`[data-row-key="${CSS.escape(key)}"]`);
+        order.forEach((key) => {
+            table.tBodies[0].append(byKey(table.tBodies[0], key));
+            if (mobileList) mobileList.append(byKey(mobileList, key));
+        });
+        showToast("Đã xáo trộn thứ tự từ.");
     }
 
     function triggerForShortcut() {
@@ -913,6 +959,13 @@
         if (action === "save-selection") saveSelection();
         if (action === "reset-selection") { resetSelection(); if (parentDialog) parentDialog.close(); }
         if (action === "close-dialog") closeDialog(button.closest("dialog"));
+        if (action === "shuffle") shuffleRows();
+        if (action === "toggle-cover") toggleCover(Number(button.dataset.cover));
+    });
+
+    document.addEventListener("click", (event) => {
+        const cell = event.target.closest("[data-col].is-covered, [data-col].is-lifted");
+        if (cell && !event.target.closest("button")) liftCell(cell);
     });
 
     document.querySelector("#custom-format-copy")?.addEventListener("click", () => {
@@ -935,6 +988,11 @@
         const key = event.key.toLowerCase();
         const isTyping = event.target.matches("input, textarea, select, [contenteditable=true]");
         if (isTyping || document.querySelector("dialog[open]")) return;
+        if (event.target.matches("[data-col][tabindex]") && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            liftCell(event.target);
+            return;
+        }
 
         if (event.ctrlKey && !event.metaKey && !event.altKey) {
             const shortcuts = {
@@ -988,4 +1046,5 @@
     });
 
     restoreSelection();
+    applyCover();
 })();
