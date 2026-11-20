@@ -94,6 +94,21 @@
 .is-screen-hidden .cell-content { visibility: hidden; }
 .is-user-hidden { display: none; }
 
+/* Toolbar: shuffle, pick words, cover columns */
+.lesson-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--line); }
+.pick-button { position: relative; }
+.pick-badge { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; color: #fff; background: var(--cobalt); font: 700 0.68rem/18px var(--font-ui); text-align: center; }
+.icon-button:focus-visible, .cover-group button:focus-visible, [data-col][tabindex]:focus-visible { outline: 2px solid var(--cobalt); outline-offset: 2px; }
+.cover-group { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; margin-left: auto; padding: 3px; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.cover-label { padding: 0 6px 0 8px; color: var(--slate); font-size: 0.78rem; font-weight: 750; }
+.cover-group button { min-height: 32px; padding: 0 10px; border: 0; border-radius: 6px; color: var(--slate); background: none; font: 700 0.8rem var(--font-ui); cursor: pointer; white-space: nowrap; transition: background 160ms ease, color 160ms ease; }
+.cover-group button:hover:not(:disabled) { color: var(--ink); background: #f3f7ff; }
+.cover-group button[aria-pressed="true"] { color: var(--cobalt-dark); background: #e8efff; box-shadow: inset 0 -2px 0 var(--cobalt); }
+.cover-group button:disabled { opacity: .4; cursor: not-allowed; }
+/* A covered cell is tape over the text; tap to lift it. */
+[data-col].is-covered { color: transparent !important; background: #dfe7f7; border-radius: 4px; cursor: pointer; user-select: none; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+[data-col].is-lifted { cursor: pointer; }
+
 .study-workspace { border: 1px solid var(--line); border-radius: 0 0 var(--radius-lg) var(--radius-lg); background: var(--paper); box-shadow: var(--shadow); }
 .study-header { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 16px 28px; padding: 15px 30px; border-bottom: 1px solid var(--line); }
 .study-header h2 { margin: 4px 0 0; font-size: clamp(1.25rem, 2.4vw, 1.65rem); letter-spacing: -0.035em; }
@@ -223,13 +238,16 @@
     .mobile-word-item:last-child { border-bottom: 0; }
     .mobile-word-header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; }
     .mobile-word-index { color: var(--slate); font: 0.72rem var(--font-data); }
-    .mobile-word-header strong, .mobile-word-header span { display: block; }
+    .mobile-word-header strong, .mobile-word-header span:not([data-col]) { display: block; }
+    .lesson-toolbar { padding: 10px 12px; }
+    .cover-group { margin-left: 0; flex: 1 1 100%; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+    .cover-group button { flex: none; min-height: 36px; }
     .mobile-word-header strong { overflow-wrap: anywhere; font-size: 1rem; }
-    .mobile-word-header span:not(.mobile-word-index) { margin-top: 3px; color: var(--cobalt); font: 0.72rem/1.4 var(--font-data); }
+    .mobile-word-header span:not(.mobile-word-index, [data-col]) { margin-top: 3px; color: var(--cobalt); font: 0.72rem/1.4 var(--font-data); }
     .mobile-word-meaning { margin: 12px 0 0 27px; color: #344054; font-size: 0.9rem; line-height: 1.55; }
     .mobile-word-support { display: grid; gap: 10px; margin: 13px 0 0 27px; padding-top: 12px; border-top: 1px solid #edf1f6; color: var(--slate); font-size: 0.82rem; }
     .mobile-word-support p { display: grid; gap: 3px; margin: 0; line-height: 1.55; }
-    .mobile-word-support p span { color: var(--slate); font: 0.68rem var(--font-data); letter-spacing: 0.05em; text-transform: uppercase; }
+    .mobile-word-support p span:not([data-col]) { color: var(--slate); font: 0.68rem var(--font-data); letter-spacing: 0.05em; text-transform: uppercase; }
     .dialog { width: calc(100% - 20px); }
     .study-workspace { border-radius: 0 0 var(--radius-md) var(--radius-md); }
     .share-shell.is-study-open { min-height: 100dvh; padding: 0; }
@@ -287,11 +305,12 @@
 }
 
 @media print {
+    [data-col].is-covered { color: inherit !important; background: none; }
     @page { margin: 8mm; }
     body { background: #fff; }
     .share-shell { padding: 0; }
     .lesson-hero { display: block; padding: 0 0 10px; border: 0; border-radius: 0; }
-    .lesson-eyebrow, .lesson-subtitle, .lesson-hero-actions, .audio-button, .dialog, .toast, .study-workspace, .lesson-mobile-list { display: none !important; }
+    .lesson-toolbar, .lesson-eyebrow, .lesson-subtitle, .lesson-hero-actions, .audio-button, .dialog, .toast, .study-workspace, .lesson-mobile-list { display: none !important; }
     .lesson-title { display: none; }
     .lesson-print-title { display: block; margin: 0; font-size: 18pt; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
     .lesson-table-card { border: 0; border-radius: 0; box-shadow: none; }

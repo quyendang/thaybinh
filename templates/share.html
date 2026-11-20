@@ -36,6 +36,24 @@
             </header>
 
             <section class="lesson-table-card" id="lesson-list" aria-label="Danh sách từ vựng">
+                <div class="lesson-toolbar" role="toolbar" aria-label="Công cụ học">
+                    <button class="icon-button" type="button" data-action="shuffle" aria-label="Xáo trộn thứ tự từ" title="Xáo trộn">
+                        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 7h3.5c4 0 5 10 9 10H21m0 0-3-3m3 3-3 3M3 17h3.5c1.6 0 2.7-1.6 3.6-3.5M21 7h-5.5c-1.6 0-2.7 1.6-3.6 3.5M21 7l-3-3m3 3-3 3"/></svg>
+                    </button>
+                    <button class="icon-button pick-button" type="button" data-action="open-selection" aria-label="Chọn từ muốn học" title="Chọn từ muốn học">
+                        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m3.5 6 1.5 1.5L8 4.5M3.5 12.5 5 14l3-3M3.5 19l1.5 1.5 3-3M11.5 6H21M11.5 12.5H21M11.5 19H21"/></svg>
+                        <span class="pick-badge" id="pick-badge" hidden></span>
+                    </button>
+                    <div class="cover-group" role="group" aria-label="Che cột">
+                        <span class="cover-label">Che</span>
+                        <button type="button" data-action="toggle-cover" data-cover="1" aria-pressed="false">Từ</button>
+                        <button type="button" data-action="toggle-cover" data-cover="2" aria-pressed="false">Loại</button>
+                        <button type="button" data-action="toggle-cover" data-cover="3" aria-pressed="false">Phiên âm</button>
+                        <button type="button" data-action="toggle-cover" data-cover="6" aria-pressed="false">Bản dịch</button>
+                        <button type="button" data-action="toggle-cover" data-cover="4" aria-pressed="false">Định nghĩa</button>
+                        <button type="button" data-action="toggle-cover" data-cover="5" aria-pressed="false">Ví dụ</button>
+                    </div>
+                </div>
                 <div class="table-scroll">
                     <table class="lesson-table" data-lesson-id="{{ lesson_id }}" data-hidden-columns="{{ hide_columns|join(',') }}" data-print-hidden-columns="{{ hide_columns_print|join(',') }}">
                         <caption class="visually-hidden">Danh sách từ vựng của bài học {{ lesson_name }}</caption>
@@ -67,7 +85,7 @@
                                 <td>{{ loop.index }}</td>
                                 <td class="{{ 'is-screen-hidden' if 1 in hide_columns else '' }} {{ 'is-print-hidden' if 1 in hide_columns_print else '' }}">
                                     <div class="cell-content word-cell" {% if 1 in hide_columns %}aria-hidden="true"{% endif %}>
-                                        <span>{{ word.word }}</span>
+                                        <span data-col="1">{{ word.word }}</span>
                                         {% if word.word_voice %}
                                         <button class="audio-button" type="button" data-audio-src="{{ word.word_voice }}" aria-label="Nghe phát âm từ {{ word.word }}">
                                             <svg aria-hidden="true" viewBox="0 0 24 24">
@@ -79,11 +97,11 @@
                                         {% endif %}
                                     </div>
                                 </td>
-                                <td class="{{ 'is-screen-hidden' if 2 in hide_columns else '' }} {{ 'is-print-hidden' if 2 in hide_columns_print else '' }}"><span class="cell-content" {% if 2 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.type|default('—') }}</span></td>
-                                <td class="ipa-cell {{ 'is-screen-hidden' if 3 in hide_columns else '' }} {{ 'is-print-hidden' if 3 in hide_columns_print else '' }}"><span class="cell-content" {% if 3 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.pronunciation|default('—') }}</span></td>
-                                <td class="{{ 'is-screen-hidden' if 4 in hide_columns else '' }} {{ 'is-print-hidden' if 4 in hide_columns_print else '' }}"><span class="cell-content" {% if 4 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.meaning|default('—') }}</span></td>
-                                <td class="{{ 'is-screen-hidden' if 5 in hide_columns else '' }} {{ 'is-print-hidden' if 5 in hide_columns_print else '' }}"><span class="cell-content" {% if 5 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.example|default('—') }}</span></td>
-                                <td class="{{ 'is-screen-hidden' if 6 in hide_columns else '' }} {{ 'is-print-hidden' if 6 in hide_columns_print else '' }}"><span class="cell-content" {% if 6 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.translate|default('—') }}</span></td>
+                                <td class="{{ 'is-screen-hidden' if 2 in hide_columns else '' }} {{ 'is-print-hidden' if 2 in hide_columns_print else '' }}"><span class="cell-content" data-col="2" {% if 2 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.type|default('—') }}</span></td>
+                                <td class="ipa-cell {{ 'is-screen-hidden' if 3 in hide_columns else '' }} {{ 'is-print-hidden' if 3 in hide_columns_print else '' }}"><span class="cell-content" data-col="3" {% if 3 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.pronunciation|default('—') }}</span></td>
+                                <td class="{{ 'is-screen-hidden' if 4 in hide_columns else '' }} {{ 'is-print-hidden' if 4 in hide_columns_print else '' }}"><span class="cell-content" data-col="4" {% if 4 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.meaning|default('—') }}</span></td>
+                                <td class="{{ 'is-screen-hidden' if 5 in hide_columns else '' }} {{ 'is-print-hidden' if 5 in hide_columns_print else '' }}"><span class="cell-content" data-col="5" {% if 5 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.example|default('—') }}</span></td>
+                                <td class="{{ 'is-screen-hidden' if 6 in hide_columns else '' }} {{ 'is-print-hidden' if 6 in hide_columns_print else '' }}"><span class="cell-content" data-col="6" {% if 6 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.translate|default('—') }}</span></td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -95,8 +113,8 @@
                         <header class="mobile-word-header">
                             <span class="mobile-word-index">{{ loop.index }}</span>
                             <div>
-                                {% if 1 not in hide_columns %}<strong>{{ word.word }}</strong>{% endif %}
-                                <span>{% if 2 not in hide_columns %}{{ word.type|default('') }}{% endif %}{% if 3 not in hide_columns and word.pronunciation %} · {{ word.pronunciation }}{% endif %}</span>
+                                {% if 1 not in hide_columns %}<strong data-col="1">{{ word.word }}</strong>{% endif %}
+                                <span>{% if 2 not in hide_columns %}<span data-col="2">{{ word.type|default('') }}</span>{% endif %}{% if 3 not in hide_columns and word.pronunciation %} · <span data-col="3">{{ word.pronunciation }}</span>{% endif %}</span>
                             </div>
                             {% if word.word_voice and 1 not in hide_columns %}
                             <button class="audio-button" type="button" data-audio-src="{{ word.word_voice }}" aria-label="Nghe phát âm từ {{ word.word }}">
@@ -104,11 +122,11 @@
                             </button>
                             {% endif %}
                         </header>
-                        {% if 4 not in hide_columns %}<p class="mobile-word-meaning">{{ word.meaning|default('—') }}</p>{% endif %}
+                        {% if 4 not in hide_columns %}<p class="mobile-word-meaning" data-col="4">{{ word.meaning|default('—') }}</p>{% endif %}
                         {% if (5 not in hide_columns and word.example) or (6 not in hide_columns and word.translate) %}
                         <div class="mobile-word-support">
-                            {% if 5 not in hide_columns and word.example %}<p><span>Example</span>{{ word.example }}</p>{% endif %}
-                            {% if 6 not in hide_columns and word.translate %}<p><span>Tiếng Việt</span>{{ word.translate }}</p>{% endif %}
+                            {% if 5 not in hide_columns and word.example %}<p><span>Example</span><span data-col="5">{{ word.example }}</span></p>{% endif %}
+                            {% if 6 not in hide_columns and word.translate %}<p><span>Tiếng Việt</span><span data-col="6">{{ word.translate }}</span></p>{% endif %}
                         </div>
                         {% endif %}
                     </li>
