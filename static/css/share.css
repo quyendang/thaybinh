@@ -94,17 +94,24 @@
 .is-screen-hidden .cell-content { visibility: hidden; }
 .is-user-hidden { display: none; }
 
-/* Toolbar: shuffle, pick words, cover columns */
-.lesson-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--line); }
-.pick-button { position: relative; }
-.pick-badge { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; color: #fff; background: var(--cobalt); font: 700 0.68rem/18px var(--font-ui); text-align: center; }
-.icon-button:focus-visible, .cover-group button:focus-visible, [data-col][tabindex]:focus-visible { outline: 2px solid var(--cobalt); outline-offset: 2px; }
-.cover-group { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; margin-left: auto; padding: 3px; border: 1px solid var(--line); border-radius: var(--radius-sm); }
-.cover-label { padding: 0 6px 0 8px; color: var(--slate); font-size: 0.78rem; font-weight: 750; }
-.cover-group button { min-height: 32px; padding: 0 10px; border: 0; border-radius: 6px; color: var(--slate); background: none; font: 700 0.8rem var(--font-ui); cursor: pointer; white-space: nowrap; transition: background 160ms ease, color 160ms ease; }
-.cover-group button:hover:not(:disabled) { color: var(--ink); background: #f3f7ff; }
-.cover-group button[aria-pressed="true"] { color: var(--cobalt-dark); background: #e8efff; box-shadow: inset 0 -2px 0 var(--cobalt); }
-.cover-group button:disabled { opacity: .4; cursor: not-allowed; }
+/* Hero tools: study, shuffle, pick words, cover columns, PDF in one row */
+.hero-tools { display: flex; align-items: center; gap: 8px; }
+.hero-tools .icon-button { position: relative; width: 44px; min-width: 44px; min-height: 44px; }
+.tool-badge { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; color: #fff; background: var(--cobalt); font: 700 0.68rem/18px var(--font-ui); text-align: center; }
+.icon-button:focus-visible, .cover-pop button:focus-visible, [data-col][tabindex]:focus-visible { outline: 2px solid var(--cobalt); outline-offset: 2px; }
+.cover-menu { position: relative; }
+.cover-menu > summary { list-style: none; }
+.cover-menu > summary::-webkit-details-marker { display: none; }
+.cover-menu[open] > summary { border-color: var(--cobalt); color: var(--cobalt); background: #f3f7ff; }
+.cover-pop { position: absolute; z-index: 10; top: calc(100% + 6px); right: 0; display: grid; min-width: 190px; padding: 6px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--paper); box-shadow: 0 16px 40px rgb(22 32 51 / 16%); }
+.cover-pop-title { margin: 0; padding: 6px 10px 4px; color: var(--slate); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.cover-pop button { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 40px; padding: 0 10px; border: 0; border-radius: var(--radius-sm); color: var(--ink); background: none; font: 700 0.88rem var(--font-ui); text-align: left; cursor: pointer; }
+.cover-pop button::after { content: ""; width: 16px; height: 16px; border: 1.5px solid #b9c5d7; border-radius: 4px; }
+.cover-pop button:hover:not(:disabled) { background: #f3f7ff; }
+.cover-pop button[aria-pressed="true"] { color: var(--cobalt-dark); }
+.cover-pop button[aria-pressed="true"]::after { border-color: var(--cobalt); background: var(--cobalt) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m4 8.5 2.5 2.5L12 5.5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 14px no-repeat; }
+.cover-pop button:disabled { opacity: .4; cursor: not-allowed; }
+.share-shell.is-study-open .hero-tools > :not(.export-pdf-button) { display: none; }
 /* A covered cell is tape over the text; tap to lift it. */
 [data-col].is-covered { color: transparent !important; background: #dfe7f7; border-radius: 4px; cursor: pointer; user-select: none; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 [data-col].is-lifted { cursor: pointer; }
@@ -228,9 +235,7 @@
 @media (max-width: 760px) {
     .share-shell { padding: 12px 10px 32px; }
     .lesson-hero { grid-template-columns: 1fr; gap: 18px; padding: 23px 20px; }
-    .lesson-hero-actions { justify-items: stretch; grid-template-columns: minmax(0, 1fr) auto; }
-    .phonetic-rail { min-width: 0; padding: 12px 0 0; border-top: 2px solid var(--cobalt); border-left: 0; }
-    .study-start-button { width: 100%; }
+    .lesson-hero-actions { justify-items: stretch; grid-template-columns: minmax(0, 1fr); }
     .lesson-table-card { border-radius: 0 0 var(--radius-md) var(--radius-md); }
     .table-scroll { display: none; }
     .lesson-mobile-list { display: grid; gap: 0; }
@@ -239,9 +244,9 @@
     .mobile-word-header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; }
     .mobile-word-index { color: var(--slate); font: 0.72rem var(--font-data); }
     .mobile-word-header strong, .mobile-word-header span:not([data-col]) { display: block; }
-    .lesson-toolbar { padding: 10px 12px; }
-    .cover-group { margin-left: 0; flex: 1 1 100%; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
-    .cover-group button { flex: none; min-height: 36px; }
+    .phonetic-rail { display: none; }
+    .hero-tools { gap: 6px; }
+    .hero-tools .study-start-button { flex: 1; min-width: 0; }
     .mobile-word-header strong { overflow-wrap: anywhere; font-size: 1rem; }
     .mobile-word-header span:not(.mobile-word-index, [data-col]) { margin-top: 3px; color: var(--cobalt); font: 0.72rem/1.4 var(--font-data); }
     .mobile-word-meaning { margin: 12px 0 0 27px; color: #344054; font-size: 0.9rem; line-height: 1.55; }
@@ -310,7 +315,7 @@
     body { background: #fff; }
     .share-shell { padding: 0; }
     .lesson-hero { display: block; padding: 0 0 10px; border: 0; border-radius: 0; }
-    .lesson-toolbar, .lesson-eyebrow, .lesson-subtitle, .lesson-hero-actions, .audio-button, .dialog, .toast, .study-workspace, .lesson-mobile-list { display: none !important; }
+    .lesson-eyebrow, .lesson-subtitle, .lesson-hero-actions, .audio-button, .dialog, .toast, .study-workspace, .lesson-mobile-list { display: none !important; }
     .lesson-title { display: none; }
     .lesson-print-title { display: block; margin: 0; font-size: 18pt; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
     .lesson-table-card { border: 0; border-radius: 0; box-shadow: none; }
