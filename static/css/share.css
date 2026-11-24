@@ -319,7 +319,8 @@
     .lesson-title { display: none; }
     .lesson-print-title { display: block; margin: 0; font-size: 18pt; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
     .lesson-table-card { border: 0; border-radius: 0; box-shadow: none; }
-    .table-scroll { overflow: visible; }
+    /* Portrait A4/Letter with 8mm margins is under 760px wide, so the mobile rule would hide the table. */
+    .table-scroll { display: block !important; overflow: visible; }
     .lesson-table { min-width: 0; font-size: 9pt; }
     .lesson-table th, .lesson-table td { padding: 5px 4px; border: 1px solid #cbd5e1; font-size: 8.5pt; }
     .lesson-table th { color: #111827; background: #eef2f7; }
