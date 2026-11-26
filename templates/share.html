@@ -18,7 +18,6 @@
                 <div>
                     <p class="lesson-eyebrow">{{ group_name or "FastENG · Bài học được chia sẻ" }}</p>
                     <h1 class="lesson-title" id="lesson-title" tabindex="-1">{{ lesson_name }}</h1>
-                    <p class="lesson-print-title">{% if group_name %}{{ group_name }} · {% endif %}{{ lesson_name }}</p>
                     <p class="lesson-subtitle" id="visible-word-count">{{ words|length }} từ đang hiển thị</p>
                 </div>
                 <div class="lesson-hero-actions">
@@ -37,7 +36,7 @@
                             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m3.5 6 1.5 1.5L8 4.5M3.5 12.5 5 14l3-3M3.5 19l1.5 1.5 3-3M11.5 6H21M11.5 12.5H21M11.5 19H21"/></svg>
                             <span class="tool-badge" id="pick-badge" hidden></span>
                         </button>
-                        <button class="icon-button button-quiet export-pdf-button" type="button" data-action="download-pdf" aria-label="Tải bài học dạng PDF; nhấn hai lần để in phiếu bài tập kèm đáp án" title="Tải PDF · Nhấn hai lần: phiếu bài tập và đáp án">
+                        <button class="icon-button button-quiet export-pdf-button" type="button" data-action="download-pdf" aria-label="In hoặc tải PDF, tạo phiếu bài tập kèm đáp án" title="In / Tải PDF · Phiếu bài tập">
                             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 3.75h8.25L18 7.5v12.75H6z"/><path d="M14.25 3.75V7.5H18M12 11.25v5.5m0 0-2.25-2.25M12 16.75l2.25-2.25"/></svg>
                         </button>
                     </div>
@@ -46,9 +45,9 @@
                         <button type="button" data-action="toggle-cover" data-cover="1" aria-pressed="false">Từ</button>
                         <button type="button" data-action="toggle-cover" data-cover="2" aria-pressed="false">Loại</button>
                         <button type="button" data-action="toggle-cover" data-cover="3" aria-pressed="false">Phiên âm</button>
-                        <button type="button" data-action="toggle-cover" data-cover="6" aria-pressed="false">Bản dịch</button>
                         <button type="button" data-action="toggle-cover" data-cover="4" aria-pressed="false">Định nghĩa</button>
                         <button type="button" data-action="toggle-cover" data-cover="5" aria-pressed="false">Ví dụ</button>
+                        <button type="button" data-action="toggle-cover" data-cover="6" aria-pressed="false">Bản dịch</button>
                     </div>
                 </div>
             </header>
@@ -101,7 +100,7 @@
                                 <td class="ipa-cell {{ 'is-screen-hidden' if 3 in hide_columns else '' }} {{ 'is-print-hidden' if 3 in hide_columns_print else '' }}"><span class="cell-content" data-col="3" {% if 3 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.pronunciation|default('—') }}</span></td>
                                 <td class="{{ 'is-screen-hidden' if 4 in hide_columns else '' }} {{ 'is-print-hidden' if 4 in hide_columns_print else '' }}"><span class="cell-content" data-col="4" {% if 4 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.meaning|default('—') }}</span></td>
                                 <td class="{{ 'is-screen-hidden' if 5 in hide_columns else '' }} {{ 'is-print-hidden' if 5 in hide_columns_print else '' }}"><span class="cell-content" data-col="5" {% if 5 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.example|default('—') }}</span></td>
-                                <td class="{{ 'is-screen-hidden' if 6 in hide_columns else '' }} {{ 'is-print-hidden' if 6 in hide_columns_print else '' }}"><span class="cell-content" data-col="6" {% if 6 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.translate|default('—') }}</span></td>
+                                <td class="{{ 'is-screen-hidden' if 6 in hide_columns else '' }} {{ 'is-print-hidden' if 6 in hide_columns_print else '' }}"><div class="cell-content speak-cell" {% if 6 in hide_columns %}aria-hidden="true"{% endif %}><span data-col="6">{{ word.translate|default('—') }}</span>{% if word.translate and 6 not in hide_columns %}<button class="audio-button" type="button" data-audio-src="{{ word.trans_voice|default('', true) }}" data-speak="{{ word.translate }}" data-speak-lang="vi-VN" aria-label="Nghe nghĩa tiếng Việt của {{ word.word }}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M11.25 5.25 6.75 9H3.75v6h3l4.5 3.75V5.25Z"/><path d="M15.75 8.25a5.25 5.25 0 0 1 0 7.5"/><path d="M18.75 5.25a9.5 9.5 0 0 1 0 13.5"/></svg></button>{% endif %}</div></td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -126,7 +125,7 @@
                         {% if (5 not in hide_columns and word.example) or (6 not in hide_columns and word.translate) %}
                         <div class="mobile-word-support">
                             {% if 5 not in hide_columns and word.example %}<p><span>Example</span><span data-col="5">{{ word.example }}</span></p>{% endif %}
-                            {% if 6 not in hide_columns and word.translate %}<p><span>Tiếng Việt</span><span data-col="6">{{ word.translate }}</span></p>{% endif %}
+                            {% if 6 not in hide_columns and word.translate %}<p class="mobile-speak"><span>Tiếng Việt</span><span data-col="6">{{ word.translate }}</span><button class="audio-button" type="button" data-audio-src="{{ word.trans_voice|default('', true) }}" data-speak="{{ word.translate }}" data-speak-lang="vi-VN" aria-label="Nghe nghĩa tiếng Việt của {{ word.word }}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M11.25 5.25 6.75 9H3.75v6h3l4.5 3.75V5.25Z"/><path d="M15.75 8.25a5.25 5.25 0 0 1 0 7.5"/><path d="M18.75 5.25a9.5 9.5 0 0 1 0 13.5"/></svg></button></p>{% endif %}
                         </div>
                         {% endif %}
                     </li>
@@ -192,21 +191,31 @@
 
     <dialog class="dialog" id="pdf-options-dialog" aria-labelledby="pdf-options-dialog-title">
         <header class="dialog-header">
-            <div><h2 class="dialog-title" id="pdf-options-dialog-title">Tải PDF</h2><p class="dialog-description">Chọn nội dung cần che trong file. Các cột bị ẩn bởi link chia sẻ sẽ luôn được giữ nguyên.</p></div>
+            <div><h2 class="dialog-title" id="pdf-options-dialog-title">In / Tải PDF</h2><p class="dialog-description">Các từ đang hiển thị, theo đúng thứ tự trên màn hình. Cột bị ẩn bởi link chia sẻ luôn để trống.</p></div>
             <button class="icon-button" type="button" data-action="close-dialog" aria-label="Đóng hộp thoại">×</button>
         </header>
-        <div class="dialog-body">
-            <fieldset class="pdf-column-options" id="pdf-column-options">
-                <legend>Ẩn nội dung cột</legend>
-                <label><input type="checkbox" value="1"> Word</label>
-                <label><input type="checkbox" value="2"> Type</label>
-                <label><input type="checkbox" value="3"> IPA</label>
-                <label><input type="checkbox" value="4"> Meaning</label>
-                <label><input type="checkbox" value="5"> Example</label>
-                <label><input type="checkbox" value="6"> Vietnamese</label>
+        <div class="dialog-body print-options">
+            <fieldset class="pdf-column-options" data-print-group="blank">
+                <legend>Cột để TRỐNG cho học sinh điền</legend>
+                <label><input type="checkbox" value="1"> Từ</label>
+                <label><input type="checkbox" value="2"> Loại</label>
+                <label><input type="checkbox" value="3"> Phiên âm</label>
+                <label><input type="checkbox" value="4"> Định nghĩa</label>
+                <label><input type="checkbox" value="5"> Ví dụ</label>
+                <label><input type="checkbox" value="6"> Bản dịch</label>
             </fieldset>
+            <fieldset class="pdf-column-options" data-print-group="answer">
+                <legend>Trang đáp án hiện cột</legend>
+                <label><input type="checkbox" value="1"> Từ</label>
+                <label><input type="checkbox" value="2"> Loại</label>
+                <label><input type="checkbox" value="3"> Phiên âm</label>
+                <label><input type="checkbox" value="4"> Định nghĩa</label>
+                <label><input type="checkbox" value="5"> Ví dụ</label>
+                <label><input type="checkbox" value="6"> Bản dịch</label>
+            </fieldset>
+            <p class="pdf-estimate" id="pdf-estimate" aria-live="polite"></p>
         </div>
-        <footer class="dialog-footer"><button class="button" type="button" data-action="close-dialog">Hủy</button><button class="button button-primary" type="button" data-action="confirm-download-pdf">Tải PDF</button></footer>
+        <footer class="dialog-footer"><button class="button" type="button" data-action="close-dialog">Hủy</button><button class="button" type="button" data-action="print-sheet">In</button><button class="button button-primary" type="button" data-action="confirm-download-pdf">Tải PDF</button></footer>
     </dialog>
 
     <dialog class="dialog" id="shortcut-dialog" aria-labelledby="shortcut-dialog-title">
@@ -224,8 +233,8 @@
                 <li><kbd>Control</kbd> + <kbd>H</kbd>: Mở trợ giúp này</li>
                 <li><kbd>Control</kbd> + <kbd>Y</kbd>: Sao chép Tên Lesson, Link</li>
                 <li><kbd>Control</kbd> + <kbd>U</kbd>: Sao chép Tên Group, Tên Lesson, Link</li>
-                <li><kbd>Shift</kbd> + nhấn biểu tượng PDF: Chọn cột cần che</li>
-                <li>Nhấn biểu tượng PDF hai lần trong 0,5 giây: In phiếu bài tập kèm đáp án (dùng chuột, chạm hoặc Enter khi nút có focus)</li>
+                <li>Nút PDF: chọn cột để trống, cột hiện ở trang đáp án, rồi In hoặc Tải PDF</li>
+                <li><kbd>⌘/Ctrl</kbd> + <kbd>P</kbd>: In các từ đang hiển thị, cột đang che in trống (không kèm đáp án)</li>
                 <li>Trong Flashcard: <kbd>Enter</kbd> nghe phát âm, <kbd>Space</kbd> lật thẻ, <kbd>←</kbd>/<kbd>→</kbd> quay lại hoặc tiếp theo</li>
             </ul>
         </div>
