@@ -301,13 +301,12 @@
     const KEY_FS = 8.5;
     const PRINT_COLS = [
         { col: 1, label: "Word", key: "word", weight: "700" },
-        { col: 2, label: "Type", key: "type" },
+        { col: 2, label: "Type", key: "typeShort" },
         { col: 3, label: "IPA", key: "ipa", mono: true },
         { col: 4, label: "Meaning", key: "meaning" },
         { col: 5, label: "Example", key: "example" },
         { col: 6, label: "Vietnamese", key: "translate" },
     ];
-    const TYPE_SHORT = { noun: "n", verb: "v", adjective: "adj", adverb: "adv", preposition: "prep", pronoun: "pron", conjunction: "conj", interjection: "interj", determiner: "det", phrase: "phr" };
     const measureCtx = document.createElement("canvas").getContext("2d");
     const lockedColumns = () => new Set([...hiddenColumns, ...printHiddenColumns]);
     const fontPx = (sizePt, weight = "400", mono = false) =>
@@ -319,11 +318,8 @@
         return { group, name, full: [group, name].filter(Boolean).join(" · ") };
     };
 
-    function cellText(row, c) {
-        const value = (row.dataset[c.key] || "").trim();
-        if (c.key !== "type") return value;
-        return value.split(/\s*[,/]\s*/).map((t) => TYPE_SHORT[t.toLowerCase()] || t).join(", ");
-    }
+    // Type uses data-type-short, rendered by the server's short_type filter, so print matches the table.
+    const cellText = (row, c) => (row.dataset[c.key] || "").trim();
 
     // Word wrap; a token wider than the column breaks by character.
     function wrapLines(ctx, text, maxMm) {

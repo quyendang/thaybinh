@@ -81,6 +81,7 @@ def test_share_short_id_renders_workspace(client):
     assert 'data-print-group="blank"' in response.text
     assert 'data-print-group="answer"' in response.text
     assert 'data-speak="diễn đạt rõ ràng"' in response.text
+    assert 'data-type-short="v"' in response.text
     assert 'id="pdf-options-dialog"' in response.text
     assert 'id="shortcut-dialog"' in response.text
     assert "Sao chép Tên Lesson, Link" in response.text
