@@ -22,7 +22,6 @@
 }
 
 .lesson-title { max-width: 800px; margin: 7px 0 10px; font-size: clamp(1.7rem, 4vw, 2.7rem); line-height: 1.08; letter-spacing: -0.045em; }
-.lesson-print-title { display: none; }
 .lesson-subtitle { margin: 0; color: var(--slate); font-size: 0.93rem; }
 
 .lesson-hero-actions { display: grid; justify-items: end; gap: 10px; grid-template-columns: 1fr auto; }
@@ -72,6 +71,8 @@
 .lesson-table tbody tr:hover td { background: #fafcff; }
 .lesson-table th:first-child, .lesson-table td:first-child { width: 58px; color: var(--slate); text-align: center; font-family: var(--font-data); font-size: 0.78rem; }
 .word-cell { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 136px; font-weight: 800; }
+.speak-cell { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.speak-cell .audio-button, .mobile-speak .audio-button { width: 30px; height: 30px; }
 .ipa-cell { color: var(--cobalt); font-family: var(--font-data); font-size: 0.82rem; }
 .audio-button {
     display: inline-grid;
@@ -216,8 +217,11 @@
 .selection-item strong { font-size: 0.9rem; }
 .selection-item span { margin-top: 2px; color: var(--slate); font-size: 0.8rem; }
 .selection-tools { display: flex; gap: 8px; margin-bottom: 14px; }
-.pdf-column-options { display: grid; gap: 10px; margin: 0; padding: 0; border: 0; }
-.pdf-column-options legend { margin-bottom: 12px; color: var(--ink); font-weight: 800; }
+.print-options { display: grid; gap: 18px; }
+.pdf-column-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; border: 0; }
+.pdf-column-options:disabled { opacity: .5; }
+.pdf-estimate { margin: 0; color: var(--slate); font: 0.8rem var(--font-data); }
+.pdf-column-options legend { margin-bottom: 10px; color: var(--ink); font-weight: 800; }
 .pdf-column-options label { display: flex; align-items: center; gap: 9px; min-height: 38px; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--ink); background: #fbfcfe; cursor: pointer; }
 .pdf-column-options input { width: 16px; height: 16px; accent-color: var(--cobalt); }
 .pdf-column-options label:has(input:disabled) { color: var(--slate); cursor: not-allowed; }
@@ -251,6 +255,8 @@
     .mobile-word-meaning { margin: 12px 0 0 27px; color: #344054; font-size: 0.9rem; line-height: 1.55; }
     .mobile-word-support { display: grid; gap: 10px; margin: 13px 0 0 27px; padding-top: 12px; border-top: 1px solid #edf1f6; color: var(--slate); font-size: 0.82rem; }
     .mobile-word-support p { display: grid; gap: 3px; margin: 0; line-height: 1.55; }
+    .mobile-word-support p.mobile-speak { grid-template-columns: 1fr auto; align-items: center; column-gap: 8px; }
+    .mobile-speak > span:first-child { grid-column: 1 / -1; }
     .mobile-word-support p span:not([data-col]) { color: var(--slate); font: 0.68rem var(--font-data); letter-spacing: 0.05em; text-transform: uppercase; }
     .dialog { width: calc(100% - 20px); }
     .study-workspace { border-radius: 0 0 var(--radius-md) var(--radius-md); }
@@ -308,21 +314,29 @@
     .flash-card { block-size: clamp(520px, calc(100dvh - 154px), 760px); }
 }
 
+/* Print document, black ink only (no fills, no colour, hairline rules): built by share.js (printPlan) for Cmd/Ctrl+P and the "In" button.
+   Widths and font size come from the same plan as the PDF download. */
+.print-doc { display: none; }
 @media print {
-    /* Covered columns print as blanks for students to fill in; the header stays. */
-    [data-col].is-covered, [data-col].is-lifted { color: transparent !important; background: none; }
-    @page { margin: 8mm; }
-    body { background: #fff; }
-    .share-shell { padding: 0; }
-    .lesson-hero { display: block; padding: 0 0 10px; border: 0; border-radius: 0; }
-    .lesson-eyebrow, .lesson-subtitle, .lesson-hero-actions, .audio-button, .dialog, .toast, .study-workspace, .lesson-mobile-list { display: none !important; }
-    .lesson-title { display: none; }
-    .lesson-print-title { display: block; margin: 0; font-size: 18pt; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
-    .lesson-table-card { border: 0; border-radius: 0; box-shadow: none; }
-    /* Portrait A4/Letter with 8mm margins is under 760px wide, so the mobile rule would hide the table. */
-    .table-scroll { display: block !important; overflow: visible; }
-    .lesson-table { min-width: 0; font-size: 9pt; }
-    .lesson-table th, .lesson-table td { padding: 5px 4px; border: 1px solid #cbd5e1; font-size: 8.5pt; }
-    .lesson-table th { color: #111827; background: #eef2f7; }
-    .is-print-hidden .cell-content { color: transparent !important; text-shadow: none !important; }
+    @page { size: A4; margin: 8mm; }
+    html, body { background: #fff !important; }
+    body > :not(.print-doc) { display: none !important; }
+    .print-doc { display: block; color: #000; font: 400 var(--fs)/1.3 var(--font-ui); }
+    .pd-head { margin-bottom: 2mm; }
+    .pd-head h1 { margin: 0; font-size: 13pt; line-height: 1.25; overflow-wrap: anywhere; }
+    .pd-table { width: 100%; table-layout: fixed; border-collapse: collapse; }
+    .pd-table thead { display: table-header-group; }
+    .pd-table tr { break-inside: avoid; }
+    .pd-table th { padding: .9mm 1.4mm; border-bottom: .25mm solid #000; font-size: .8em; font-weight: 700; text-align: left; text-transform: uppercase; }
+    .pd-table td { padding: .9mm 1.4mm; border-bottom: .1mm solid #000; vertical-align: top; overflow-wrap: anywhere; }
+    .pd-table.has-blank td { height: 7mm; }
+    .pd-table.has-blank :is(td, th) + :is(td, th) { border-left: .1mm solid #000; }
+    .pd-table th, .pd-n { white-space: nowrap; overflow-wrap: normal; }
+    .pd-n { font-family: var(--font-data); font-size: .85em; }
+    .pd-word { font-weight: 700; }
+    .pd-ipa { font-family: var(--font-data); }
+    .pd-key { break-before: page; }
+    .pd-key h2 { margin: 0 0 3mm; font-size: 12pt; }
+    .pd-key ol { margin: 0; padding-left: 6mm; columns: 3; column-gap: 5mm; font-size: 8.5pt; line-height: 1.3; }
+    .pd-key li { break-inside: avoid; }
 }

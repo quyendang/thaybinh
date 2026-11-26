@@ -32,7 +32,6 @@
     let pShortcutCount = 0;
     let pShortcutStartedAt = 0;
     let pShortcutTimer = null;
-    let pdfClickTimer = null;
 
     const getRows = () => [...table.tBodies[0].rows];
     const readStorage = (key, fallback) => {
@@ -286,94 +285,306 @@
         openDialog(copyDialog, trigger);
     }
 
-    function lockedPdfColumns() {
-        return new Set([...hiddenColumns, ...printHiddenColumns]);
+    // ── Print & PDF ──────────────────────────────────────────────────────────
+    // One layout plan (columns, widths, font size, pages) feeds all three outputs: Cmd/Ctrl+P, the
+    // "In" button and the PDF download. Units are mm; A4 portrait with 8mm margins.
+    const MM = 2800 / 210; // canvas px per mm; 2800 x 3959 px is exactly A4 in html2pdf
+    const PAGE_H = 3959 / MM;
+    const MARGIN = 8;
+    const CW = 210 - 2 * MARGIN;
+    const CH = PAGE_H - 2 * MARGIN; // the PDF page number sits inside the bottom margin
+    const PT = 25.4 / 72; // mm per point
+    const PAD_X = 1.4;
+    const PAD_Y = 0.9;
+    const LINE = 1.3;
+    const WRITE_H = 7; // row height that leaves room to write by hand
+    const KEY_FS = 8.5;
+    const PRINT_COLS = [
+        { col: 1, label: "Word", key: "word", weight: "700" },
+        { col: 2, label: "Type", key: "type" },
+        { col: 3, label: "IPA", key: "ipa", mono: true },
+        { col: 4, label: "Meaning", key: "meaning" },
+        { col: 5, label: "Example", key: "example" },
+        { col: 6, label: "Vietnamese", key: "translate" },
+    ];
+    const TYPE_SHORT = { noun: "n", verb: "v", adjective: "adj", adverb: "adv", preposition: "prep", pronoun: "pron", conjunction: "conj", interjection: "interj", determiner: "det", phrase: "phr" };
+    const measureCtx = document.createElement("canvas").getContext("2d");
+    const lockedColumns = () => new Set([...hiddenColumns, ...printHiddenColumns]);
+    const fontPx = (sizePt, weight = "400", mono = false) =>
+        `${weight} ${sizePt * PT * MM}px ${mono ? '"IBM Plex Mono", ui-monospace, monospace' : 'Manrope, "Segoe UI", sans-serif'}`;
+    const textMm = (ctx, text) => ctx.measureText(text).width / MM;
+    const lessonTitle = () => {
+        const group = document.querySelector(".share-workspace")?.dataset.groupName || "";
+        const name = document.querySelector("#lesson-title")?.textContent?.trim() || "FastENG lesson";
+        return { group, name, full: [group, name].filter(Boolean).join(" · ") };
+    };
+
+    function cellText(row, c) {
+        const value = (row.dataset[c.key] || "").trim();
+        if (c.key !== "type") return value;
+        return value.split(/\s*[,/]\s*/).map((t) => TYPE_SHORT[t.toLowerCase()] || t).join(", ");
     }
 
-    function printWorksheet() {
-        const rows = selectedRows();
-        if (!rows.length) return showToast("Không có từ đang hiển thị để tạo phiếu.", true);
-        const headers = [...table.tHead.rows[0].cells].map((cell) => cell.textContent.trim());
-        const list = headers.map((header, index) => `${index}. ${header}`).join("\n");
-        const parseColumns = (value) => [...new Set(value.split(/[ ,]+/).map(Number)
-            .filter((column) => Number.isInteger(column) && column > 0 && column < headers.length))];
-        // Open during the click so time spent answering prompts cannot trigger popup blocking.
-        const popup = window.open("", "_blank");
-        if (!popup) return showToast("Hãy cho phép cửa sổ bật lên để in phiếu bài tập.", true);
-        popup.opener = null;
-        const blankInput = window.prompt(`Cột nào để TRỐNG cho học sinh điền? (nhập số, cách nhau dấu phẩy)\n${list}`, [...printHiddenColumns].join(",") || "1");
-        if (blankInput === null) { popup.close(); return; }
-        const chosenBlankColumns = parseColumns(blankInput);
-        const blankColumns = new Set([...lockedPdfColumns(), ...chosenBlankColumns].filter((column) => column > 0 && column < headers.length));
-        const answerInput = window.prompt(`Đáp án hiện cột nào? (nhập số, cách nhau dấu phẩy)\n${list}`, String(chosenBlankColumns[0] || ""));
-        if (answerInput === null) { popup.close(); return; }
-        let answerColumns = parseColumns(answerInput);
-        if (!answerColumns.length) answerColumns = chosenBlankColumns;
-        const data = rows.map((row, index) => headers.map((_, column) => column === 0
-            ? String(index + 1) : hiddenColumns.has(column) ? "" : rowValue(row, column + 1).trim()));
-        const title = document.title;
-        const worksheet = element("table", "worksheet");
-        const head = element("thead");
-        const headingRow = element("tr");
-        headers.forEach((header) => {
-            const cell = element("th", "", header);
-            cell.scope = "col";
-            headingRow.append(cell);
-        });
-        head.append(headingRow);
-        const body = element("tbody");
-        data.forEach((values) => {
-            const row = element("tr");
-            values.forEach((value, column) => row.append(element("td", column === 0 ? "n" : "", blankColumns.has(column) ? "" : value)));
-            body.append(row);
-        });
-        worksheet.append(head, body);
-        const answers = element("section", "answers");
-        answers.append(element("h2", "", `ĐÁP ÁN – ${title}`), element("div", "sub", `${data.length} từ vựng`));
-        for (let start = 0; start < data.length; start += 120) {
-            const part = data.slice(start, start + 120);
-            const rowCount = Math.ceil(part.length / 3);
-            const key = element("table", "key");
-            for (let index = 0; index < rowCount; index += 1) {
-                const row = element("tr");
-                for (let column = 0; column < 3; column += 1) {
-                    const position = column * rowCount + index;
-                    const cell = element("td");
-                    if (position < part.length) {
-                        cell.append(element("b", "", `${start + position + 1}.`), ` ${answerColumns.map((answer) => part[position][answer]).join(" – ")}`);
-                    }
-                    row.append(cell);
-                }
-                key.append(row);
+    // Word wrap; a token wider than the column breaks by character.
+    function wrapLines(ctx, text, maxMm) {
+        const lines = [];
+        let line = "";
+        for (let piece of String(text).split(/\s+/).filter(Boolean)) {
+            const joined = line ? `${line} ${piece}` : piece;
+            if (textMm(ctx, joined) <= maxMm) { line = joined; continue; }
+            if (line) lines.push(line);
+            while (piece.length > 1 && textMm(ctx, piece) > maxMm) {
+                let cut = piece.length - 1;
+                while (cut > 1 && textMm(ctx, piece.slice(0, cut)) > maxMm) cut--;
+                lines.push(piece.slice(0, cut));
+                piece = piece.slice(cut);
             }
-            answers.append(key);
+            line = piece;
         }
-        popup.document.documentElement.lang = "vi";
-        popup.document.title = title;
-        popup.document.body.replaceChildren(
-            element("h2", "", title), element("div", "sub", `${data.length} từ vựng`),
-            element("div", "info", "Họ tên: ................................................ Lớp: .........."), worksheet, answers,
-        );
-        const stylesheet = element("link");
-        stylesheet.rel = "stylesheet";
-        stylesheet.href = new URL("/static/css/worksheet.css", window.location.href).href;
-        stylesheet.onload = () => { if (!popup.closed) { popup.focus(); popup.print(); } };
-        stylesheet.onerror = () => { popup.close(); showToast("Không thể tải định dạng phiếu bài tập. Hãy thử lại.", true); };
-        popup.document.head.append(stylesheet);
+        if (line) lines.push(line);
+        return lines;
     }
 
-    function buildPdfOptionsDialog() {
-        const locked = lockedPdfColumns();
-        pdfOptionsDialog.querySelectorAll("input[type=checkbox]").forEach((input) => {
-            const column = Number(input.value);
-            input.checked = locked.has(column);
-            input.disabled = locked.has(column);
-            input.parentElement.title = input.disabled ? "Cột này đã được ẩn bởi link chia sẻ." : "";
+    // Column widths like a browser's auto table layout: every column gets its longest word, then the
+    // free width goes to the columns that still wrap, in proportion to how much they would need.
+    function fitWidths(specs, k, avail) {
+        // +0.8mm slack: the browser's text metrics and rounding differ slightly from the canvas measure.
+        const min = specs.map((s) => s.min * k + 2 * PAD_X + 0.8);
+        const max = specs.map((s) => s.max * k + 2 * PAD_X + 0.8);
+        const sum = (list) => list.reduce((a, b) => a + b, 0);
+        const free = avail - sum(min);
+        if (free <= 0) return min.map((w) => w * avail / sum(min));
+        const need = max.map((w, i) => w - min[i]);
+        if (free >= sum(need)) return max.map((w) => w * avail / sum(max));
+        return min.map((w, i) => w + free * need[i] / sum(need));
+    }
+
+    function paginate(heights, firstCap, restCap) {
+        const pages = [];
+        let start = 0;
+        let used = 0;
+        heights.forEach((h, i) => {
+            const cap = pages.length ? restCap : firstCap;
+            if (i > start && used + h > cap) { pages.push([start, i]); start = i; used = 0; }
+            used += h;
         });
+        if (heights.length) pages.push([start, heights.length]);
+        return pages;
     }
 
-    function selectedPdfHiddenColumns() {
-        return new Set([...lockedPdfColumns(), ...[...pdfOptionsDialog.querySelectorAll("input[type=checkbox]:checked")].map((input) => Number(input.value))]);
+    const HEADER_H = 7.5; // title line on the first page only
+
+    /** blankCols: columns printed empty for students; answerCols: columns shown on the answer key. */
+    function printPlan(blankCols, answerCols) {
+        const rows = selectedRows();
+        const locked = lockedColumns();
+        const cols = PRINT_COLS.filter((c) => rows.some((row) => cellText(row, c)));
+        const blank = new Set(cols.filter((c) => locked.has(c.col) || blankCols.has(c.col)).map((c) => c.col));
+        const answers = blank.size ? cols.filter((c) => answerCols.has(c.col) && !locked.has(c.col)) : [];
+
+        // Text widths at 10pt, scaled linearly for other sizes.
+        const specs = cols.map((c) => {
+            measureCtx.font = fontPx(10, c.weight, c.mono);
+            let min = 0;
+            let max = 0;
+            for (const row of rows) {
+                const text = cellText(row, c);
+                max = Math.max(max, textMm(measureCtx, text));
+                for (const token of text.split(/\s+/)) min = Math.max(min, textMm(measureCtx, token));
+            }
+            measureCtx.font = fontPx(8, "700");
+            const head = textMm(measureCtx, c.label.toUpperCase());
+            if (blank.has(c.col)) {
+                // Room to write: about the answer's own length, never a sliver.
+                min = Math.max(min, 16, head);
+                max = Math.max(max, 24, head);
+            }
+            return { ...c, min: Math.max(min, head), max: Math.max(max, head) };
+        });
+
+        const layoutAt = (fs) => {
+            const k = fs / 10;
+            measureCtx.font = fontPx(fs * 0.85, "400", true);
+            const numW = textMm(measureCtx, String(rows.length)) + 2 * PAD_X + 0.8;
+            const widths = fitWidths(specs, k, CW - numW);
+            const lineH = fs * PT * LINE;
+            const cells = rows.map((row) => specs.map((c, i) => {
+                if (blank.has(c.col)) return [];
+                measureCtx.font = fontPx(fs, c.weight, c.mono);
+                return wrapLines(measureCtx, cellText(row, c), widths[i] - 2 * PAD_X);
+            }));
+            const heights = cells.map((lines) => Math.max(blank.size ? WRITE_H : 0, Math.max(1, ...lines.map((l) => l.length)) * lineH + 2 * PAD_Y));
+            const headH = fs * 0.8 * PT * LINE + 2 * PAD_Y;
+            const pages = paginate(heights, CH - HEADER_H - headH, CH - headH);
+            return { fs, numW, widths, lineH, headH, cells, heights, pages };
+        };
+
+        // Fewest pages first, then the largest font that still fits in that many pages.
+        let best = layoutAt(8);
+        for (let fs = 11; fs > 8; fs -= 0.5) {
+            const candidate = layoutAt(fs);
+            if (candidate.pages.length <= best.pages.length) { best = candidate; break; }
+        }
+
+        // Answer key: numbered items flowing down three columns per page.
+        const keyPages = [];
+        if (answers.length) {
+            measureCtx.font = fontPx(KEY_FS);
+            const colW = (CW - 2 * 5) / 3;
+            const lineH = KEY_FS * PT * LINE;
+            let page = [];
+            let column = 0;
+            let y = 0;
+            const top = 9;
+            rows.forEach((row, i) => {
+                const text = `${i + 1}. ${answers.map((c) => cellText(row, c)).filter(Boolean).join(" – ")}`;
+                const lines = wrapLines(measureCtx, text, colW);
+                const h = lines.length * lineH + 0.6;
+                if (y + h > CH - (keyPages.length ? 0 : top)) {
+                    column += 1;
+                    y = 0;
+                    if (column === 3) { keyPages.push(page); page = []; column = 0; }
+                }
+                page.push({ x: column * (colW + 5), y, lines });
+                y += h;
+            });
+            keyPages.push(page);
+        }
+
+        return { rows, cols: specs, blank, answers, keyPages, title: lessonTitle(), ...best, total: best.pages.length + keyPages.length };
+    }
+
+    // ── Print DOM (Cmd/Ctrl+P and the "In" button). Same widths and font size as the PDF. ──
+    function renderPrintDoc(plan) {
+        document.querySelector(".print-doc")?.remove();
+        const doc = element("div", "print-doc");
+        doc.setAttribute("aria-hidden", "true");
+        doc.style.setProperty("--fs", `${plan.fs}pt`);
+        const head = element("header", "pd-head");
+        head.append(element("h1", "", plan.title.full));
+        const tableNode = element("table", `pd-table${plan.blank.size ? " has-blank" : ""}`);
+        const colgroup = element("colgroup");
+        [plan.numW, ...plan.widths].forEach((w) => {
+            const col = element("col");
+            col.style.width = `${(w / CW) * 100}%`;
+            colgroup.append(col);
+        });
+        const headRow = element("tr");
+        headRow.append(element("th", "pd-n", "#"), ...plan.cols.map((c) => element("th", "", c.label)));
+        const thead = element("thead");
+        thead.append(headRow);
+        const tbody = element("tbody");
+        plan.rows.forEach((row, i) => {
+            const tr = element("tr");
+            tr.append(element("td", "pd-n", String(i + 1)));
+            plan.cols.forEach((c) => tr.append(element("td", `pd-${c.key}`, plan.blank.has(c.col) ? "" : cellText(row, c))));
+            tbody.append(tr);
+        });
+        tableNode.append(colgroup, thead, tbody);
+        doc.append(head, tableNode);
+        if (plan.answers.length) {
+            const key = element("section", "pd-key");
+            const list = element("ol");
+            plan.rows.forEach((row) => list.append(element("li", "", plan.answers.map((c) => cellText(row, c)).filter(Boolean).join(" – "))));
+            key.append(element("h2", "", `Đáp án · ${plan.title.full}`), list);
+            doc.append(key);
+        }
+        document.body.append(doc);
+    }
+
+    // Cmd/Ctrl+P prints the visible words with covered columns blank and no answer key.
+    // The "In" button renders its own plan first and skips this once.
+    let printPrepared = false;
+    window.addEventListener("beforeprint", () => {
+        if (printPrepared) { printPrepared = false; return; }
+        renderPrintDoc(printPlan(covered, new Set()));
+    });
+
+    function printPlanNow(plan) {
+        if (!plan.rows.length) return showToast("Không có từ đang hiển thị để in.", true);
+        renderPrintDoc(plan);
+        printPrepared = true;
+        window.print();
+    }
+
+    // ── PDF download: the same plan drawn on A4 canvases ──
+    function drawPdfPage(plan, pageIndex) {
+        const canvas = document.createElement("canvas");
+        canvas.width = 2800;
+        canvas.height = 3959;
+        const ctx = canvas.getContext("2d");
+        const px = (mm) => mm * MM;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.textBaseline = "top";
+        let y = MARGIN;
+        const tablePages = plan.pages.length;
+
+        ctx.fillStyle = "#000000";
+        ctx.font = fontPx(7);
+        ctx.textAlign = "right";
+        ctx.fillText(`${pageIndex + 1} / ${plan.total}`, px(210 - MARGIN), px(PAGE_H - MARGIN + 3));
+        ctx.textAlign = "left";
+
+        if (pageIndex >= tablePages) {
+            const keyIndex = pageIndex - tablePages;
+            if (keyIndex === 0) {
+                ctx.fillStyle = "#000000";
+                ctx.font = fontPx(12, "700");
+                ctx.fillText(`Đáp án · ${plan.title.full}`, px(MARGIN), px(y));
+                y += 9;
+            }
+            ctx.fillStyle = "#000000";
+            ctx.font = fontPx(KEY_FS);
+            const lineH = KEY_FS * PT * LINE;
+            for (const item of plan.keyPages[keyIndex]) {
+                item.lines.forEach((line, i) => ctx.fillText(line, px(MARGIN + item.x), px(y + item.y + i * lineH)));
+            }
+            return canvas;
+        }
+
+        if (pageIndex === 0) {
+            ctx.fillStyle = "#000000";
+            ctx.font = fontPx(13, "700");
+            ctx.fillText(plan.title.full, px(MARGIN), px(y));
+            y += HEADER_H;
+        }
+
+        const widths = [plan.numW, ...plan.widths];
+        const xs = widths.reduce((list, w) => [...list, list[list.length - 1] + w], [MARGIN]);
+        const rule = (x1, y1, x2, y2, color, width) => {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = px(width);
+            ctx.beginPath();
+            ctx.moveTo(px(x1), px(y1));
+            ctx.lineTo(px(x2), px(y2));
+            ctx.stroke();
+        };
+
+        ctx.fillStyle = "#000000";
+        ctx.font = fontPx(plan.fs * 0.8, "700");
+        ["#", ...plan.cols.map((c) => c.label.toUpperCase())].forEach((label, i) => ctx.fillText(label, px(xs[i] + PAD_X), px(y + PAD_Y)));
+        rule(MARGIN, y + plan.headH, MARGIN + CW, y + plan.headH, "#000000", 0.25);
+        y += plan.headH;
+
+        const tableTop = y - plan.headH;
+        const [start, end] = plan.pages[pageIndex];
+        for (let r = start; r < end; r++) {
+            const h = plan.heights[r];
+            ctx.fillStyle = "#000000";
+            ctx.font = fontPx(plan.fs * 0.85, "400", true);
+            ctx.fillText(String(r + 1), px(xs[0] + PAD_X), px(y + PAD_Y + 0.2));
+            plan.cols.forEach((c, i) => {
+                ctx.fillStyle = "#000000";
+                ctx.font = fontPx(plan.fs, c.weight, c.mono);
+                plan.cells[r][i].forEach((line, l) => ctx.fillText(line, px(xs[i + 1] + PAD_X), px(y + PAD_Y + l * plan.lineH)));
+            });
+            rule(MARGIN, y + h, MARGIN + CW, y + h, "#000000", 0.1);
+            y += h;
+        }
+        // Worksheets get column rules so each blank reads as a box to write in.
+        if (plan.blank.size) xs.slice(1, -1).forEach((x) => rule(x, tableTop, x, y, "#000000", 0.1));
+        return canvas;
     }
 
     function pdfFilename(groupName, lessonName) {
@@ -382,95 +593,14 @@
         return `${parts.join(" - ") || "fasteng-lesson"}.pdf`;
     }
 
-    function wrapPdfText(context, value, maxWidth) {
-        const text = String(value || "").trim();
-        if (!text) return [];
-        const lines = [];
-        let current = "";
-        for (const character of text) {
-            const candidate = current + character;
-            if (current && context.measureText(candidate).width > maxWidth) {
-                lines.push(current.trimEnd());
-                current = character === " " ? "" : character;
-            } else {
-                current = candidate;
-            }
-        }
-        if (current.trim()) lines.push(current.trimEnd());
-        return lines;
-    }
-
-    const PDF_CANVAS_SCALE = 2;
-    const PDF_CANVAS_WIDTH = 2800;
-    // 2,800 x 3,959 maps exactly to A4 in html2pdf (about 339 DPI).
-    const PDF_CANVAS_HEIGHT = 3959;
-    const PDF_LOGICAL_HEIGHT = PDF_CANVAS_HEIGHT / PDF_CANVAS_SCALE;
-
-    function createPdfCanvas(title, wordCount, pageNumber) {
-        const canvas = document.createElement("canvas");
-        canvas.width = PDF_CANVAS_WIDTH;
-        // Matching html2pdf's A4 rounding prevents it from adding a near-empty extra page.
-        canvas.height = PDF_CANVAS_HEIGHT;
-        const context = canvas.getContext("2d");
-        context.scale(PDF_CANVAS_SCALE, PDF_CANVAS_SCALE);
-        context.fillStyle = "#ffffff";
-        context.fillRect(0, 0, canvas.width / PDF_CANVAS_SCALE, canvas.height / PDF_CANVAS_SCALE);
-        context.fillStyle = "#162033";
-        context.font = '700 42px Manrope, "Segoe UI", sans-serif';
-        context.fillText(title, 60, 82);
-        context.fillStyle = "#667085";
-        context.font = '500 18px "IBM Plex Mono", ui-monospace, monospace';
-        context.fillText(`${wordCount} từ vựng · Trang ${pageNumber}`, 60, 116);
-        context.fillStyle = "#2563eb";
-        context.fillRect(60, 142, 1280, 3);
-        return { canvas, context, y: 172 };
-    }
-
-    function drawPdfTableHeader(context, y, columns) {
-        let x = 60;
-        context.fillStyle = "#eef2f7";
-        context.fillRect(x, y, 1280, 38);
-        context.strokeStyle = "#cbd5e1";
-        context.lineWidth = 1;
-        context.font = '700 15px Manrope, "Segoe UI", sans-serif';
-        context.fillStyle = "#162033";
-        columns.forEach((column) => {
-            context.strokeRect(x, y, column.width, 38);
-            context.fillText(column.label, x + 8, y + 24);
-            x += column.width;
-        });
-        return y + 38;
-    }
-
-    function drawPdfRow(context, y, cells, columns) {
-        const lineHeight = 23;
-        context.font = '500 17px Manrope, "Segoe UI", "PingFang SC", sans-serif';
-        const lines = cells.map((cell, index) => wrapPdfText(context, cell, columns[index].width - 16));
-        const rowHeight = Math.max(48, ...lines.map((cellLines) => cellLines.length * lineHeight + 18));
-        let x = 60;
-        context.strokeStyle = "#cbd5e1";
-        context.lineWidth = 1;
-        context.fillStyle = "#263247";
-        columns.forEach((column, index) => {
-            context.strokeRect(x, y, column.width, rowHeight);
-            context.save();
-            context.beginPath();
-            context.rect(x + 6, y + 6, column.width - 12, rowHeight - 12);
-            context.clip();
-            lines[index].forEach((line, lineIndex) => {
-                const textX = index === 0 ? x + (column.width - context.measureText(line).width) / 2 : x + 8;
-                context.fillText(line, textX, y + 24 + lineIndex * lineHeight);
-            });
-            context.restore();
-            x += column.width;
-        });
-        return rowHeight;
-    }
+    // Pages go in as JPEG: the browser encodes it natively and jsPDF embeds it as is (~50ms a page),
+    // while PNG makes jsPDF re-compress every pixel in JavaScript (~2.5s a page). 0.95 keeps text crisp.
+    const PDF_JPEG_QUALITY = 0.95;
 
     async function appendPdfPage(pdf, canvas) {
         if (pdf) {
             pdf.addPage();
-            pdf.addImage(canvas, "PNG", 0, 0, 595.28, 841.89);
+            pdf.addImage(canvas.toDataURL("image/jpeg", PDF_JPEG_QUALITY), "JPEG", 0, 0, 595.28, 841.89);
             canvas.width = 1;
             canvas.height = 1;
             return pdf;
@@ -481,7 +611,7 @@
         // then later pages can be appended without ever reading the responsive lesson table.
         const worker = window.html2pdf().set({
             margin: 0,
-            image: { type: "png" },
+            image: { type: "jpeg", quality: PDF_JPEG_QUALITY },
             jsPDF: { unit: "pt", format: "a4", orientation: "portrait", compress: true },
         }).from(canvas, "canvas").toPdf();
         const generatedPdf = await worker.get("pdf");
@@ -490,49 +620,55 @@
         return generatedPdf;
     }
 
-    async function downloadPdf(hiddenPdfColumns = lockedPdfColumns()) {
+    async function downloadPdf(plan) {
         if (typeof window.html2pdf !== "function") {
             showToast("Không thể tải trình tạo PDF. Hãy tải lại trang rồi thử lại.", true);
             return;
         }
+        if (!plan.rows.length) return showToast("Không có từ đang hiển thị để tạo PDF.", true);
         try {
             showToast("Đang tạo PDF…");
-            await document.fonts?.ready;
-            const title = document.querySelector("#lesson-title")?.textContent?.trim() || "FastENG lesson";
-            const groupName = document.querySelector(".share-workspace")?.dataset.groupName || "";
-            const rows = selectedRows();
-            const columns = [
-                { label: "#", width: 42, field: "index" },
-                { label: "Word", width: 175, field: "word", hidden: 1 },
-                { label: "Type", width: 110, field: "type", hidden: 2 },
-                { label: "IPA", width: 170, field: "ipa", hidden: 3 },
-                { label: "Meaning", width: 260, field: "meaning", hidden: 4 },
-                { label: "Example", width: 270, field: "example", hidden: 5 },
-                { label: "Vietnamese", width: 253, field: "translate", hidden: 6 },
-            ];
             let pdf;
-            let pageNumber = 1;
-            let page = createPdfCanvas(title, rows.length, pageNumber);
-            let y = drawPdfTableHeader(page.context, page.y, columns);
-            for (const row of rows) {
-                const cells = columns.map((column) => column.hidden && hiddenPdfColumns.has(column.hidden) ? "" : row.dataset[column.field] || "—");
-                page.context.font = '500 17px Manrope, "Segoe UI", "PingFang SC", sans-serif';
-                const rowHeight = Math.max(48, ...cells.map((cell, index) => wrapPdfText(page.context, cell, columns[index].width - 16).length * 23 + 18));
-                if (y + rowHeight > PDF_LOGICAL_HEIGHT - 67) {
-                    pdf = await appendPdfPage(pdf, page.canvas);
-                    pageNumber += 1;
-                    page = createPdfCanvas(title, rows.length, pageNumber);
-                    y = drawPdfTableHeader(page.context, page.y, columns);
-                }
-                y += drawPdfRow(page.context, y, cells, columns);
-            }
-            pdf = await appendPdfPage(pdf, page.canvas);
-            pdf.save(pdfFilename(groupName, title));
+            for (let i = 0; i < plan.total; i++) pdf = await appendPdfPage(pdf, drawPdfPage(plan, i));
+            pdf.save(pdfFilename(plan.title.group, plan.title.name));
             showToast("PDF đã được tải xuống.");
         } catch {
             showToast("Không thể tạo PDF trên thiết bị này.", true);
         }
     }
+
+    // ── Print options dialog (the PDF button) ──
+    const checkedColumns = (group) => new Set([...pdfOptionsDialog.querySelectorAll(`[data-print-group="${group}"] input:checked`)].map((input) => Number(input.value)));
+    const dialogPlan = () => printPlan(checkedColumns("blank"), checkedColumns("answer"));
+
+    function updatePrintEstimate() {
+        const blankSet = checkedColumns("blank");
+        pdfOptionsDialog.querySelector('[data-print-group="answer"]').disabled = !blankSet.size;
+        const plan = dialogPlan();
+        const parts = [`${plan.rows.length} từ`, `${plan.pages.length} trang bảng`];
+        if (plan.keyPages.length) parts.push(`${plan.keyPages.length} trang đáp án`);
+        parts.push(`chữ ${plan.fs}pt`);
+        pdfOptionsDialog.querySelector("#pdf-estimate").textContent = `A4 lề hẹp · ${parts.join(" · ")}`;
+    }
+
+    function openPrintDialog(trigger) {
+        const locked = lockedColumns();
+        const blank = new Set([...locked, ...covered]);
+        pdfOptionsDialog.querySelectorAll('[data-print-group="blank"] input').forEach((input) => {
+            const column = Number(input.value);
+            input.checked = blank.has(column);
+            input.disabled = locked.has(column);
+            input.parentElement.title = input.disabled ? "Cột này đã được ẩn bởi link chia sẻ." : "";
+        });
+        pdfOptionsDialog.querySelectorAll('[data-print-group="answer"] input').forEach((input) => {
+            const column = Number(input.value);
+            input.checked = blank.has(column) && !locked.has(column);
+            input.disabled = locked.has(column);
+        });
+        openDialog(pdfOptionsDialog, trigger);
+        document.fonts?.ready.then(updatePrintEstimate) ?? updatePrintEstimate();
+    }
+    pdfOptionsDialog.addEventListener("change", updatePrintEstimate);
 
     function resetPShortcut() {
         pShortcutCount = 0;
@@ -562,14 +698,25 @@
 
     function playAudio(button) {
         const source = button.dataset.audioSrc;
-        if (!source) return showToast("Từ này chưa có audio.", true);
-        if (activeAudioButton === button && activeAudio && !activeAudio.paused) {
-            activeAudio.pause();
-            button.classList.remove("is-playing");
+        const speech = window.speechSynthesis;
+        const wasPlaying = activeAudioButton === button && button.classList.contains("is-playing");
+        activeAudio?.pause();
+        speech?.cancel();
+        activeAudioButton?.classList.remove("is-playing");
+        if (wasPlaying) return;
+        // No recording (e.g. Vietnamese without trans_voice): read the text with the device's own voice.
+        if (!source && button.dataset.speak && speech) {
+            const utterance = new SpeechSynthesisUtterance(button.dataset.speak);
+            utterance.lang = button.dataset.speakLang || "vi-VN";
+            utterance.voice = speech.getVoices().find((voice) => voice.lang.replace("_", "-").startsWith(utterance.lang.slice(0, 2))) || null;
+            utterance.onend = utterance.onerror = () => button.classList.remove("is-playing");
+            activeAudio = null;
+            activeAudioButton = button;
+            button.classList.add("is-playing");
+            speech.speak(utterance);
             return;
         }
-        activeAudio?.pause();
-        activeAudioButton?.classList.remove("is-playing");
+        if (!source) return showToast("Từ này chưa có audio.", true);
         const url = /^https?:\/\//i.test(source) ? source : `data:audio/mp3;base64,${source}`;
         activeAudio = new Audio(url);
         activeAudioButton = button;
@@ -944,28 +1091,16 @@
         if (action === "mark-again") markAgain();
         if (action === "previous-slide") changeSlide(-1);
         if (action === "next-slide") changeSlide(1);
-        if (action === "download-pdf") {
-            event.preventDefault();
-            if (event.shiftKey) {
-                clearTimeout(pdfClickTimer);
-                pdfClickTimer = null;
-                buildPdfOptionsDialog();
-                openDialog(pdfOptionsDialog, button);
-            } else if (pdfClickTimer !== null) {
-                clearTimeout(pdfClickTimer);
-                pdfClickTimer = null;
-                printWorksheet();
-            } else {
-                pdfClickTimer = setTimeout(() => {
-                    pdfClickTimer = null;
-                    downloadPdf();
-                }, 500);
-            }
-        }
+        if (action === "download-pdf") openPrintDialog(button);
         if (action === "confirm-download-pdf") {
-            const hiddenPdfColumns = selectedPdfHiddenColumns();
+            const plan = dialogPlan();
             closeDialog(pdfOptionsDialog);
-            downloadPdf(hiddenPdfColumns);
+            downloadPdf(plan);
+        }
+        if (action === "print-sheet") {
+            const plan = dialogPlan();
+            closeDialog(pdfOptionsDialog);
+            printPlanNow(plan);
         }
         if (action === "open-copy") { if (parentDialog) parentDialog.close(); openCopyDialog(button); }
         if (action === "open-selection") { if (parentDialog) parentDialog.close(); openSelectionDialog(button); }
