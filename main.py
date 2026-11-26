@@ -11,6 +11,7 @@ from supabase import create_client
 from app.config import Settings
 from app.routers import admin, public
 from app.services.lessons import LessonService
+from app.services.word_types import short_type
 
 logging.basicConfig(level=logging.INFO)
 BASE_DIR = Path(__file__).resolve().parent
@@ -45,6 +46,7 @@ def create_app() -> FastAPI:
     templates.env.filters["comma"] = (
         lambda value: f"{float(value):,.0f}" if value is not None else value
     )
+    templates.env.filters["short_type"] = short_type
     app.state.templates = templates
     app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
     app.include_router(admin.router)

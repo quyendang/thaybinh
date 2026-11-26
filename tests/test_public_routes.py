@@ -1,4 +1,5 @@
 import base64
+import re
 
 import pytest
 
@@ -105,3 +106,11 @@ def test_legacy_lesson_url_keeps_base64_column_contract(client):
     assert response.status_code == 200
     assert response.text.count("is-screen-hidden") >= 2
     assert response.text.count("is-print-hidden") >= 2
+
+
+def test_share_table_shows_short_word_type(client):
+    response = client.get("/share?id=demo")
+    assert response.status_code == 200
+    # Shown short like the FastENG table; the full value stays for copy and hover.
+    assert re.search(r'data-col="2" title="verb"\s*>v</span>', response.text)
+    assert 'data-type="verb"' in response.text

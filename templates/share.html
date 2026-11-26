@@ -96,7 +96,7 @@
                                         {% endif %}
                                     </div>
                                 </td>
-                                <td class="{{ 'is-screen-hidden' if 2 in hide_columns else '' }} {{ 'is-print-hidden' if 2 in hide_columns_print else '' }}"><span class="cell-content" data-col="2" {% if 2 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.type|default('—') }}</span></td>
+                                <td class="{{ 'is-screen-hidden' if 2 in hide_columns else '' }} {{ 'is-print-hidden' if 2 in hide_columns_print else '' }}"><span class="cell-content" data-col="2" {% if word.type %}title="{{ word.type }}"{% endif %} {% if 2 in hide_columns %}aria-hidden="true"{% endif %}>{{ (word.type|short_type) or '—' }}</span></td>
                                 <td class="ipa-cell {{ 'is-screen-hidden' if 3 in hide_columns else '' }} {{ 'is-print-hidden' if 3 in hide_columns_print else '' }}"><span class="cell-content" data-col="3" {% if 3 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.pronunciation|default('—') }}</span></td>
                                 <td class="{{ 'is-screen-hidden' if 4 in hide_columns else '' }} {{ 'is-print-hidden' if 4 in hide_columns_print else '' }}"><span class="cell-content" data-col="4" {% if 4 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.meaning|default('—') }}</span></td>
                                 <td class="{{ 'is-screen-hidden' if 5 in hide_columns else '' }} {{ 'is-print-hidden' if 5 in hide_columns_print else '' }}"><span class="cell-content" data-col="5" {% if 5 in hide_columns %}aria-hidden="true"{% endif %}>{{ word.example|default('—') }}</span></td>
@@ -113,7 +113,7 @@
                             <span class="mobile-word-index">{{ loop.index }}</span>
                             <div>
                                 {% if 1 not in hide_columns %}<strong data-col="1">{{ word.word }}</strong>{% endif %}
-                                <span>{% if 2 not in hide_columns %}<span data-col="2">{{ word.type|default('') }}</span>{% endif %}{% if 3 not in hide_columns and word.pronunciation %} · <span data-col="3">{{ word.pronunciation }}</span>{% endif %}</span>
+                                <span>{% if 2 not in hide_columns %}<span data-col="2" {% if word.type %}title="{{ word.type }}"{% endif %}>{{ word.type|short_type }}</span>{% endif %}{% if 3 not in hide_columns and word.pronunciation %} · <span data-col="3">{{ word.pronunciation }}</span>{% endif %}</span>
                             </div>
                             {% if word.word_voice and 1 not in hide_columns %}
                             <button class="audio-button" type="button" data-audio-src="{{ word.word_voice }}" aria-label="Nghe phát âm từ {{ word.word }}">
