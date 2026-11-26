@@ -299,6 +299,9 @@
     const LINE = 1.3;
     const WRITE_H = 7; // row height that leaves room to write by hand
     const KEY_FS = 8.5;
+    const KEY_GAP = 5;
+    const KEY_COL_W = (CW - 2 * KEY_GAP) / 3;
+    const KEY_TOP = 9; // answer key heading on its first page
     const PRINT_COLS = [
         { col: 1, label: "Word", key: "word", weight: "700" },
         { col: 2, label: "Type", key: "typeShort" },
@@ -422,29 +425,41 @@
             if (candidate.pages.length <= best.pages.length) { best = candidate; break; }
         }
 
-        // Answer key: numbered items flowing down three columns per page.
+        // Answer key: three balanced columns per page. Print and PDF both place items from these columns,
+        // so no browser has to support CSS multi-column in print (Safari prints those as one column).
         const keyPages = [];
         if (answers.length) {
             measureCtx.font = fontPx(KEY_FS);
-            const colW = (CW - 2 * 5) / 3;
             const lineH = KEY_FS * PT * LINE;
-            let page = [];
-            let column = 0;
-            let y = 0;
-            const top = 9;
-            rows.forEach((row, i) => {
+            const items = rows.map((row, i) => {
                 const text = `${i + 1}. ${answers.map((c) => cellText(row, c)).filter(Boolean).join(" – ")}`;
-                const lines = wrapLines(measureCtx, text, colW);
-                const h = lines.length * lineH + 0.6;
-                if (y + h > CH - (keyPages.length ? 0 : top)) {
-                    column += 1;
-                    y = 0;
-                    if (column === 3) { keyPages.push(page); page = []; column = 0; }
-                }
-                page.push({ x: column * (colW + 5), y, lines });
-                y += h;
+                const lines = wrapLines(measureCtx, text, KEY_COL_W);
+                return { text, lines, h: lines.length * lineH + 0.6 };
             });
-            keyPages.push(page);
+            const fill = (list, cap) => {
+                const cols = [[]];
+                let used = 0;
+                for (const item of list) {
+                    if (cols[cols.length - 1].length && used + item.h > cap) { cols.push([]); used = 0; }
+                    cols[cols.length - 1].push(item);
+                    used += item.h;
+                }
+                return cols;
+            };
+            let rest = items;
+            while (rest.length) {
+                const cap = (CH - (keyPages.length ? 0 : KEY_TOP)) * 0.97; // slack for browser text metrics
+                const pageItems = rest.slice(0, fill(rest, cap).slice(0, 3).flat().length);
+                rest = rest.slice(pageItems.length);
+                // Shortest column height that still fits this page's items in three columns.
+                let lo = Math.max(...pageItems.map((item) => item.h));
+                let hi = cap;
+                while (hi - lo > 0.2) {
+                    const mid = (lo + hi) / 2;
+                    if (fill(pageItems, mid).length <= 3) hi = mid; else lo = mid;
+                }
+                keyPages.push(fill(pageItems, hi));
+            }
         }
 
         return { rows, cols: specs, blank, answers, keyPages, title: lessonTitle(), ...best, total: best.pages.length + keyPages.length };
@@ -479,11 +494,18 @@
         tableNode.append(colgroup, thead, tbody);
         doc.append(head, tableNode);
         if (plan.answers.length) {
-            const key = element("section", "pd-key");
-            const list = element("ol");
-            plan.rows.forEach((row) => list.append(element("li", "", plan.answers.map((c) => cellText(row, c)).filter(Boolean).join(" – "))));
-            key.append(element("h2", "", `Đáp án · ${plan.title.full}`), list);
-            doc.append(key);
+            plan.keyPages.forEach((page, pageIndex) => {
+                const key = element("section", "pd-key");
+                if (pageIndex === 0) key.append(element("h2", "", `Đáp án · ${plan.title.full}`));
+                const grid = element("div", "pd-key-grid");
+                page.forEach((column) => {
+                    const node = element("div");
+                    column.forEach((item) => node.append(element("p", "", item.text)));
+                    grid.append(node);
+                });
+                key.append(grid);
+                doc.append(key);
+            });
         }
         document.body.append(doc);
     }
@@ -528,14 +550,18 @@
                 ctx.fillStyle = "#000000";
                 ctx.font = fontPx(12, "700");
                 ctx.fillText(`Đáp án · ${plan.title.full}`, px(MARGIN), px(y));
-                y += 9;
+                y += KEY_TOP;
             }
             ctx.fillStyle = "#000000";
             ctx.font = fontPx(KEY_FS);
             const lineH = KEY_FS * PT * LINE;
-            for (const item of plan.keyPages[keyIndex]) {
-                item.lines.forEach((line, i) => ctx.fillText(line, px(MARGIN + item.x), px(y + item.y + i * lineH)));
-            }
+            plan.keyPages[keyIndex].forEach((column, ci) => {
+                let itemY = y;
+                for (const item of column) {
+                    item.lines.forEach((line, i) => ctx.fillText(line, px(MARGIN + ci * (KEY_COL_W + KEY_GAP)), px(itemY + i * lineH)));
+                    itemY += item.h;
+                }
+            });
             return canvas;
         }
 

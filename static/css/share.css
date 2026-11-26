@@ -336,7 +336,8 @@
     .pd-word { font-weight: 700; }
     .pd-ipa { font-family: var(--font-data); }
     .pd-key { break-before: page; }
-    .pd-key h2 { margin: 0 0 3mm; font-size: 12pt; }
-    .pd-key ol { margin: 0; padding-left: 6mm; columns: 3; column-gap: 5mm; font-size: 8.5pt; line-height: 1.3; }
-    .pd-key li { break-inside: avoid; }
+    .pd-key h2 { margin: 0 0 3mm; font-size: 12pt; line-height: 1.25; }
+    /* Fixed grid, not CSS columns: Safari prints multi-column as a single column. */
+    .pd-key-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 5mm; align-items: start; font-size: 8.5pt; line-height: 1.3; }
+    .pd-key-grid p { margin: 0 0 .6mm; overflow-wrap: anywhere; }
 }
